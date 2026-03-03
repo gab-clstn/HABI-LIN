@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weaver Profile | HABI-LIN</title>
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+
+body{
+    background: linear-gradient(180deg,#fcfcfb 0%,#f3efe9 100%);
+}
+
+/* PROFILE HERO */
+.profile-wrapper{
+    margin-top:80px;
+    padding:40px;
+    display:flex;
+    justify-content:center;
+}
+
+.profile-card{
+    width:900px;
+    background:white;
+    border-radius:24px;
+    padding:40px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+}
+
+/* decorative weaving stripe */
+.profile-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:6px;
+    background: repeating-linear-gradient(
+        90deg,
+        #2b0303 0px,
+        #2b0303 18px,
+        #c89f65 18px,
+        #c89f65 36px
+    );
+}
+
+/* HEADER */
+.profile-header{
+    display:flex;
+    align-items:center;
+    gap:30px;
+    margin-bottom:30px;
+}
+
+/* avatar */
+.profile-avatar{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#f0f0f0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    border:4px solid #fff;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+.profile-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.profile-avatar i{
+    font-size:40px;
+    color:#2b0303;
+}
+
+/* name */
+.profile-name{
+    font-size:2rem;
+    font-weight:700;
+    color:#1a1a1a;
+}
+
+.profile-title{
+    color:#c89f65;
+    font-weight:600;
+    margin-top:6px;
+    letter-spacing:1px;
+}
+
+/* bio */
+.profile-bio{
+    margin-top:15px;
+    color:#555;
+    line-height:1.6;
+    max-width:520px;
+}
+
+/* stats */
+.profile-stats{
+    margin-top:35px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+.stat-box{
+    background:#faf7f2;
+    border-radius:18px;
+    padding:22px;
+    text-align:center;
+}
+
+.stat-number{
+    font-size:1.7rem;
+    font-weight:700;
+    color:#2b0303;
+}
+
+.stat-label{
+    font-size:0.8rem;
+    letter-spacing:1px;
+    color:#777;
+    margin-top:6px;
+}
+
+/* back button */
+.back-btn{
+    margin-top:45px;
+    display:inline-block;
+    text-decoration:none;
+    background:#2b0303;
+    color:white;
+    padding:12px 24px;
+    border-radius:10px;
+    font-weight:600;
+    transition:0.2s;
+}
+
+.back-btn:hover{
+    background:#4a0606;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="profile-wrapper">
+    <div class="profile-card">
+        
+        
+    <div class="profile-header">
+
+        <div class="profile-avatar">
+            <img id="settings-photo" style="display:none;">
+            <i class="fa-solid fa-user" id="settings-icon"></i>
+        </div>
+
+        <div>
+            <div class="profile-name" id="settings-name">Weaver</div>
+            <div class="profile-title">Traditional Textile Apprentice</div>
+
+            <p class="profile-bio">
+                A digital weaver preserving the heritage of Filipino handloom textiles.
+                Practicing patterns, exploring structures, and keeping ancestral
+                weaving knowledge alive through technology.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-box">
+            <div class="stat-number">0</div>
+            <div class="stat-label">PATTERNS CREATED</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-number">Beginner</div>
+            <div class="stat-label">WEAVER LEVEL</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-number">Plain</div>
+            <div class="stat-label">FAVORITE WEAVE</div>
+        </div>
+    </div>
+
+    <a href="dashboard.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+</div>
+
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const response = await fetch("/auth/user", {
+        credentials:"include"
+    });
+
+    
+
+    const user = await response.json();
+
+    if(!user){
+        window.location.href="/login.html";
+        return;
+    }
+
+    document.getElementById("settings-name").textContent = user.name;
+
+    if(user.photo){
+        const img = document.getElementById("settings-photo");
+        img.src = user.photo;
+        img.style.display="block";
+        document.getElementById("settings-icon").style.display="none";
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
+    <title>HABI-LIN | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+      body { background-color: #fcfcfb; color: #1a1a1a; height: 100vh; overflow: hidden; }
+      .dashboard-wrapper { display: flex; flex-direction: column; height: 100%; }
+      .sidebar { width: 100%; height: 70px; background: #ffffff; border-bottom: 1px solid #eee; display: flex; flex-direction: row; align-items: center; padding: 0 40px; position: fixed; top: 0; left: 0; z-index: 1000; }
+      .sidebar-header h2 { font-weight: 800; letter-spacing: -1px; margin-right: 120px; white-space: nowrap; font-size: 1.4rem; color: #2b0303; }
+      .sidebar-nav { display: flex; flex-direction: row; align-items: center; flex: 1; gap: 15px; }
+      .nav-item { color: #666; text-decoration: none; padding: 8px 0; margin: 0 15px; font-size: 0.95rem; font-weight: 500; position: relative; white-space: nowrap; cursor: pointer; }
+      .nav-item::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background-color: #2b0303; transition: width 0.3s ease; }
+      .logo-link, .logo-link h2 { text-decoration: none; }
+      .nav-item:hover { color: #2b0303; }
+      .nav-item:hover::after, .nav-item.active::after { width: 100%; }
+      .nav-item.active { color: #2b0303; font-weight: 700; }
+      .nav-spacer { margin-left: auto; }
+      .search-container { display: flex; align-items: center; background: #f5f5f5; padding: 6px 15px; border-radius: 30px; margin-right: 20px; transition: all 0.3s ease; border: 1px solid transparent; }
+      .search-container:focus-within { background: #fff; border-color: #2b0303; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .search-input { width: 160px; border: none; background: transparent; outline: none; font-size: 0.85rem; color: #333; }
+      .search-icon-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 0.9rem; margin-left: 8px; display: flex; align-items: center; }
+      .logout { color: #d93025 !important; font-weight: 600; margin-left: 10px; }
+      .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; margin-top: 70px; }
+      .top-header { background: transparent; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; }
+      .header-breadcrumb { font-size: 0.85rem; color: #888; font-weight: 500; }
+      .active-crumb { color: #2b0303; }
+      .user-info { display: flex; align-items: center; gap: 15px; }
+      .user-text { text-align: right; }
+      .greeting { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+      .user-info strong { color: #1a1a1a; font-weight: 600; font-size: 0.95rem; }
+      .profile-circle { width: 42px; height: 42px; background: #f0f0f0; color: #2b0303; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+      .profile-circle:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,0.12); }
+      .dashboard-content { padding: 0 40px 40px; }
+      .welcome-banner { background: #2b0303; background-image: linear-gradient(45deg, #2b0303 0%, #4a0606 100%); padding: 50px; border-radius: 24px; color: white; margin-bottom: 40px; position: relative; overflow: hidden; }
+      .welcome-banner h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 10px; }
+      .welcome-banner p { opacity: 0.8; font-weight: 300; max-width: 500px; }
+      .section-title { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1.5px; }
+      .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 30px; }
+      .action-card { background: white; border-radius: 20px; padding: 30px; display: flex; align-items: flex-start; gap: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s cubic-bezier(0.4,0,0.2,1); border: 1px solid #f0f0f0; }
+      .action-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+      .card-visual { width: 54px; height: 54px; background: #fdf2f2; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; color: #2b0303; flex-shrink: 0; }
+      .card-info h4 { color: #1a1a1a; margin-bottom: 8px; font-size: 1.1rem; font-weight: 600; }
+      .card-info p { font-size: 0.9rem; color: #666; line-height: 1.6; margin-bottom: 20px; }
+      .card-btn { background: #2b0303; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
+      .card-btn:hover { background: #4a0606; }
+      .card-btn-outline { background: transparent; border: 1px solid #ddd; color: #444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
+      .card-btn-outline:hover { border-color: #2b0303; color: #2b0303; }
+      .overlay-card, .setup-card { background: #1e1e21; padding: 40px; border-radius: 24px; text-align: center; width: 480px; color: white; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+      .overlay-card h2, .setup-card h2 { margin-bottom: 15px; font-weight: 700; }
+      .overlay-card p { color: #aaa; margin-bottom: 35px; font-size: 0.95rem; }
+      .overlay-btns { display: flex; gap: 15px; }
+      .btn-primary { background: #2b0303; color: white; border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; flex: 1; }
+      .btn-secondary { background: #333; color: white; border: none; padding: 14px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; flex: 1; }
+      .btn-ghost { background: transparent; color: #888; border: none; padding: 10px; cursor: pointer; margin-top: 10px; }
+      .form-group-grid { display: flex; flex-direction: column; gap: 18px; text-align: left; }
+      .input-wrap label { display: block; font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+      .input-wrap input, .input-wrap select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2a2a30; color: white; outline: none; }
+      .dual-input { display: flex; align-items: center; gap: 10px; color: #555; }
+      .full-width { width: 100%; margin-top: 10px; }
+      #weaving-studio { position: relative; width: 100%; height: 75vh !important; min-height: 600px; }
+      #bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+      #overview-section, #weaving-studio, #collection-section { animation: fadeIn 0.4s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* ---- COLLECTION STYLES ---- */
+      .collection-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+      .header-text h1 { font-size: 2rem; color: #2b0303; font-weight: 700; margin-bottom: 5px; }
+      .header-text p { color: #666; font-size: 0.95rem; }
+      .pattern-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+
+      /* Pattern card */
+      .pattern-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; display: flex; flex-direction: column; }
+      .pattern-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); border-color: #2b0303; }
+
+      /* Canvas-based preview */
+      .pattern-preview { height: 180px; background: #f9f9f9; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+      .pattern-preview canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+
+      /* Fallback static previews (kept for static demo cards) */
+      .weave-thumb { width: 100%; height: 100%; opacity: 0.4; }
+      .plain-weave { background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, #2b0303 10px, #2b0303 11px), repeating-linear-gradient(90deg, transparent, transparent 10px, #2b0303 10px, #2b0303 11px); }
+      .twill-weave { background: repeating-linear-gradient(45deg, #4a0606, #4a0606 10px, #fdf2f2 10px, #fdf2f2 20px); }
+
+      .pattern-details { padding: 24px; }
+      .pattern-details h4 { color: #1a1a1a; margin-bottom: 8px; font-size: 1.15rem; font-weight: 700; }
+      .pattern-details p { font-size: 0.85rem; color: #888; margin-bottom: 18px; }
+      .tag-row { display: flex; justify-content: space-between; align-items: center; }
+      .pattern-tag { font-size: 0.7rem; background: #fdf2f2; color: #2b0303; padding: 5px 12px; border-radius: 50px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .btn-new { background: #2b0303; color: white; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+      .btn-new:hover { background: #4a0606; box-shadow: 0 4px 15px rgba(43,3,3,0.2); }
+
+      /* Empty state */
+      .empty-state { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: #aaa; }
+      .empty-state i { font-size: 3rem; margin-bottom: 20px; color: #ddd; display: block; }
+      .empty-state h3 { font-size: 1.2rem; color: #666; margin-bottom: 8px; }
+      .empty-state p { font-size: 0.9rem; }
+
+      /* Loading spinner */
+      .loading-state { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; padding: 80px 20px; gap: 12px; color: #888; font-size: 0.9rem; }
+      .spinner { width: 22px; height: 22px; border: 3px solid #f0f0f0; border-top-color: #2b0303; border-radius: 50%; animation: spin 0.7s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Delete button on card */
+      .pattern-card .delete-btn { opacity: 0; position: absolute; top: 10px; right: 10px; background: rgba(43,3,3,0.85); color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; cursor: pointer; transition: opacity 0.2s; z-index: 5; }
+      .pattern-card:hover .delete-btn { opacity: 1; }
+      .pattern-preview { position: relative; }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <a href="#" class="logo-link" onclick="showDashboard()">
+            <h2>HABI-LIN</h2>
+          </a>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" id="home-link" onclick="showDashboard()">Home</a>
+          <a href="#" class="nav-item" id="collection-link" onclick="showCollection()">Collection</a>
+          <a href="about.html" class="nav-item" id="about-link">About</a>
+          <div class="nav-spacer"></div>
+          <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Search patterns..." />
+            <button class="search-icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </div>
+          <a href="#" class="nav-item">Settings</a>
+          <a href="/auth/logout" class="nav-item logout">Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-container">
+        <header class="top-header">
+          <div class="header-breadcrumb">
+            <span>Dashboard</span> / <span class="active-crumb">Overview</span>
+          </div>
+          <div class="user-info">
+            <div class="user-text">
+              <span class="greeting">Hello,</span>
+              <strong id="user-firstname">Weaver</strong>
+            </div>
+            <a href="user-settings.html" class="profile-circle" id="profile-btn">
+              <i class="fa-solid fa-user" id="default-avatar-icon"></i>
+              <img id="user-photo" src="" alt="" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+            </a>
+          </div>
+        </header>
+
+        <section class="dashboard-content">
+          <!-- WEAVING STUDIO -->
+          <div id="weaving-studio" style="display:none;height:calc(100vh - 180px);position:relative;background:#121214;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.2);">
+            <canvas id="bg" style="width:100%;height:100%;display:block;"></canvas>
+
+            <div id="modeSelectionOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,0.95);display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
+              <div class="overlay-card">
+                <h2>Handloom Weaving</h2>
+                <p>Select your preferred creative mode</p>
+                <div class="overlay-btns">
+                  <button onclick="goToSetup()" class="btn-primary">Create Weave Pattern</button>
+                  <button class="btn-secondary">Learn Weave Pattern</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="setupOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;display:none;justify-content:center;align-items:center;z-index:15;">
+              <div class="setup-card">
+                <h2>Weaving Setup</h2>
+                <div class="form-group-grid">
+                  <div class="input-wrap"><label>Pattern Name</label><input type="text" id="patternName" placeholder="Ex: Plain Weave Practice" /></div>
+                  <div class="input-wrap"><label>Handloom Equipment</label><select id="loomType"><option value="standard">Modern (4 Pedals)</option><option value="traditional">Traditional (2 Pedals)</option></select></div>
+                  <div class="input-wrap"><label>Beginner Pattern</label><select id="patternType"><option value="plain">Plain Weave (Tabby)</option><option value="twill">Twill</option></select></div>
+                  <div class="input-wrap"><label>Textile Size (cm)</label><div class="dual-input"><input type="number" id="clothWidth" value="6.5" /><span>×</span><input type="number" id="clothHeight" value="10" /></div></div>
+                  <button id="startWeaving" class="btn-primary full-width">Start Weaving</button>
+                  <button onclick="backToMenu()" class="btn-ghost">Back to Menu</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OVERVIEW -->
+          <div id="overview-section">
+            <div class="welcome-banner">
+              <div class="banner-content">
+                <h1>Welcome back, <span id="user-firstname-display">Weaver</span>!</h1>
+                <p>Pick up where you left off or explore new traditional techniques.</p>
+              </div>
+            </div>
+            <div class="section-header"><h3 class="section-title">Quick Actions</h3></div>
+            <div class="card-grid">
+              <div class="action-card">
+                <div class="card-visual"><i class="fa-solid fa-plus"></i></div>
+                <div class="card-info">
+                  <h4>Create New Weave</h4>
+                  <p>Start a blank pattern draft from scratch using our 3D loom.</p>
+                  <button class="card-btn" onclick="showLoom()">Get Started</button>
+                </div>
+              </div>
+              <div class="action-card secondary" onclick="showCollection()">
+                <div class="card-visual"><i class="fa-solid fa-book-open"></i></div>
+                <div class="card-info">
+                  <h4>Pattern Library</h4>
+                  <p>Browse through your saved collection and community favorites.</p>
+                  <button class="card-btn-outline">Open Library</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLLECTION -->
+          <div id="collection-section" style="display:none;">
+            <div class="collection-header">
+              <div class="header-text">
+                <h1>Digital Patterns</h1>
+                <p>Your saved weave drafts from the loom studio.</p>
+              </div>
+              <button onclick="showLoom()" class="btn-new">
+                <i class="fa-solid fa-plus"></i> New Design
+              </button>
+            </div>
+            <div class="pattern-grid" id="pattern-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      /* ───────────────────────────────────────────
+         USER SESSION
+      ─────────────────────────────────────────── */
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const res = await fetch("/auth/user");
+          if (!res.ok) throw new Error("No session");
+          const user = await res.json();
+          if (user) {
+            const firstName = user.name.split(" ")[0];
+            document.getElementById("user-firstname").textContent = firstName + "!";
+            document.getElementById("user-firstname-display").textContent = firstName;
+            if (user.photo) {
+              document.getElementById("user-photo").src = user.photo;
+              document.getElementById("user-photo").style.display = "block";
+              document.getElementById("default-avatar-icon").style.display = "none";
+            }
+          }
+        } catch (e) { console.log("Session not ready."); }
+      });
+
+      /* ───────────────────────────────────────────
+         NAVIGATION
+      ─────────────────────────────────────────── */
+      function showDashboard() {
+        document.getElementById("overview-section").style.display = "block";
+        document.getElementById("weaving-studio").style.display = "none";
+        document.getElementById("collection-section").style.display = "none";
+        document.querySelector(".active-crumb").textContent = "Overview";
+        updateActiveLink("home-link");
+      }
+
+      async function showCollection() {
+        document.getElementById("overview-section").style.display = "none";
+        document.getElementById("weaving-studio").style.display = "none";
+        document.getElementById("collection-section").style.display = "block";
+        document.querySelector(".active-crumb").textContent = "Collection";
+        updateActiveLink("collection-link");
+        await loadPatterns();
+      }
+
+      async function showLoom() {
+        document.getElementById("overview-section").style.display = "none";
+        document.getElementById("collection-section").style.display = "none";
+        document.getElementById("weaving-studio").style.display = "block";
+        document.querySelector(".active-crumb").textContent = "Weaving Studio";
+        updateActiveLink("");
+        document.getElementById("modeSelectionOverlay").style.display = "flex";
+        document.getElementById("setupOverlay").style.display = "none";
+        if (window.loomStarted) return;
+        window.loomStarted = true;
+        await import("./loom.js").then(m => m.startLoom && m.startLoom());
+      }
+
+      function updateActiveLink(id) {
+        document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+        if (id) document.getElementById(id)?.classList.add("active");
+      }
+
+      function goToSetup() {
+        document.getElementById("modeSelectionOverlay").style.display = "none";
+        document.getElementById("setupOverlay").style.display = "flex";
+      }
+
+      function backToMenu() {
+        document.getElementById("modeSelectionOverlay").style.display = "flex";
+        document.getElementById("setupOverlay").style.display = "none";
+      }
+
+      /* ───────────────────────────────────────────
+         PATTERN PREVIEW RENDERER
+         Reconstructs the 2D weave draft from the
+         saved patternHistory steps embedded in the
+         pattern document (steps → weft row states).
+      ─────────────────────────────────────────── */
+
+      /**
+       * Simulate patternHistory from recorded steps.
+       * Each "beat" action finalises a row; the shed
+       * state at that point is captured from the last
+       * pedal press preceding it.
+       *
+       * The saved document now also stores patternRows
+       * (the actual patternHistory array) if available,
+       * which is the preferred source.
+       */
+      function simulatePatternFromSteps(steps, shaftCount) {
+        const history = [];
+        const warpCount = 60;
+
+        // Determine threading: alternating shaft assignment
+        const threading = [];
+        for (let i = 0; i < warpCount + 1; i++) {
+          threading.push(i % shaftCount);
+        }
+
+        let pressedPedals = new Set();
+
+        for (const step of steps) {
+          if (step.action === "pedal") {
+            pressedPedals.add(step.value);
+          } else if (step.action === "pedals") {
+            pressedPedals = new Set(step.value);
+          } else if (step.action === "beat") {
+            // Build shed snapshot
+            const shed = [];
+            for (let i = 0; i < shaftCount; i++) {
+              shed.push(!pressedPedals.has(i));
+            }
+            const rowStates = [];
+            for (let i = 0; i <= warpCount; i++) {
+              const shaft = threading[i % threading.length];
+              rowStates.push(shed[shaft]);
+            }
+            history.push(rowStates);
+          }
+        }
+        return history;
+      }
+
+      /**
+       * Draw a weave draft onto a canvas element.
+       * warpUp = true  → warp on top  → dark vertical tick  (#111)
+       * warpUp = false → weft on top  → weft colour fill
+       */
+      function drawPatternOnCanvas(canvas, patternRows, weftColor = "#c0392b") {
+        if (!canvas || !patternRows || patternRows.length === 0) return;
+
+        const warpCount = patternRows[0].length;
+        const rowCount  = patternRows.length;
+
+        // Cell size: fill the 300×180 preview area
+        const cellW = Math.max(1, Math.floor(canvas.width  / warpCount));
+        const cellH = Math.max(1, Math.floor(canvas.height / rowCount));
+        const cellSize = Math.min(cellW, cellH, 8); // cap at 8px for clarity
+
+        canvas.width  = warpCount * cellSize;
+        canvas.height = rowCount  * cellSize;
+
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#f5f0eb";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        patternRows.forEach((rowStates, rowIndex) => {
+          // Draw bottom-to-top (newest row at top)
+          const y = (rowCount - 1 - rowIndex) * cellSize;
+          rowStates.forEach((isWarpUp, warpIndex) => {
+            const x = warpIndex * cellSize;
+            if (!isWarpUp) {
+              // weft over warp → fill with weft colour
+              ctx.fillStyle = weftColor;
+              ctx.fillRect(x, y, cellSize, cellSize);
+            } else {
+              // warp over weft → small dark vertical marker
+              ctx.fillStyle = "#1a1a1a";
+              ctx.fillRect(x + cellSize * 0.75, y, cellSize * 0.25, cellSize);
+            }
+          });
+        });
+      }
+
+      /* ───────────────────────────────────────────
+         LOAD PATTERNS FROM MONGODB
+      ─────────────────────────────────────────── */
+      let allPatterns = [];
+
+      async function loadPatterns() {
+        const grid = document.getElementById("pattern-grid");
+        grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
+
+        try {
+          const res = await fetch("/api/patterns");
+          if (!res.ok) throw new Error("Failed to fetch");
+          const patterns = await res.json();
+          allPatterns = patterns;
+          renderPatternGrid(patterns);
+        } catch (err) {
+          console.error("Collection fetch error:", err);
+          grid.innerHTML = `
+            <div class="empty-state">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <h3>Could not load patterns</h3>
+              <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
+            </div>`;
+        }
+      }
+
+      function renderPatternGrid(patterns) {
+        const grid = document.getElementById("pattern-grid");
+
+        if (!patterns || patterns.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <i class="fa-solid fa-loom" style="font-family:sans-serif;font-style:normal;">🪡</i>
+              <h3>No patterns saved yet</h3>
+              <p>Head to the Weaving Studio and save your first design!</p>
+            </div>`;
+          return;
+        }
+
+        grid.innerHTML = "";
+
+        patterns.forEach(pattern => {
+          const shaftCount = pattern.loom === "traditional" ? 2 : 4;
+          const weftColor  = pattern.weftColor || "#c0392b";
+
+          // Prefer saved patternRows; fall back to simulating from steps
+          const patternRows = pattern.patternRows && pattern.patternRows.length > 0
+            ? pattern.patternRows
+            : simulatePatternFromSteps(pattern.steps || [], shaftCount);
+
+          const createdAt = pattern.created
+            ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
+            : "Unknown date";
+
+          const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
+
+          const card = document.createElement("div");
+          card.className = "pattern-card";
+          card.innerHTML = `
+            <div class="pattern-preview">
+              <canvas class="pattern-canvas" width="300" height="180"></canvas>
+              <button class="delete-btn" title="Delete pattern">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+            <div class="pattern-details">
+              <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
+              <p>Saved ${createdAt} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}</p>
+              <div class="tag-row">
+                <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
+                <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
+              </div>
+            </div>`;
+
+          // Render the canvas preview
+          const canvas = card.querySelector(".pattern-canvas");
+          // Use rAF so the card is in DOM before drawing
+          requestAnimationFrame(() => drawPatternOnCanvas(canvas, patternRows, weftColor));
+
+          // Delete button
+          card.querySelector(".delete-btn").addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Delete "${pattern.name}"?`)) return;
+            try {
+              const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
+              if (res.ok) {
+                card.style.transition = "opacity 0.3s, transform 0.3s";
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                setTimeout(() => { card.remove(); }, 300);
+              } else {
+                alert("Could not delete pattern.");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Server error while deleting.");
+            }
+          });
+
+          grid.appendChild(card);
+        });
+      }
+
+      /* ───────────────────────────────────────────
+         SEARCH / FILTER
+      ─────────────────────────────────────────── */
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("search-input").addEventListener("input", (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          if (!document.getElementById("collection-section").offsetParent) return;
+          const filtered = allPatterns.filter(p =>
+            (p.name || "").toLowerCase().includes(q) ||
+            (p.type || "").toLowerCase().includes(q) ||
+            (p.loom || "").toLowerCase().includes(q)
+          );
+          renderPatternGrid(filtered);
+        });
+      });
+
+      /* ───────────────────────────────────────────
+         UTILITY
+      ─────────────────────────────────────────── */
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+    </script>
+  </body>
+</html>

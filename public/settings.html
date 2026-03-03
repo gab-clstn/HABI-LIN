@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HABI-LIN | Settings</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <style>
+      /* --- PRESERVED ORIGINAL CSS FROM DASHBOARD --- */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      body {
+        background-color: #fcfcfb;
+        color: #1a1a1a;
+        height: 100vh;
+        overflow: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .dashboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .sidebar {
+        width: 100%;
+        height: 70px;
+        background: #ffffff;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+      }
+      .sidebar-header h2 {
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-right: 120px;
+        white-space: nowrap;
+        font-size: 1.4rem;
+        color: #2b0303;
+      }
+      .sidebar-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex: 1;
+        gap: 15px;
+      }
+      .nav-item {
+        color: #666;
+        text-decoration: none;
+        padding: 8px 0;
+        margin: 0 15px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        position: relative;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .nav-item::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 0;
+        height: 2px;
+        background-color: #2b0303;
+        transition: width 0.3s ease;
+      }
+      .logo-link,
+      .logo-link h2 {
+        text-decoration: none;
+      }
+      .nav-item:hover {
+        color: #2b0303;
+      }
+      .nav-item:hover::after,
+      .nav-item.active::after {
+        width: 100%;
+      }
+      .nav-item.active {
+        color: #2b0303;
+        font-weight: 700;
+      }
+      .nav-spacer {
+        margin-left: auto;
+      }
+      .logout {
+        color: #d93025 !important;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .main-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        margin-top: 70px;
+      }
+      .top-header {
+        background: transparent;
+        padding: 25px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .header-breadcrumb {
+        font-size: 0.85rem;
+        color: #888;
+        font-weight: 500;
+      }
+      .active-crumb {
+        color: #2b0303;
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .user-text {
+        text-align: right;
+      }
+      .greeting {
+        display: block;
+        font-size: 0.75rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .user-info strong {
+        color: #1a1a1a;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .profile-circle {
+        width: 42px;
+        height: 42px;
+        background: #f0f0f0;
+        color: #2b0303;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      /* --- UPDATED PROFESSIONAL SETTINGS CONTENT --- */
+      .settings-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 0;
+        height: calc(100vh - 140px); /* Adjusted for navbar and header */
+        background: #fff;
+        border-top: 1px solid #eee;
+      }
+
+      .settings-sidebar {
+        background: #fcfcfc;
+        border-right: 1px solid #eee;
+        padding: 40px 20px;
+      }
+
+      .settings-menu-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 5px;
+        text-align: left;
+      }
+
+      .settings-menu-btn i {
+        width: 20px;
+        font-size: 1.1rem;
+        color: #888;
+      }
+      .settings-menu-btn:hover {
+        background: #f0f0f0;
+        color: #2b0303;
+      }
+      .settings-menu-btn.active {
+        background: #2b0303;
+        color: white;
+      }
+      .settings-menu-btn.active i {
+        color: white;
+      }
+
+      .settings-body {
+        padding: 60px 80px;
+        overflow-y: auto;
+      }
+
+      .pane {
+        display: none;
+      }
+      .pane.active {
+        display: block;
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      .pane-header {
+        margin-bottom: 40px;
+      }
+      .pane-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+      }
+      .pane-header p {
+        color: #888;
+        font-size: 1rem;
+      }
+
+      /* Form Elements Refresh */
+      .form-section {
+        max-width: 600px;
+      }
+      .form-group {
+        margin-bottom: 25px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 10px;
+      }
+
+      .settings-input {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background: #fcfcfb;
+        font-size: 0.95rem;
+        transition: 0.2s;
+        outline: none;
+      }
+
+      .settings-input:focus {
+        border-color: #2b0303;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(43, 3, 3, 0.05);
+      }
+
+      /* Professional Toggle Row */
+      .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .toggle-text h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+      .toggle-text p {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #e0e0e0;
+        transition: 0.3s;
+        border-radius: 30px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background: #2b0303;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      .save-btn {
+        background: #2b0303;
+        color: white;
+        border: none;
+        padding: 14px 35px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 30px;
+      }
+
+      .save-btn:hover {
+        background: #4a0606;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(43, 3, 3, 0.15);
+      }
+
+      .danger-link {
+        color: #d93025;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 40px;
+      }
+      .danger-link:hover {
+        text-decoration: underline;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- GLOBAL DARK MODE CLASSES --- */
+      body.dark-mode { background-color: #121214; color: #e0e0e0; }
+      body.dark-mode .sidebar { background: #1a1a1d; border-color: #333; }
+      body.dark-mode .sidebar-header h2 { color: #fdf2f2; }
+      body.dark-mode .settings-layout { background: #1a1a1d; border-color: #333; }
+      body.dark-mode .settings-sidebar { background: #121214; border-color: #333; }
+      body.dark-mode .settings-input { background: #2a2a2d; border-color: #444; color: white; }
+      body.dark-mode .settings-menu-btn:hover { background: #2a2a2d; color: #fdf2f2; }
+      body.dark-mode .pane-header h2 { color: #fff; }
+      body.dark-mode .user-info strong { color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <a href="index.html" class="logo-link">
+            <h2>HABI-LIN</h2>
+          </a>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
+          <a href="collection.html" class="nav-item" id="collection-link"
+            >Collection</a
+          >
+          <a href="about.html" class="nav-item" id="about-link">About</a>
+          <div class="nav-spacer"></div>
+          <a href="settings.html" class="nav-item active">Settings</a>
+          <a href="/auth/logout" class="nav-item logout">Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-container">
+        <header class="top-header">
+          <div class="header-breadcrumb">
+            <span>Dashboard</span> /
+            <span class="active-crumb">System Settings</span>
+          </div>
+          <div class="user-info">
+            <div class="user-text">
+              <span class="greeting">Hello,</span>
+              <strong id="user-firstname-sidebar">Weaver</strong>
+            </div>
+            <div class="profile-circle">
+              <i class="fa-solid fa-user"></i>
+            </div>
+          </div>
+        </header>
+
+        <section class="settings-layout">
+          <aside class="settings-sidebar">
+            <button
+              class="settings-menu-btn active"
+              onclick="tab(event, 'general')"
+            >
+              <i class="fa-solid fa-sliders"></i> General
+            </button>
+            <button class="settings-menu-btn" onclick="tab(event, 'account')">
+              <i class="fa-solid fa-circle-user"></i> Account
+            </button>
+            <button class="settings-menu-btn" onclick="tab(event, 'security')">
+              <i class="fa-solid fa-shield-halved"></i> Security
+            </button>
+          </aside>
+
+          <div class="settings-body">
+            <div class="form-section">
+              <div id="general" class="pane active">
+                <div class="pane-header">
+                  <h2>General Settings</h2>
+                  <p>
+                    Manage your workspace preferences and localized experience.
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label>Interface Language</label>
+                  <select class="settings-input">
+                    <option>English (International)</option>
+                    <option>Filipino (National)</option>
+                    <option>Ilocano</option>
+                  </select>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-text">
+                    <h4>Dark Appearance</h4>
+                    <p>
+                      Switch between light and dark visual themes for the
+                      dashboard.
+                    </p>
+                  </div>
+                  <label class="switch"
+                    ><input type="checkbox" id="darkModeToggle" onchange="toggleTheme()"/><span
+                      class="slider"
+                    ></span
+                  ></label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-text">
+                    <h4>High Fidelity Rendering</h4>
+                    <p>
+                      Enable high-precision 3D textures in the Weaving Studio.
+                    </p>
+                  </div>
+                  <label class="switch"
+                    ><input type="checkbox" checked /><span
+                      class="slider"
+                    ></span
+                  ></label>
+                </div>
+
+                <button class="save-btn" onclick="showGeneralFeedback(this)">
+                  Save Preferences
+                </button>
+              </div>
+
+              <div id="account" class="pane">
+                <div class="pane-header">
+                  <h2>Account Details</h2>
+                  <p>Update your personal information and contact details.</p>
+                </div>
+
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    background: transparent;
+                    border-radius: 15px;
+                    border: 1px solid #eee;
+                  "
+                >
+                  <div
+                    id="avatar-preview"
+                    style="
+                      width: 60px;
+                      height: 60px;
+                      background: #eee;
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.5rem;
+                      color: #2b0303;
+                    "
+                  >
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                  <div>
+                    <button
+                      class="save-btn"
+                      style="
+                        margin-top: 0;
+                        padding: 8px 16px;
+                        font-size: 0.8rem;
+                        background: #fff;
+                        color: #2b0303;
+                        border: 1px solid #ddd;
+                      "
+                      onclick="window.location.href='#'; alert('Please use the profile upload feature on the dashboard for now.')"
+                    >
+                      Change Avatar
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Full Legal Name</label>
+                  <input
+                    type="text"
+                    class="settings-input"
+                    id="full-name-input"
+                    placeholder="Full Name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input
+                    type="email"
+                    class="settings-input"
+                    id="email-input"
+                    placeholder="email@example.com"
+                  />
+                </div>
+
+                <button class="save-btn" onclick="updateAccountSettings()">
+                  Update Account
+                </button>
+                <br />
+                <a href="#" class="danger-link"
+                  >Permanently delete my account</a
+                >
+              </div>
+
+              <div id="security" class="pane">
+                <div class="pane-header">
+                  <h2>Security & Access</h2>
+                  <p>
+                    Protect your designs and patterns with robust security
+                    protocols.
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    id="current-password"
+                    class="settings-input"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>New Secure Password</label>
+                  <input
+                    type="password"
+                    id="new-password"
+                    class="settings-input"
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <button class="save-btn" onclick="updatePassword()">
+                  Update Security
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+   <script>
+      // Tab Switching Logic (Rethain existing)
+      function tab(evt, paneId) {
+        document.querySelectorAll(".pane").forEach((p) => p.classList.remove("active"));
+        document.querySelectorAll(".settings-menu-btn").forEach((b) => b.classList.remove("active"));
+        document.getElementById(paneId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+      }
+
+      // --- 1. Account Update (FIXED CONNECTION) ---
+      async function updateAccountSettings() {
+        const fullName = document.getElementById("full-name-input").value;
+        const email = document.getElementById("email-input").value;
+        const btn = document.querySelector("#account .save-btn");
+
+        if(!fullName || !email) return alert("Please fill in all fields.");
+
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        try {
+          const response = await fetch("/auth/update-account", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: fullName, email: email }),
+          });
+
+          // Check if the server actually sent JSON
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+             throw new TypeError("Oops, we haven't got JSON from the server!");
+          }
+
+          const data = await response.json();
+
+          if (response.ok) {
+            btn.innerText = "Changes Saved";
+            btn.style.background = "#28a745";
+            document.getElementById("user-firstname-sidebar").textContent = fullName.split(" ")[0];
+          } else {
+            throw new Error(data.error || "Update failed");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          alert("Error: " + error.message);
+          btn.innerText = "Error Saving";
+          btn.style.background = "#d93025";
+        } finally {
+          setTimeout(() => {
+            btn.innerText = "Update Account";
+            btn.style.background = "#2b0303";
+            btn.disabled = false;
+          }, 2000);
+        }
+      }
+
+      // --- 2. Update Password (Rethain existing) ---
+      async function updatePassword() {
+        const currentPassword = document.getElementById("current-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const btn = document.querySelector("#security .save-btn");
+
+        if(!currentPassword || !newPassword) return alert("Please fill both fields");
+
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Updating...';
+        btn.disabled = true;
+
+        try {
+          const response = await fetch("/auth/update-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword, newPassword }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            btn.innerText = "Password Updated";
+            btn.style.background = "#28a745";
+            document.getElementById("current-password").value = "";
+            document.getElementById("new-password").value = "";
+          } else {
+            alert(data.error || "Check current password.");
+            btn.innerText = "Update Failed";
+          }
+        } catch (error) {
+          btn.innerText = "Error";
+        } finally {
+          setTimeout(() => {
+            btn.innerText = "Update Security";
+            btn.style.background = "#2b0303";
+            btn.disabled = false;
+          }, 2000);
+        }
+      }
+
+      // --- 3. Global Theme Toggle ---
+      async function toggleTheme() {
+        const isDark = document.getElementById("darkModeToggle").checked;
+        const theme = isDark ? "dark" : "light";
+        
+        document.body.classList.toggle("dark-mode", isDark);
+
+        try {
+          await fetch("/auth/update-theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ theme }),
+          });
+        } catch (err) { console.error("Theme sync failed", err); }
+      }
+
+      // Preference Feedback
+      function showGeneralFeedback(btn) {
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+        btn.style.background = "#28a745";
+        setTimeout(() => {
+          btn.innerText = "Save Preferences";
+          btn.style.background = "#2b0303";
+        }, 2000);
+      }
+
+      // --- 4. Initialization ---
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const response = await fetch("/auth/user");
+          const user = await response.json();
+          if (user) {
+            document.getElementById("user-firstname-sidebar").textContent = user.name.split(" ")[0];
+            document.getElementById("full-name-input").value = user.name || "";
+            document.getElementById("email-input").value = user.email || "";
+            
+            if (user.theme === "dark") {
+              document.body.classList.add("dark-mode");
+              document.getElementById("darkModeToggle").checked = true;
+            }
+          }
+        } catch (error) { console.log("Session sync failed."); }
+      });
+    </script>
+  </body>
+</html>

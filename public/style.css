@@ -1,0 +1,408 @@
+/* =========================================
+    2. GLOBAL RESET & LOGIN BODY
+   ========================================= */
+* { box-sizing: border-box; }
+
+body.login-body {
+    background-color: #FAF9F6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* =========================================
+    3. LOGIN FORM STYLES (SLIDING AUTH)
+   ========================================= */
+.auth-container {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+    width: 768px;
+    min-height: 480px;
+}
+
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+    width: 50%;
+}
+
+.sign-in-container {
+    left: 0;
+    z-index: 2;
+}
+
+.sign-up-container {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+/* FORM CONTENT */
+form {
+    background-color: #FAF9F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 50px; 
+    height: 100%;
+    text-align: center;
+    position: relative; /* CRITICAL for absolute floating messages */
+}
+
+.auth-container h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 20px; 
+    letter-spacing: 1px;
+}
+
+.form-container span {
+    font-size: 15px;
+    margin-bottom: 20px;
+    display: inline-block;
+    color: #444;
+    font-weight: 500;
+}
+
+.social-icons {
+    margin: 10px 0 15px 0; 
+}
+
+.social-btn {
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    height: 40px;
+    width: 40px;
+    color: #333;
+    text-decoration: none;
+    transition: 0.3s ease;
+    background-color: #fff;
+}
+
+.social-btn:hover {
+    background: linear-gradient(to bottom right, #2b0303, #000000);
+    color: #fff;
+    border-color: #2b0303;
+    transform: translateY(-3px);
+}
+
+/* OVERLAY STYLES */
+.overlay-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100;
+}
+
+.overlay {
+    background: linear-gradient(to right, #2b0303, #000000, #2b0303);
+    color: #FFFFFF;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel h1 {
+    color: white;
+    margin-bottom: 15px;
+}
+
+.overlay-left { transform: translateX(-20%); }
+.overlay-right { right: 0; transform: translateX(0); }
+
+/* ANIMATION LOGIC */
+.auth-container.right-panel-active .sign-in-container { transform: translateX(100%); }
+.auth-container.right-panel-active .sign-up-container {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+}
+
+.auth-container.right-panel-active .overlay-container { transform: translateX(-100%); }
+.auth-container.right-panel-active .overlay { transform: translateX(50%); }
+.auth-container.right-panel-active .overlay-left { transform: translateX(0); }
+.auth-container.right-panel-active .overlay-right { transform: translateX(20%); }
+
+/* INPUTS & BUTTONS */
+input {
+    background-color: #f4f4f4;
+    border: none;
+    padding: 12px 15px;
+    margin: 10px 0; 
+    width: 100%;
+    border-radius: 5px;
+    outline: none;
+    font-size: 15px;
+}
+
+.btn-primary {
+    border-radius: 20px;
+    background: linear-gradient(to right, #2b0303, #000000);
+    color: #fff;
+    padding: 12px 45px;
+    border: none;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 25px; 
+    transition: transform 80ms ease-in;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 10px 45px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.forgot {
+    color: #333;
+    font-size: 14px;
+    text-decoration: none;
+    margin: 15px 0;
+}
+
+/* =========================================
+    4. DASHBOARD STYLES
+   ========================================= */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    height: 100vh;
+}
+
+.sidebar {
+    background: linear-gradient(to bottom, #2b0303, #000000);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+}
+
+.logo h2 {
+    font-family: "Times New Roman", Times, serif;
+    letter-spacing: 2px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.nav-menu a {
+    color: #ccc;
+    text-decoration: none;
+    padding: 15px;
+    display: block;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: 0.3s;
+}
+
+.nav-menu a:hover, .nav-menu a.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.main-content {
+    overflow-y: auto;
+    padding: 20px 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.stat-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2b0303;
+}
+
+/* =========================================
+    5. FLOATING FORM MESSAGES (FIXED)
+   ========================================= */
+.floating-message {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    width: 85%;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-message.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.floating-message.success {
+    background: linear-gradient(to right, #2b0303, #000000);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.floating-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+    box-shadow: 0 4px 12px rgba(153, 27, 27, 0.1);
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: translateX(-50%) scale(0.9); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* =========================================
+    6. WEAVING STUDIO & OVERLAY FIXES
+   ========================================= */
+
+/* Main Container Fix */
+#weaving-studio {
+    width: 100%;
+    background-color: #1a1a1e !important;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+}
+
+/* Make the Setup Windows Smaller and Centered */
+#modeSelectionOverlay > div, 
+#setupOverlay > div {
+    max-width: 400px; /* Reduced width */
+    width: 90%;
+    padding: 25px !important; /* Compact padding */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px); /* Glass effect */
+    background: rgba(30, 30, 35, 0.95) !important;
+}
+
+/* Typography adjustments for smaller windows */
+#modeSelectionOverlay h2, 
+#setupOverlay h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 15px !important;
+    letter-spacing: 1px !important;
+}
+
+/* Remove "Excess Box" behavior from inputs */
+#setupOverlay input, 
+#setupOverlay select {
+    background-color: #25252b !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+    margin: 5px 0 15px 0 !important; /* Controlled spacing */
+    padding: 10px !important;
+    height: auto !important;
+}
+
+#setupOverlay label {
+    font-size: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888 !important;
+}
+
+/* Action Buttons inside Studio */
+#startWeaving, .goToSetupBtn {
+    padding: 12px !important;
+    font-size: 14px !important;
+    margin-top: 10px !important;
+    transition: all 0.3s ease;
+}
+
+#startWeaving:hover {
+    background-color: #45a049 !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+/* Responsive fix to prevent "Cut Off" look on small screens */
+@media (max-height: 700px) {
+    #setupOverlay > div {
+        transform: scale(0.85);
+        transform-origin: center;
+    }
+}
+
+/* Fix for the Loom Control panel positioning */
+.loom-control-panel {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 100;
+}
+
+/* Compact Save Notification */
+.save-alert {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    z-index: 2000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+#patternPreview {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    height: 320px;
+    background: #111;
+    border-radius: 14px;
+    border: 2px solid #444;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    z-index: 50;
+}

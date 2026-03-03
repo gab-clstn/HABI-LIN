@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HABI-LIN</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /*
+        Goal: Match image_0.png exactly, including:
+        1.  Center alignment of all content.
+        2.  Large spacing: top, between text blocks, and especially on sides for the image.
+        3.  The text-to-image size hierarchy.
+        4.  Correct font styles (clean sans-serif, varying weights).
+        5.  Correct image appearance (centered, with side borders).
+        */
+
+      /* RESET */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        font-family: "Inter", sans-serif;
+        background: #ffffff;
+        color: #000;
+        overflow: hidden; /* 🚨 removes scrollbar (critical) */
+      }
+
+      /* MAIN FULLSCREEN LAYOUT */
+      .main-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh; /* 🚨 lock to viewport */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: center;
+      }
+
+      /* CENTER CONTENT BLOCK */
+      .content {
+        position: absolute;
+        top: 5vh;
+      }
+
+      /* LOGO */
+      .logo {
+        width: 110px;
+        margin-bottom: 15px;
+      }
+
+      /* TITLE */
+      h1 {
+        font-size: 60px;
+        font-weight: 300;
+        letter-spacing: 18px;
+        margin-bottom: 23px;
+        padding-left: 18px;
+      }
+      /* TAGLINE */
+      .tagline {
+        font-size: 17px;
+        font-weight: 400;
+        color: #4a4a4a;
+        max-width: 560px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+      }
+
+      /* BUTTON */
+      .btn-get-started {
+        background: #000;
+        color: #fff;
+        padding: 14px 46px;
+        border-radius: 40px;
+        font-size: 15px;
+        font-weight: 500;
+        text-decoration: none; /* ← removes underline */
+        display: inline-block; /* ← required for transform to behave properly */
+      }
+
+      .btn-get-started:hover {
+        opacity: 0.8;
+      }
+
+      /* HERO IMAGE — THE MOST IMPORTANT PART */
+      .hero-image-container {
+        position: absolute;
+        bottom: 0; /* 🚨 anchors to bottom of screen */
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      .hero-image-container {
+        position: absolute;
+        bottom: 0px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        padding-bottom: 0;
+      }
+
+      /* IMAGE SIZE MATCH */
+      .hero-image {
+        height: 45vh; /*image height here*/
+        width: 85%; /* ← wider image */
+        object-fit: cover;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="content">
+        <img src="logo.png" alt="HABI-LIN Logo" class="logo" />
+
+        <h1>HABI-LIN</h1>
+
+        <p class="tagline">
+          Digitalizing the dying art of traditional Filipino weaving.
+        </p>
+
+        <a href="login.html" class="btn-get-started">Get Started</a>
+      </div>
+
+      <div class="hero-image-container">
+        <img
+          src="indexBG1.jpg"
+          alt="Traditional Weaving Art"
+          class="hero-image"
+        />
+      </div>
+    </div>
+  </body>
+</html>
