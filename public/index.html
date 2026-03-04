@@ -1,149 +1,187 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HABI-LIN</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      /*
-        Goal: Match image_0.png exactly, including:
-        1.  Center alignment of all content.
-        2.  Large spacing: top, between text blocks, and especially on sides for the image.
-        3.  The text-to-image size hierarchy.
-        4.  Correct font styles (clean sans-serif, varying weights).
-        5.  Correct image appearance (centered, with side borders).
-        */
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HABI-LIN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      /* RESET */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: "Inter", sans-serif;
+      background: #ffffff;
+      color: #000;
+      overflow: hidden;
+    }
 
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        font-family: "Inter", sans-serif;
-        background: #ffffff;
-        color: #000;
-        overflow: hidden; /* 🚨 removes scrollbar (critical) */
-      }
+    /* ── FULLSCREEN LAYOUT ── */
+    .main-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: center;
+      overflow: hidden;
+    }
 
-      /* MAIN FULLSCREEN LAYOUT */
-      .main-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh; /* 🚨 lock to viewport */
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        text-align: center;
-      }
+    /* ── CENTER CONTENT ── */
+    .content {
+      position: absolute;
+      top: clamp(24px, 5vh, 5vh);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
 
-      /* CENTER CONTENT BLOCK */
-      .content {
-        position: absolute;
-        top: 5vh;
-      }
+    /* ── LOGO ── */
+    .logo {
+      width: clamp(60px, 10vw, 110px);
+      margin-bottom: clamp(10px, 2vh, 15px);
+    }
 
-      /* LOGO */
-      .logo {
-        width: 110px;
-        margin-bottom: 15px;
-      }
+    /* ── TITLE ── */
+    h1 {
+      font-size: clamp(2rem, 8vw, 60px);
+      font-weight: 300;
+      letter-spacing: clamp(6px, 2.5vw, 18px);
+      padding-left: clamp(6px, 2.5vw, 18px); /* compensate letter-spacing */
+      margin-bottom: clamp(12px, 2.5vh, 23px);
+      white-space: nowrap;
+    }
 
-      /* TITLE */
-      h1 {
-        font-size: 60px;
-        font-weight: 300;
-        letter-spacing: 18px;
-        margin-bottom: 23px;
-        padding-left: 18px;
-      }
-      /* TAGLINE */
-      .tagline {
-        font-size: 17px;
-        font-weight: 400;
-        color: #4a4a4a;
-        max-width: 560px;
-        line-height: 1.6;
-        margin-bottom: 40px;
-      }
+    /* ── TAGLINE ── */
+    .tagline {
+      font-size: clamp(0.85rem, 2.2vw, 17px);
+      font-weight: 400;
+      color: #4a4a4a;
+      max-width: 560px;
+      line-height: 1.6;
+      margin-bottom: clamp(24px, 4vh, 40px);
+      padding: 0 8px;
+    }
 
-      /* BUTTON */
-      .btn-get-started {
-        background: #000;
-        color: #fff;
-        padding: 14px 46px;
-        border-radius: 40px;
-        font-size: 15px;
-        font-weight: 500;
-        text-decoration: none; /* ← removes underline */
-        display: inline-block; /* ← required for transform to behave properly */
-      }
+    /* ── BUTTON ── */
+    .btn-get-started {
+      background: #000;
+      color: #fff;
+      padding: clamp(10px, 1.5vh, 14px) clamp(28px, 5vw, 46px);
+      border-radius: 40px;
+      font-size: clamp(0.8rem, 1.8vw, 15px);
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
 
-      .btn-get-started:hover {
-        opacity: 0.8;
-      }
+    .btn-get-started:hover { opacity: 0.75; }
 
-      /* HERO IMAGE — THE MOST IMPORTANT PART */
-      .hero-image-container {
-        position: absolute;
-        bottom: 0; /* 🚨 anchors to bottom of screen */
-        left: 0;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        pointer-events: none;
-      }
+    /* ── HERO IMAGE ── */
+    .hero-image-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 1;
+      pointer-events: none;
+    }
 
-      .hero-image-container {
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        padding-bottom: 0;
-      }
+    .hero-image {
+      height: clamp(30vh, 45vh, 50vh);
+      width: clamp(70%, 85%, 95%);
+      object-fit: cover;
+      display: block;
+    }
 
-      /* IMAGE SIZE MATCH */
+    /* ── RESPONSIVE BREAKPOINTS ── */
+
+    /* Tablet (≤768px) */
+    @media (max-width: 768px) {
+      html, body { overflow: hidden; } /* keep no-scroll on tablet */
+
+      h1 { white-space: normal; } /* allow wrap if very narrow */
+
       .hero-image {
-        height: 45vh; /*image height here*/
-        width: 85%; /* ← wider image */
-        object-fit: cover;
-        display: block;
+        height: clamp(28vh, 38vh, 42vh);
+        width: 95%;
       }
-    </style>
-  </head>
-  <body>
-    <div class="main-container">
-      <div class="content">
-        <img src="logo.png" alt="HABI-LIN Logo" class="logo" />
+    }
 
-        <h1>HABI-LIN</h1>
+    /* Mobile (≤480px) */
+    @media (max-width: 480px) {
+      .content { top: clamp(16px, 3vh, 28px); }
 
-        <p class="tagline">
-          Digitalizing the dying art of traditional Filipino weaving.
-        </p>
+      h1 {
+        font-size: clamp(1.8rem, 10vw, 2.6rem);
+        letter-spacing: clamp(4px, 3vw, 10px);
+        padding-left: clamp(4px, 3vw, 10px);
+      }
 
-        <a href="login.html" class="btn-get-started">Get Started</a>
-      </div>
+      .tagline { font-size: 0.88rem; }
 
-      <div class="hero-image-container">
-        <img
-          src="indexBG1.jpg"
-          alt="Traditional Weaving Art"
-          class="hero-image"
-        />
-      </div>
+      .hero-image {
+        height: clamp(26vh, 35vh, 38vh);
+        width: 100%;
+        border-radius: 0;
+      }
+    }
+
+    /* Very small (≤360px) */
+    @media (max-width: 360px) {
+      h1 { font-size: 1.6rem; letter-spacing: 4px; padding-left: 4px; }
+      .tagline { font-size: 0.8rem; }
+      .btn-get-started { padding: 10px 24px; font-size: 0.78rem; }
+    }
+
+    /* Landscape phones — content may be tight, shrink top gap */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .content { top: 12px; }
+      h1 { font-size: clamp(1.4rem, 6vw, 2rem); margin-bottom: 8px; }
+      .tagline { margin-bottom: 14px; font-size: 0.8rem; }
+      .logo { width: 50px; margin-bottom: 8px; }
+      .hero-image { height: 30vh; }
+    }
+
+    /* Large screens (≥1280px) */
+    @media (min-width: 1280px) {
+      .hero-image { width: 75%; height: 48vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+
+    <div class="content">
+      <img src="logo.png" alt="HABI-LIN Logo" class="logo" />
+      <h1>HABI-LIN</h1>
+      <p class="tagline">
+        Digitalizing the dying art of traditional Filipino weaving.
+      </p>
+      <a href="login.html" class="btn-get-started">Get Started</a>
     </div>
-  </body>
+
+    <div class="hero-image-container">
+      <img src="indexBG1.jpg" alt="Traditional Weaving Art" class="hero-image" />
+    </div>
+
+  </div>
+</body>
 </html>

@@ -2,91 +2,74 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
 /*
- * learn.js — Guided Learn Mode
+ * learn.js — Guided Learn Mode (Responsive)
  *
  * Flow:
- *   1. startLearn() is called from index.html with a pattern object
- *      (fetched from MongoDB, same shape as what loom.js saves).
+ *   1. startLearn() is called from index.html with a pattern object.
  *   2. The 3D loom is built identically to loom.js.
- *   3. A "lesson plan" is derived from the pattern's patternRows
- *      (or reconstructed from steps if patternRows is absent).
- *   4. Each row becomes one "lesson step" with sub-phases:
- *        PHASE 1 — SHED  : highlight which pedal(s) to press;
- *                           loom waits until user presses correct key(s).
- *        PHASE 2 — SHUTTLE: highlight shuttle direction;
- *                           loom waits until user presses Space.
- *        PHASE 3 — BEAT  : highlight beater;
- *                           loom waits until user presses 0.
- *   5. After each correct action the 3D loom animates the motion,
- *      and a HUD panel shows live progress + next instruction.
- *   6. Auto-play mode (toggle) plays the whole pattern automatically.
+ *   3. A "lesson plan" is derived from the pattern's patternRows.
+ *   4. Each row = one lesson step with 3 sub-phases:
+ *        SHED    → highlight pedal(s); wait for correct key press
+ *        SHUTTLE → highlight shuttle direction; wait for Space
+ *        BEAT    → highlight beater; wait for 0
+ *   5. After each correct action the 3D loom animates the motion.
+ *   6. Auto-play mode plays the whole pattern automatically.
+ *
+ * Responsive changes vs original:
+ *   - HUD uses clamp() widths, vw units, and flexbox wrap
+ *   - Pattern panel repositions to bottom on narrow screens
+ *   - All fixed px sizes replaced with responsive equivalents
+ *   - ResizeObserver keeps renderer + HUD in sync on resize
  */
 
 /* ══════════════════════════════════════════════════════════════
    TOP-LEVEL STATE
 ══════════════════════════════════════════════════════════════ */
-let learnPattern   = null;   // the loaded pattern object
-let lessonPlan     = [];     // array of { pedals, shuttleDir, rowStates }
-let lessonIndex    = 0;      // which row we are teaching
-let currentPhase   = "SHED"; // SHED | SHUTTLE | BEAT | DONE
+let learnPattern   = null;
+let lessonPlan     = [];
+let lessonIndex    = 0;
+let currentPhase   = "SHED";
 let autoPlay       = false;
 let autoPlayTimer  = 0;
-const AUTO_PLAY_DELAY = 90;  // frames between auto-steps (~1.5 sec at 60fps)
+const AUTO_PLAY_DELAY = 90;
 
 /* ══════════════════════════════════════════════════════════════
    PUBLIC ENTRY POINT
-   Called from index.html: startLearn(patternObject)
 ══════════════════════════════════════════════════════════════ */
 export async function startLearn(pattern) {
     console.log("[LEARN] Starting learn mode for:", pattern.name);
     learnPattern = pattern;
-
-    // Short delay so the weaving-studio div is visible before we size the renderer
     await new Promise(r => setTimeout(r, 60));
-
     buildLessonPlan(pattern);
     initLearnLoom(pattern);
 }
 
 /* ══════════════════════════════════════════════════════════════
    BUILD LESSON PLAN
-   Converts patternRows (bool[][]) into structured lesson steps.
-   Each step tells us:
-     - which shaft indices must be pressed (pedals)
-     - which direction the shuttle travels this row
-     - the expected warp-up/down pattern for visual feedback
 ══════════════════════════════════════════════════════════════ */
 function buildLessonPlan(pattern) {
-    lessonPlan  = [];
-    lessonIndex = 0;
+    lessonPlan   = [];
+    lessonIndex  = 0;
     currentPhase = "SHED";
 
-    const shaftCount  = pattern.loom === "traditional" ? 2 : 4;
-    const warpCount   = 61; // 0..60 inclusive, matching loom.js
-    const threading   = [];
+    const shaftCount = pattern.loom === "traditional" ? 2 : 4;
+    const warpCount  = 61;
+    const threading  = [];
     for (let i = 0; i < warpCount; i++) threading.push(i % shaftCount);
 
-    // Prefer the saved patternRows; fall back to simulating from steps
     const rows = (pattern.patternRows && pattern.patternRows.length > 0)
         ? pattern.patternRows
         : simulateRowsFromSteps(pattern.steps || [], shaftCount, threading);
 
     rows.forEach((rowStates, rowIndex) => {
-        // Determine which shafts are DOWN (pressed) this row.
-        // isWarpUp[i] = true  → shaft is UP   → NOT pressed
-        // isWarpUp[i] = false → shaft is DOWN  → pressed
         const pressedShafts = new Set();
         rowStates.forEach((isUp, warpIdx) => {
             if (!isUp) pressedShafts.add(threading[warpIdx % threading.length]);
         });
-
-        // Shuttle direction alternates each row: even rows → left→right, odd → right→left
-        const shuttleDir = rowIndex % 2 === 0 ? "right" : "left";
-
         lessonPlan.push({
             rowIndex,
             pedals:     Array.from(pressedShafts).sort(),
-            shuttleDir,
+            shuttleDir: rowIndex % 2 === 0 ? "right" : "left",
             rowStates:  rowStates.slice()
         });
     });
@@ -94,28 +77,38 @@ function buildLessonPlan(pattern) {
     console.log("[LEARN] Lesson plan:", lessonPlan.length, "rows");
 }
 
-/* Reconstruct row states from recorded steps (fallback) */
 function simulateRowsFromSteps(steps, shaftCount, threading) {
     const rows = [];
     const warpCount = 61;
     let pressedPedals = new Set();
-
     for (const step of steps) {
-        if (step.action === "pedal")  { pressedPedals.add(step.value); }
-        if (step.action === "pedals") { pressedPedals = new Set(step.value); }
+        if (step.action === "pedal")  pressedPedals.add(step.value);
+        if (step.action === "pedals") pressedPedals = new Set(step.value);
         if (step.action === "beat") {
             const shed = [];
             for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
-            const rowStates = [];
-            for (let i = 0; i < warpCount; i++) rowStates.push(shed[threading[i % threading.length]]);
-            rows.push(rowStates);
+            rows.push(Array.from({ length: warpCount }, (_, i) => shed[threading[i % threading.length]]));
         }
     }
     return rows;
 }
 
 /* ══════════════════════════════════════════════════════════════
-   3D LOOM INITIALIZER  (mirrors loom.js exactly)
+   HELPERS — responsive sizing
+══════════════════════════════════════════════════════════════ */
+
+/** Returns true when the studio container is "narrow" (phone landscape / portrait) */
+function isNarrow(container) {
+    return container.getBoundingClientRect().width < 640;
+}
+
+/** Returns true when the studio container is "short" (landscape phone) */
+function isShort(container) {
+    return container.getBoundingClientRect().height < 420;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3D LOOM INITIALIZER
 ══════════════════════════════════════════════════════════════ */
 function initLearnLoom(pattern) {
 
@@ -155,14 +148,12 @@ function initLearnLoom(pattern) {
     for (let i = 0; i < 120; i++) threading.push(i % SHAFT_COUNT);
 
     /* ── Runtime state ─────────────────────────────────────── */
-    const pedalPivotGroups  = [];
-    const heddleFrames      = [];
-    const warpGroups        = [];
+    const pedalPivotGroups = [];
+    const heddleFrames     = [];
+    const warpGroups       = [];
     for (let i = 0; i < SHAFT_COUNT; i++) warpGroups.push([]);
 
-    // Pedals the learner is currently holding
     let currentPressedPedals = new Set();
-
     let beaterGroup, shuttleGroup, clothRoller;
     let weftThreads  = [];
     let activeWeft   = null;
@@ -170,23 +161,21 @@ function initLearnLoom(pattern) {
     let fellZ        = BASE_FRONT - 0.12;
     let beatTimer    = 0;
 
-    // Shuttle state (same as loom.js)
-    let shuttleCurrentSide = -1;
-    let shuttleStartSide   = -1;
-    let shuttleArmed       = false;
-    let shuttleInserted    = false;
-    let weftReadyToBeat    = false;
-    let shuttleDirectionChanges = 0;
+    let shuttleCurrentSide      = -1;
+    let shuttleStartSide        = -1;
+    let shuttleArmed            = false;
+    let shuttleInserted         = false;
+    let weftReadyToBeat         = false;
     let shuttleMovingPositive   = null;
     let lastShuttleX            = 0;
+    let shuttleDirectionChanges = 0;
 
-    // Highlight meshes for visual cues
-    const pedalHighlights = [];  // coloured overlays on pedals
-    let   shuttleHighlight = null;
-    let   beaterHighlight  = null;
+    const pedalHighlights = [];
+    let shuttleHighlight  = null;
+    let beaterHighlight   = null;
 
     /* ── Three.js scene ────────────────────────────────────── */
-    const scene = new THREE.Scene();
+    const scene     = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a1f);
 
     const canvas    = document.getElementById("bg");
@@ -207,9 +196,14 @@ function initLearnLoom(pattern) {
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
+        repositionHUD();
     }
     resizeRenderer();
-    window.addEventListener("resize", resizeRenderer);
+
+    // Use ResizeObserver so the renderer reacts to any container size change,
+    // not just window resize (e.g. sidebar collapsing, orientation change)
+    const resizeObs = new ResizeObserver(resizeRenderer);
+    resizeObs.observe(container);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -226,15 +220,11 @@ function initLearnLoom(pattern) {
     const reedMat        = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.4, metalness: 0.6 });
     const clothThreadMat = new THREE.LineBasicMaterial({ color: 0xf0eadf, opacity: 0.95, transparent: true });
     const weftColor      = pattern.weftColor || "#c0392b";
-    const shuttleThreadMat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(weftColor), roughness: 0.7
-    });
+    const shuttleThreadMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(weftColor), roughness: 0.7 });
 
-    // Highlight materials
     const highlightPedalMat   = new THREE.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.55 });
     const highlightShuttleMat = new THREE.MeshStandardMaterial({ color: 0xffdd00, emissive: 0xffdd00, emissiveIntensity: 0.7, transparent: true, opacity: 0.55 });
     const highlightBeaterMat  = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.7, transparent: true, opacity: 0.55 });
-    const correctFlashMat     = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 1.0, transparent: true, opacity: 0.7 });
 
     /* ── Helpers ───────────────────────────────────────────── */
     function woodBar(w, h, d, x, y, z, parent = scene) {
@@ -302,13 +292,13 @@ function initLearnLoom(pattern) {
             const fg = new THREE.Group();
             fg.position.set(0, SHED_OPEN_Y, zPositions[i]);
             [-1, 1].forEach(side => {
-                const xp     = side * (HEDDLE_WIDTH / 2 - 0.50);
-                const rz     = i < 2 ? (zPositions[0] + zPositions[1]) / 2 : (zPositions[2] + zPositions[3]) / 2;
-                const cordG  = new THREE.BufferGeometry().setFromPoints([
+                const xp  = side * (HEDDLE_WIDTH / 2 - 0.50);
+                const rz  = i < 2 ? (zPositions[0] + zPositions[1]) / 2 : (zPositions[2] + zPositions[3]) / 2;
+                const cg  = new THREE.BufferGeometry().setFromPoints([
                     new THREE.Vector3(xp, ROLLER_Y, rz),
                     new THREE.Vector3(xp, SHED_OPEN_Y + FRAME_H / 2, zPositions[i])
                 ]);
-                scene.add(new THREE.Line(cordG, stringMat));
+                scene.add(new THREE.Line(cg, stringMat));
             });
             woodBar(HEDDLE_WIDTH, 0.1, 0.1, 0,  FRAME_H / 2, 0, fg);
             woodBar(HEDDLE_WIDTH, 0.1, 0.1, 0, -FRAME_H / 2, 0, fg);
@@ -337,8 +327,6 @@ function initLearnLoom(pattern) {
         woodBar(WIDTH - 0.5, 0.15, 0.6, 0, -bh / 2, -0.1, beaterGroup);
         beaterGroup.add(new THREE.Mesh(new THREE.BoxGeometry(HEDDLE_WIDTH, bh - 0.1, 0.05), reedMat));
         scene.add(beaterGroup);
-
-        // Beater highlight overlay (hidden until BEAT phase)
         beaterHighlight = new THREE.Mesh(
             new THREE.BoxGeometry(WIDTH - 0.3, bh + 0.3, 0.4),
             highlightBeaterMat
@@ -351,7 +339,7 @@ function initLearnLoom(pattern) {
     /* ── Shuttle ────────────────────────────────────────────── */
     function createShuttle() {
         shuttleGroup = new THREE.Group();
-        const sw   = 1.2;
+        const sw    = 1.2;
         const bodyG = new THREE.BoxGeometry(sw, 0.22, 0.35);
         const pos   = bodyG.attributes.position;
         for (let i = 0; i < pos.count; i++) {
@@ -367,15 +355,12 @@ function initLearnLoom(pattern) {
         quill.rotation.z = Math.PI / 2; quill.position.y = 0.05; shuttleGroup.add(quill);
         const wrap = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, sw * 0.45, 12), shuttleThreadMat);
         wrap.rotation.z = Math.PI / 2; wrap.position.y = 0.05; shuttleGroup.add(wrap);
-
-        // Shuttle highlight (arrow-like glow)
         shuttleHighlight = new THREE.Mesh(
             new THREE.BoxGeometry(sw + 0.4, 0.5, 0.6),
             highlightShuttleMat
         );
         shuttleHighlight.visible = false;
         shuttleGroup.add(shuttleHighlight);
-
         scene.add(shuttleGroup);
     }
     createShuttle();
@@ -394,14 +379,11 @@ function initLearnLoom(pattern) {
             scene.add(pivot);
             pedalPivotGroups.push(pivot);
             woodBar(0.45, 0.4, 0.5, xPos, BASE_Y + 0.05, BASE_FRONT);
-
             const vo = Math.abs(TOWER_Z - BASE_FRONT) * Math.tan(restAngle);
             createRopeConnection(
                 new THREE.Vector3(xPos, BASE_Y + 0.05 + vo, TOWER_Z),
                 new THREE.Vector3(xPos, BREAST_BEAM_Y - FRAME_H / 2, TOWER_Z)
             );
-
-            // Pedal highlight box (rendered at pedal foot position)
             const hl = new THREE.Mesh(
                 new THREE.BoxGeometry(0.5, 0.15, 4.8),
                 highlightPedalMat.clone()
@@ -447,141 +429,314 @@ function initLearnLoom(pattern) {
     createClothBase();
 
     /* ══════════════════════════════════════════════════════════
-       LEARN HUD
+       LEARN HUD  —  fully responsive
     ══════════════════════════════════════════════════════════ */
     function createLearnHUD() {
 
-        // ── Main instruction panel ──
+        // ── Inject shared styles ──────────────────────────────
+        const style = document.createElement("style");
+        style.id = "learnHUD-styles";
+        style.textContent = `
+            /* Phase tabs */
+            .phase-tab {
+                flex: 1;
+                text-align: center;
+                padding: 4px 2px;
+                border-radius: 8px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                background: #1a1a22;
+                color: #555;
+                border: 1px solid #2a2a35;
+                transition: all 0.25s;
+                white-space: nowrap;
+            }
+            .phase-tab.active { color: #fff; border-color: currentColor; }
+            #phaseTab_SHED.active    { background:#003d44; color:#00e5ff; border-color:#00e5ff; }
+            #phaseTab_SHUTTLE.active { background:#433a00; color:#ffdd00; border-color:#ffdd00; }
+            #phaseTab_BEAT.active    { background:#003322; color:#00ff88; border-color:#00ff88; }
+
+            /* HUD kbd keys */
+            .lhud-kbd {
+                background:#222; border:1px solid #555; border-radius:4px;
+                padding:2px 6px; font-family:monospace; font-size:0.85em;
+            }
+
+            /* Collapsed mini HUD on very small screens */
+            #learnHUD.collapsed .lhud-collapsible { display: none !important; }
+            #learnHUD .lhud-toggle {
+                display: none;
+                background: none; border: none; color: #888; cursor: pointer;
+                font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;
+                border: 1px solid #333;
+            }
+
+            /* ── Responsive layout ── */
+
+            /*
+             * Layout strategy:
+             *   < 640px  (phone)  → HUD slides up from bottom full-width; pattern panel hidden
+             *   640–899px (tablet) → HUD docked top-right corner; pattern panel below it
+             *   ≥ 900px  (desktop) → HUD docked right edge as vertical sidebar; pattern panel below it
+             *
+             * The loom canvas is NEVER obscured on medium/large screens because
+             * the HUD stays pinned to the right edge, outside the loom's visual centre.
+             */
+
+            /* ── Narrow (phone portrait / very small window) ── */
+            @container learnStudio (max-width: 639px) {
+                #learnHUD {
+                    top: auto !important;
+                    bottom: 0 !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    transform: none !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    border-radius: 14px 14px 0 0 !important;
+                    max-height: 55vh;
+                    overflow-y: hidden;
+                }
+                #learnPatternPanel { display: none !important; }
+                #learnHUD .lhud-toggle { display: inline-block; }
+            }
+
+            /* ── Medium (tablet / small desktop window) ── */
+            @container learnStudio (min-width: 640px) and (max-width: 899px) {
+                /* HUD: top-right corner, never overlapping loom centre */
+                #learnHUD {
+                    top: 12px !important;
+                    right: 12px !important;
+                    left: auto !important;
+                    transform: none !important;
+                    width: 260px !important;
+                    max-height: calc(100% - 180px);
+                    overflow-y: hidden;
+                }
+                /* Pattern panel: directly below the HUD on the right */
+                #learnPatternPanel {
+                    display: flex !important;
+                    top: auto !important;
+                    bottom: 12px !important;
+                    right: 12px !important;
+                    left: auto !important;
+                    width: 260px !important;
+                    height: 150px !important;
+                }
+            }
+
+            /* ── Large (desktop) ── */
+            @container learnStudio (min-width: 900px) {
+                /* HUD: right-side panel — loom fills the left ~70% unobstructed */
+                #learnHUD {
+                    top: 16px !important;
+                    right: 16px !important;
+                    left: auto !important;
+                    transform: none !important;
+                    width: clamp(260px, 28%, 320px) !important;
+                    max-height: calc(100% - 220px);
+                    overflow-y: hidden;
+                }
+                /* Pattern panel: right edge, flush below HUD gap */
+                #learnPatternPanel {
+                    display: flex !important;
+                    top: auto !important;
+                    bottom: 16px !important;
+                    right: 16px !important;
+                    left: auto !important;
+                    width: clamp(260px, 28%, 320px) !important;
+                    height: 190px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Enable container queries on the studio div
+        container.style.containerType = "inline-size";
+        container.style.containerName = "learnStudio";
+
+        // ── Main HUD panel ────────────────────────────────────
         const hud = document.createElement("div");
         hud.id = "learnHUD";
-        hud.style.cssText = `
-            position: absolute;
-            top: 20px;
-            left: 300px;
-            transform: translateX(-50%);
-            width: 560px;
-            background: rgba(10,10,14,0.96);
-            border: 1px solid #333;
-            border-radius: 16px;
-            padding: 20px 28px;
-            color: white;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            z-index: 200;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        `;
+        Object.assign(hud.style, {
+            position:      "absolute",
+            zIndex:        "200",
+            background:    "rgba(10,10,14,0.96)",
+            border:        "1px solid #333",
+            borderRadius:  "16px",
+            padding:       "10px 14px",
+            color:         "white",
+            fontFamily:    "'Plus Jakarta Sans', sans-serif",
+            boxShadow:     "0 12px 40px rgba(0,0,0,0.6)",
+            display:       "flex",
+            flexDirection: "column",
+            gap:           "8px",
+            boxSizing:     "border-box",
+            // Default: right-side panel (overridden by container queries / repositionHUD)
+            top:           "16px",
+            right:         "16px",
+            left:          "auto",
+            transform:     "none",
+            width:         "clamp(240px, 27%, 300px)",
+            maxHeight:     "calc(100% - 185px)",
+            overflowY:     "auto",
+        });
 
         hud.innerHTML = `
-            <!-- Row progress bar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#888;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <button id="learnBackBtn" style="padding:4px 10px; background:none; border:1px solid #555; color:#aaa; border-radius:6px; cursor:pointer; font-size:11px;">← Back</button>
-                    <span id="learnPatternName" style="font-weight:700; font-size:0.9rem; color:#fff;"></span>
+            <!-- Top row: back btn + name + row counter + collapse toggle -->
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <button id="learnBackBtn" style="padding:4px 10px; background:none; border:1px solid #555; color:#aaa; border-radius:6px; cursor:pointer; font-size:11px; white-space:nowrap; flex-shrink:0;">← Back</button>
+                    <span id="learnPatternName" style="font-weight:700; font-size:clamp(0.8rem,2vw,0.9rem); color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
                 </div>
-                <span id="learnRowCounter">Row 0 / 0</span>
-            </div>
-            <div style="background:#222; border-radius:99px; height:6px; overflow:hidden;">
-                <div id="learnProgressBar" style="background: linear-gradient(90deg,#00e5ff,#00ff88); height:100%; width:0%; border-radius:99px; transition:width 0.4s ease;"></div>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <span id="learnRowCounter" style="font-size:0.75rem; color:#888; white-space:nowrap;">Row 0 / 0</span>
+                    <button class="lhud-toggle" id="learnCollapseBtn" title="Collapse HUD">▲</button>
+                </div>
             </div>
 
-            <!-- Phase indicator tabs -->
-            <div style="display:flex; gap:8px;">
+            <!-- Progress bar -->
+            <div class="lhud-collapsible" style="background:#222; border-radius:99px; height:5px; overflow:hidden;">
+                <div id="learnProgressBar" style="background:linear-gradient(90deg,#00e5ff,#00ff88); height:100%; width:0%; border-radius:99px; transition:width 0.4s ease;"></div>
+            </div>
+
+            <!-- Phase tabs -->
+            <div class="lhud-collapsible" style="display:flex; gap:6px;">
                 <div id="phaseTab_SHED"    class="phase-tab" data-phase="SHED">1 · Open Shed</div>
                 <div id="phaseTab_SHUTTLE" class="phase-tab" data-phase="SHUTTLE">2 · Throw Shuttle</div>
                 <div id="phaseTab_BEAT"    class="phase-tab" data-phase="BEAT">3 · Beat</div>
             </div>
 
-            <!-- Main instruction -->
-            <div id="learnInstruction" style="
-                background: #16161e;
-                border-radius: 10px;
-                padding: 16px 18px;
-                font-size: 1rem;
-                line-height: 1.55;
-                border-left: 3px solid #00e5ff;
-                min-height: 56px;
+            <!-- Instruction -->
+            <div class="lhud-collapsible" id="learnInstruction" style="
+                background:#16161e; border-radius:10px; padding:10px 12px;
+                font-size:0.82rem; line-height:1.55;
+                border-left:3px solid #00e5ff; min-height:50px;
             "></div>
 
             <!-- Key hint -->
-            <div id="learnKeyHint" style="
-                font-size: 0.78rem;
-                color: #666;
-                display: flex;
-                gap: 8px;
-                align-items: center;
+            <div class="lhud-collapsible" id="learnKeyHint" style="
+                font-size:clamp(0.72rem,1.5vw,0.78rem); color:#666;
+                display:flex; gap:8px; align-items:center; flex-wrap:wrap;
             "></div>
 
             <!-- Controls row -->
-            <div style="display:flex; gap:10px; justify-content:space-between; align-items:center;">
-                <label style="font-size:0.8rem; color:#888; display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <div class="lhud-collapsible" style="display:flex; gap:10px; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                <label style="font-size:clamp(0.72rem,1.5vw,0.8rem); color:#888; display:flex; align-items:center; gap:6px; cursor:pointer;">
                     <input type="checkbox" id="autoPlayToggle" style="accent-color:#00e5ff;"> Auto-play
                 </label>
                 <div style="display:flex; gap:8px;">
-                    <button id="learnPrevBtn" style="padding:7px 16px; background:#222; color:#aaa; border:1px solid #333; border-radius:8px; cursor:pointer; font-size:0.8rem;">← Prev</button>
-                    <button id="learnNextBtn" style="padding:7px 20px; background:#00e5ff; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.8rem;">Skip →</button>
+                    <button id="learnPrevBtn" style="padding:5px 11px; background:#222; color:#aaa; border:1px solid #333; border-radius:8px; cursor:pointer; font-size:clamp(0.72rem,1.5vw,0.8rem); white-space:nowrap;">← Prev</button>
+                    <button id="learnNextBtn" style="padding:5px 14px; background:#00e5ff; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:clamp(0.72rem,1.5vw,0.8rem); white-space:nowrap;">Skip →</button>
                 </div>
             </div>
         `;
-
-        // Phase tab styles
-        const style = document.createElement("style");
-        style.textContent = `
-            .phase-tab {
-                flex: 1; text-align: center; padding: 7px 4px;
-                border-radius: 8px; font-size: 0.72rem; font-weight: 600;
-                background: #1a1a22; color: #555; border: 1px solid #2a2a35;
-                transition: all 0.25s;
-            }
-            .phase-tab.active {
-                color: #fff; border-color: currentColor;
-            }
-            #phaseTab_SHED.active    { background:#003d44; color:#00e5ff; border-color:#00e5ff; }
-            #phaseTab_SHUTTLE.active { background:#433a00; color:#ffdd00; border-color:#ffdd00; }
-            #phaseTab_BEAT.active    { background:#003322; color:#00ff88; border-color:#00ff88; }
-        `;
-        document.head.appendChild(style);
-
         container.appendChild(hud);
 
-        // ── Mini 2D pattern panel (bottom-right) ──
+        // ── Mini pattern panel ────────────────────────────────
         const patPanel = document.createElement("div");
-        patPanel.style.cssText = `
-            position:absolute; bottom:20px; right:20px;
-            width:360px; height:220px;
-            background:rgba(0,0,0,0.92); border:1px solid #333;
-            border-radius:12px; padding:14px; box-sizing:border-box;
-            z-index:200; display:flex; flex-direction:column; gap:8px;
-        `;
+        patPanel.id = "learnPatternPanel";
+        Object.assign(patPanel.style, {
+            position:      "absolute",
+            zIndex:        "200",
+            background:    "rgba(0,0,0,0.92)",
+            border:        "1px solid #333",
+            borderRadius:  "12px",
+            padding:       "8px 10px",
+            boxSizing:     "border-box",
+            display:       "flex",
+            flexDirection: "column",
+            gap:           "8px",
+            // Default: right edge below HUD (overridden by container queries / repositionHUD)
+            bottom:        "16px",
+            right:         "16px",
+            left:          "auto",
+            top:           "auto",
+            width:         "clamp(260px, 28%, 320px)",
+            height:        "160px",
+        });
         patPanel.innerHTML = `
-            <div style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:1px; display:flex; justify-content:space-between;">
+            <div style="font-size:0.72rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:1px; display:flex; justify-content:space-between; flex-shrink:0;">
                 <span>Pattern Progress</span>
                 <span id="learnRowBadge" style="color:#00ff88;"></span>
             </div>
-            <div style="flex:1; overflow:hidden; background:#111; border-radius:6px;">
-                <canvas id="learnPatternCanvas" width="330" height="160" style="width:100%; height:100%; image-rendering:pixelated;"></canvas>
+            <div style="flex:1; overflow:hidden; background:#111; border-radius:6px; min-height:0;">
+                <canvas id="learnPatternCanvas" width="290" height="150"
+                    style="width:100%; height:100%; image-rendering:pixelated; display:block;"></canvas>
             </div>
         `;
         container.appendChild(patPanel);
 
-        // Event listeners
+        // ── Event listeners ───────────────────────────────────
         document.getElementById("autoPlayToggle").addEventListener("change", (e) => {
             autoPlay = e.target.checked;
             autoPlayTimer = AUTO_PLAY_DELAY;
         });
         document.getElementById("learnBackBtn").addEventListener("click", () => {
-            document.getElementById("learnHUD").remove();
+            hud.remove();
+            patPanel.remove();
             document.getElementById("modeSelectionOverlay").style.display = "flex";
         });
         document.getElementById("learnNextBtn").addEventListener("click", skipCurrentPhase);
         document.getElementById("learnPrevBtn").addEventListener("click", goToPrevStep);
 
-        // Init display
+        // Collapse toggle (shown on very small screens)
+        document.getElementById("learnCollapseBtn").addEventListener("click", () => {
+            const collapsed = hud.classList.toggle("collapsed");
+            document.getElementById("learnCollapseBtn").textContent = collapsed ? "▼" : "▲";
+        });
+
         document.getElementById("learnPatternName").textContent = learnPattern.name;
         refreshHUD();
     }
     createLearnHUD();
+
+    /* ── Reposition HUD on resize (JS fallback for browsers without container query support) ── */
+    function repositionHUD() {
+        const hud   = document.getElementById("learnHUD");
+        const panel = document.getElementById("learnPatternPanel");
+        if (!hud || !panel) return;
+
+        const { width } = container.getBoundingClientRect();
+
+        if (width < 640) {
+            // Narrow: full-width bottom drawer, pattern panel hidden
+            Object.assign(hud.style, {
+                top: "auto", bottom: "0", left: "0", right: "0",
+                transform: "none", width: "100%", maxWidth: "100%",
+                borderRadius: "14px 14px 0 0", maxHeight: "55vh", overflowY: "auto",
+            });
+            panel.style.display = "none";
+
+        } else if (width < 900) {
+            // Medium: HUD top-right corner, pattern panel bottom-right below it
+            const hudW = "260px";
+            Object.assign(hud.style, {
+                top: "12px", bottom: "auto", left: "auto", right: "12px",
+                transform: "none", width: hudW, maxWidth: "",
+                borderRadius: "16px", maxHeight: "calc(100% - 180px)", overflowY: "auto",
+            });
+            Object.assign(panel.style, {
+                display: "flex", top: "auto", bottom: "12px",
+                left: "auto", right: "12px",
+                width: "260px", height: "150px",
+            });
+
+        } else {
+            // Large: HUD right-side panel — loom fills left ~70% unobstructed
+            const hudW = Math.min(320, Math.max(260, Math.floor(width * 0.28))) + "px";
+            Object.assign(hud.style, {
+                top: "16px", bottom: "auto", left: "auto", right: "16px",
+                transform: "none", width: hudW, maxWidth: "",
+                borderRadius: "16px", maxHeight: "calc(100% - 220px)", overflowY: "auto",
+            });
+            Object.assign(panel.style, {
+                display: "flex", top: "auto", bottom: "16px",
+                left: "auto", right: "16px",
+                width: hudW, height: "190px",
+            });
+        }
+    }
 
     /* ══════════════════════════════════════════════════════════
        HUD UPDATE
@@ -589,24 +744,23 @@ function initLearnLoom(pattern) {
     function refreshHUD() {
         if (lessonPlan.length === 0) return;
 
-        const total    = lessonPlan.length;
-        const rowNum   = Math.min(lessonIndex, total - 1);
-        const step     = lessonPlan[rowNum];
-        const isDone   = (currentPhase === "DONE");
+        const total  = lessonPlan.length;
+        const rowNum = Math.min(lessonIndex, total - 1);
+        const step   = lessonPlan[rowNum];
+        const isDone = currentPhase === "DONE";
 
         // Progress
-        const pct = isDone ? 100 : ((rowNum + (currentPhase === "SHUTTLE" ? 0.33 : currentPhase === "BEAT" ? 0.66 : 0)) / total * 100).toFixed(1);
+        const phaseOffset = currentPhase === "SHUTTLE" ? 0.33 : currentPhase === "BEAT" ? 0.66 : 0;
+        const pct = isDone ? 100 : ((rowNum + phaseOffset) / total * 100).toFixed(1);
         document.getElementById("learnProgressBar").style.width = pct + "%";
         document.getElementById("learnRowCounter").textContent  = `Row ${rowNum + 1} / ${total}`;
         document.getElementById("learnRowBadge").textContent    = `${rowNum + 1} / ${total}`;
 
         // Phase tabs
         ["SHED", "SHUTTLE", "BEAT"].forEach(p => {
-            const el = document.getElementById("phaseTab_" + p);
-            el.classList.toggle("active", p === currentPhase);
+            document.getElementById("phaseTab_" + p).classList.toggle("active", p === currentPhase);
         });
 
-        // Instructions & key hints
         const instr   = document.getElementById("learnInstruction");
         const keyHint = document.getElementById("learnKeyHint");
 
@@ -614,30 +768,30 @@ function initLearnLoom(pattern) {
             instr.style.borderLeftColor = "#00ff88";
             instr.innerHTML = `<strong style="color:#00ff88;">🎉 Pattern complete!</strong><br>You've woven all ${total} rows.`;
             keyHint.innerHTML = "";
+            clearAllHighlights();
             return;
         }
 
-        const pedalNames = step.pedals.map(p => `<kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">${p + 1}</kbd>`).join(" + ");
+        const kbd = (k) => `<kbd class="lhud-kbd">${k}</kbd>`;
+        const pedalNames = step.pedals.map(p => kbd(p + 1)).join(" + ");
         const dirArrow   = step.shuttleDir === "right" ? "→ right" : "← left";
 
         if (currentPhase === "SHED") {
             instr.style.borderLeftColor = "#00e5ff";
             instr.innerHTML = step.pedals.length === 0
                 ? `No pedal needed — all shafts stay up for this row.`
-                : `Press pedal${step.pedals.length > 1 ? "s" : ""} <strong>${pedalNames}</strong> to lower shaft${step.pedals.length > 1 ? "s" : ""} <strong>${step.pedals.map(p => p + 1).join(" & ")}</strong> and open the shed.`;
+                : `Press pedal${step.pedals.length > 1 ? "s" : ""} <strong>${pedalNames}</strong> to open the shed.`;
             keyHint.innerHTML = step.pedals.length === 0
-                ? `<span style="color:#555;">No key needed — press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to continue</span>`
+                ? `<span style="color:#555;">No key needed — press ${kbd("Space")} to continue</span>`
                 : `Press key${step.pedals.length > 1 ? "s" : ""} ${pedalNames} on your keyboard`;
-        }
-        else if (currentPhase === "SHUTTLE") {
+        } else if (currentPhase === "SHUTTLE") {
             instr.style.borderLeftColor = "#ffdd00";
             instr.innerHTML = `Throw the shuttle <strong style="color:#ffdd00;">${dirArrow}</strong> through the open shed.`;
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to throw the shuttle`;
-        }
-        else if (currentPhase === "BEAT") {
+            keyHint.innerHTML = `Press ${kbd("Space")} to throw the shuttle`;
+        } else if (currentPhase === "BEAT") {
             instr.style.borderLeftColor = "#00ff88";
             instr.innerHTML = `Beat the weft thread into place by swinging the beater forward.`;
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">0</kbd> to beat`;
+            keyHint.innerHTML = `Press ${kbd("0")} to beat`;
         }
 
         updateHighlights();
@@ -646,22 +800,13 @@ function initLearnLoom(pattern) {
 
     /* ── 3D Highlights ─────────────────────────────────────── */
     function updateHighlights() {
-        if (lessonIndex >= lessonPlan.length) {
-            clearAllHighlights();
-            return;
-        }
+        if (lessonIndex >= lessonPlan.length) { clearAllHighlights(); return; }
         const step = lessonPlan[lessonIndex];
-
-        // Pedal highlights
         pedalHighlights.forEach((hl, i) => {
             hl.visible = (currentPhase === "SHED") && step.pedals.includes(i);
         });
-
-        // Shuttle highlight
         if (shuttleHighlight) shuttleHighlight.visible = (currentPhase === "SHUTTLE");
-
-        // Beater highlight
-        if (beaterHighlight) beaterHighlight.visible = (currentPhase === "BEAT");
+        if (beaterHighlight)  beaterHighlight.visible  = (currentPhase === "BEAT");
     }
 
     function clearAllHighlights() {
@@ -672,17 +817,18 @@ function initLearnLoom(pattern) {
 
     /* ── Mini pattern canvas ───────────────────────────────── */
     function renderLearnPattern(currentRow) {
-        const c   = document.getElementById("learnPatternCanvas");
+        const c = document.getElementById("learnPatternCanvas");
         if (!c) return;
-        const ctx = c.getContext("2d");
+        const ctx  = c.getContext("2d");
         const rows = lessonPlan;
         if (!rows.length) return;
 
         const warpCount = rows[0].rowStates.length;
-        const cellW     = Math.max(1, Math.floor(c.width  / warpCount));
-        const cellH     = Math.max(1, Math.floor(c.height / rows.length));
-        const cs        = Math.min(cellW, cellH, 6);
-
+        const cs = Math.min(
+            Math.max(1, Math.floor(c.clientWidth  / warpCount)),
+            Math.max(1, Math.floor(c.clientHeight / rows.length)),
+            6
+        );
         c.width  = warpCount * cs;
         c.height = rows.length * cs;
 
@@ -694,13 +840,12 @@ function initLearnLoom(pattern) {
             rowStates.forEach((isUp, wi) => {
                 const x = wi * cs;
                 if (!isUp) {
-                    // Shade completed rows normally; future rows lighter
-                    ctx.fillStyle = ri < currentRow ? weftColor
+                    ctx.fillStyle = ri < currentRow  ? weftColor
                                   : ri === currentRow ? "#ffffff"
                                   : "rgba(180,100,100,0.25)";
                     ctx.fillRect(x, y, cs, cs);
                 } else {
-                    ctx.fillStyle = ri < currentRow ? "#111"
+                    ctx.fillStyle = ri < currentRow  ? "#111"
                                   : ri === currentRow ? "#555"
                                   : "#ccc";
                     ctx.fillRect(x + cs * 0.75, y, cs * 0.25, cs);
@@ -708,7 +853,6 @@ function initLearnLoom(pattern) {
             });
         });
 
-        // Current-row highlight overlay
         if (currentRow < rows.length) {
             const y = (rows.length - 1 - currentRow) * cs;
             ctx.strokeStyle = "#00e5ff";
@@ -720,39 +864,31 @@ function initLearnLoom(pattern) {
     /* ══════════════════════════════════════════════════════════
        STEP LOGIC
     ══════════════════════════════════════════════════════════ */
-
-    // Check whether the user has pressed the correct pedals for this row
     function checkShedCorrect() {
         if (lessonIndex >= lessonPlan.length) return false;
         const required = lessonPlan[lessonIndex].pedals;
-        if (required.length === 0) return true; // no pedal needed
+        if (required.length === 0) return true;
         return required.every(p => currentPressedPedals.has(p));
     }
 
     function advancePhase() {
         if (currentPhase === "SHED") {
-            currentPhase = "SHUTTLE";
-            // Arm the shuttle in the correct direction
+            currentPhase       = "SHUTTLE";
             shuttleStartSide   = shuttleCurrentSide;
             shuttleCurrentSide = -shuttleCurrentSide;
-            shuttleArmed    = true;
-            shuttleInserted = false;
-            lastShuttleX    = shuttleGroup.position.x;
-        }
-        else if (currentPhase === "SHUTTLE") {
+            shuttleArmed       = true;
+            shuttleInserted    = false;
+            lastShuttleX       = shuttleGroup.position.x;
+        } else if (currentPhase === "SHUTTLE") {
             currentPhase = "BEAT";
-        }
-        else if (currentPhase === "BEAT") {
-            // Beat was pressed — fire the beater animation
+        } else if (currentPhase === "BEAT") {
             beatTimer = BEAT_DURATION;
-            // Advance to next row after beat animation completes
             setTimeout(() => {
                 lessonIndex++;
                 if (lessonIndex >= lessonPlan.length) {
                     currentPhase = "DONE";
                 } else {
                     currentPhase = "SHED";
-                    // Release all pedals so the loom resets
                     currentPressedPedals.clear();
                 }
                 refreshHUD();
@@ -761,20 +897,14 @@ function initLearnLoom(pattern) {
         refreshHUD();
     }
 
-    // Skip (Next button) — execute the action automatically and advance
     function skipCurrentPhase() {
         if (currentPhase === "SHED") {
-            // Force-press required pedals
             if (lessonIndex < lessonPlan.length) {
                 currentPressedPedals.clear();
                 lessonPlan[lessonIndex].pedals.forEach(p => currentPressedPedals.add(p));
             }
             advancePhase();
-        }
-        else if (currentPhase === "SHUTTLE") {
-            advancePhase();
-        }
-        else if (currentPhase === "BEAT") {
+        } else if (currentPhase === "SHUTTLE" || currentPhase === "BEAT") {
             advancePhase();
         }
     }
@@ -786,17 +916,14 @@ function initLearnLoom(pattern) {
             currentPressedPedals.clear();
             shuttleArmed = false;
             beatTimer    = 0;
-        } else {
-            if (lessonIndex > 0) {
-                lessonIndex--;
-                currentPhase = "SHED";
-                currentPressedPedals.clear();
-            }
+        } else if (lessonIndex > 0) {
+            lessonIndex--;
+            currentPhase = "SHED";
+            currentPressedPedals.clear();
         }
         refreshHUD();
     }
 
-    /* ── Auto-play tick ─────────────────────────────────────── */
     function tickAutoPlay() {
         if (!autoPlay || currentPhase === "DONE") return;
         autoPlayTimer--;
@@ -809,40 +936,28 @@ function initLearnLoom(pattern) {
        KEYBOARD INPUT
     ══════════════════════════════════════════════════════════ */
     function handleLearnKey(e) {
-        // Pedal keys (1-4)
         if (["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) {
             const idx = parseInt(e.code.replace("Digit","")) - 1;
             if (idx < SHAFT_COUNT) {
                 currentPressedPedals.add(idx);
-                // Check if this satisfies the current shed requirement
-                if (currentPhase === "SHED" && checkShedCorrect()) {
-                    advancePhase();
-                }
+                if (currentPhase === "SHED" && checkShedCorrect()) advancePhase();
             }
         }
-
-        // Space — shuttle throw
         if (e.code === "Space") {
             e.preventDefault();
             if (currentPhase === "SHED" && lessonPlan[lessonIndex]?.pedals.length === 0) {
-                // Row needs no pedal — space skips straight to shuttle
                 advancePhase();
             } else if (currentPhase === "SHUTTLE") {
                 advancePhase();
             }
         }
-
-        // 0 — beat
         if (e.code === "Digit0" || e.code === "Numpad0") {
-            if (currentPhase === "BEAT") {
-                advancePhase();
-            }
+            if (currentPhase === "BEAT") advancePhase();
         }
     }
 
     function handleLearnKeyUp(e) {
         if (["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) {
-            // Only release pedal if the shed phase is done; otherwise keep it held
             if (currentPhase !== "SHED") {
                 const idx = parseInt(e.code.replace("Digit","")) - 1;
                 currentPressedPedals.delete(idx);
@@ -854,16 +969,15 @@ function initLearnLoom(pattern) {
     window.addEventListener("keyup",   handleLearnKeyUp, true);
 
     /* ══════════════════════════════════════════════════════════
-       WEAVING ENGINE  (same as loom.js — runs passively)
+       WEAVING ENGINE
     ══════════════════════════════════════════════════════════ */
-
     function updateShafts() {
         for (let i = 0; i < SHAFT_COUNT; i++) {
             const isPressed   = currentPressedPedals.has(i);
             const targetY     = isPressed ? SHED_CLOSED_Y : SHED_OPEN_Y;
             const targetAngle = isPressed ? 3 * (Math.PI / 180) : 13 * (Math.PI / 180);
             if (pedalPivotGroups[i]) pedalPivotGroups[i].rotation.x += (targetAngle - pedalPivotGroups[i].rotation.x) * 0.15;
-            if (heddleFrames[i])     heddleFrames[i].position.y     += (targetY - heddleFrames[i].position.y) * 0.15;
+            if (heddleFrames[i])     heddleFrames[i].position.y     += (targetY     - heddleFrames[i].position.y)     * 0.15;
             if (warpGroups[i]) {
                 warpGroups[i].forEach(t => {
                     const p = t.geometry.attributes.position;
@@ -875,15 +989,6 @@ function initLearnLoom(pattern) {
         }
     }
 
-    function isShedOpenEnough() {
-        if (currentPressedPedals.size === 0) return false;
-        let ok = true;
-        currentPressedPedals.forEach(idx => {
-            if (heddleFrames[idx] && Math.abs(heddleFrames[idx].position.y - SHED_CLOSED_Y) > 0.3) ok = false;
-        });
-        return ok;
-    }
-
     function addWeftThread() {
         if (activeWeft) return;
         const warpCount = 60;
@@ -892,7 +997,7 @@ function initLearnLoom(pattern) {
         for (let i = 0; i < SHAFT_COUNT; i++) shed.push(!currentPressedPedals.has(i));
         const rowStates = [];
         for (let i = 0; i <= warpCount; i++) {
-            const x     = (i / warpCount) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const x    = (i / warpCount) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
             const shaft = threading[i % threading.length];
             const isUp  = shed[shaft];
             rowStates.push(isUp);
@@ -905,8 +1010,8 @@ function initLearnLoom(pattern) {
         scene.add(line);
         activeWeft = { line, isBeaten: false, live: true, warpPattern: rowStates.slice() };
         weftThreads.push(activeWeft);
-        shuttleMovingPositive = null;
-        lastShuttleX          = shuttleGroup.position.x;
+        shuttleMovingPositive   = null;
+        lastShuttleX            = shuttleGroup.position.x;
         shuttleDirectionChanges = 0;
     }
 
@@ -928,8 +1033,6 @@ function initLearnLoom(pattern) {
 
     function checkWeftInsertion() {
         if (!shuttleArmed || shuttleInserted) return;
-        // In learn mode we insert weft whenever shuttle crosses center (even without shed check,
-        // since the lesson already ensured the shed is open before arming)
         const fromLeft  = shuttleStartSide === -1 && shuttleGroup.position.x > 0;
         const fromRight = shuttleStartSide ===  1 && shuttleGroup.position.x < 0;
         if (fromLeft || fromRight) { addWeftThread(); shuttleInserted = true; }
@@ -939,16 +1042,12 @@ function initLearnLoom(pattern) {
         if (!activeWeft || activeWeft.isBeaten || !shuttleInserted) return;
         const reachedRight = shuttleStartSide === -1 && shuttleGroup.position.x >  SHUTTLE_LIMIT * 0.9;
         const reachedLeft  = shuttleStartSide ===  1 && shuttleGroup.position.x < -SHUTTLE_LIMIT * 0.9;
-        if (reachedRight || reachedLeft) {
-            if (reachedRight) shuttleCurrentSide =  1;
-            if (reachedLeft)  shuttleCurrentSide = -1;
-            weftReadyToBeat = true;
-        }
+        if (reachedRight) { shuttleCurrentSide =  1; weftReadyToBeat = true; }
+        if (reachedLeft)  { shuttleCurrentSide = -1; weftReadyToBeat = true; }
     }
 
     function processBeat(beaterPressed, currentHitZ) {
-        if (!beaterPressed || beatTimer !== BEAT_DURATION - 1) return;
-        if (!activeWeft) return;
+        if (!beaterPressed || beatTimer !== BEAT_DURATION - 1 || !activeWeft) return;
         const pos = activeWeft.line.geometry.attributes.position;
         for (let j = 0; j < pos.count; j++) {
             pos.setZ(j, currentHitZ);
@@ -958,11 +1057,11 @@ function initLearnLoom(pattern) {
         activeWeft.isBeaten = true;
         activeWeft.live     = false;
         rowCounter++;
-        fellZ        = currentHitZ;
-        activeWeft   = null;
+        fellZ              = currentHitZ;
+        activeWeft         = null;
         weftReadyToBeat    = false;
-        shuttleInserted     = false;
-        shuttleArmed        = false;
+        shuttleInserted    = false;
+        shuttleArmed       = false;
     }
 
     function updateClothTakeup() {
@@ -984,48 +1083,35 @@ function initLearnLoom(pattern) {
     }
 
     /* ══════════════════════════════════════════════════════════
-       MAIN ANIMATION LOOP
+       ANIMATION LOOP
     ══════════════════════════════════════════════════════════ */
     function animate() {
         requestAnimationFrame(animate);
 
-        // Shaft + pedal animation
         updateShafts();
-
-        // Auto-play ticker
         tickAutoPlay();
-
-        // Active weft follows shed
         updateActiveWeftShape();
 
-        // Shuttle lerp
         const targetX = shuttleCurrentSide * SHUTTLE_LIMIT;
         shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.12;
 
-        // Beat timer
         const beaterPressed = beatTimer > 0;
         if (beatTimer > 0) beatTimer--;
 
-        // Cloth takeup
         updateClothTakeup();
 
-        // Beater movement
         const hitZ        = BEATER_HIT_Z - rowCounter * ROW_SPACING;
         const targetBeatZ = beaterPressed ? hitZ : BEATER_REST_Z;
         beaterGroup.position.z += (targetBeatZ - beaterGroup.position.z) * (beaterPressed ? 0.4 : 0.12);
 
-        // Weft insertion & readiness
         checkWeftInsertion();
         checkWeftReady();
-
-        // Beat processing
         processBeat(beaterPressed, hitZ);
 
-        // Shuttle tracks beater
         shuttleGroup.position.y = beaterGroup.position.y - 0.35;
         shuttleGroup.position.z = beaterGroup.position.z + 0.18;
 
-        // Highlight pulse animation
+        // Highlight pulse
         const pulse = 0.45 + 0.25 * Math.sin(Date.now() / 200);
         pedalHighlights.forEach(h => { if (h.visible) h.material.opacity = pulse; });
         if (shuttleHighlight?.visible) shuttleHighlight.material.opacity = pulse;
