@@ -175,7 +175,7 @@ app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRe
 
 app.get("/auth/user", (req, res) => {
     if (!req.user) return res.json(null);
-    res.json({ name: req.user.name, email: req.user.email, photo: req.user.photo, theme: req.user.theme || "light" });
+    res.json({ _id: req.user._id, name: req.user.name, email: req.user.email, photo: req.user.photo, theme: req.user.theme || "light" });
 });
 
 app.post("/auth/update-account", async (req, res) => {
