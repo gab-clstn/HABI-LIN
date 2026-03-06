@@ -1,7 +1,9 @@
 /* =========================================
     2. GLOBAL RESET & LOGIN BODY
    ========================================= */
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body.login-body {
     background-color: #FAF9F6;
@@ -19,7 +21,7 @@ body.login-body {
 .auth-container {
     background-color: #fff;
     border-radius: 15px;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
     position: relative;
     overflow: hidden;
     width: 768px;
@@ -53,16 +55,16 @@ form {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding: 0 50px; 
+    padding: 0 50px;
     height: 100%;
     text-align: center;
-    position: relative; /* CRITICAL for absolute floating messages */
+    position: relative;
 }
 
 .auth-container h1 {
     font-size: 2.2rem;
     font-weight: bold;
-    margin-bottom: 20px; 
+    margin-bottom: 20px;
     letter-spacing: 1px;
 }
 
@@ -75,7 +77,7 @@ form {
 }
 
 .social-icons {
-    margin: 10px 0 15px 0; 
+    margin: 10px 0 15px 0;
 }
 
 .social-btn {
@@ -142,28 +144,48 @@ form {
     margin-bottom: 15px;
 }
 
-.overlay-left { transform: translateX(-20%); }
-.overlay-right { right: 0; transform: translateX(0); }
+.overlay-left {
+    transform: translateX(-20%);
+}
+
+.overlay-right {
+    right: 0;
+    transform: translateX(0);
+}
 
 /* ANIMATION LOGIC */
-.auth-container.right-panel-active .sign-in-container { transform: translateX(100%); }
+.auth-container.right-panel-active .sign-in-container {
+    transform: translateX(100%);
+}
+
 .auth-container.right-panel-active .sign-up-container {
     transform: translateX(100%);
     opacity: 1;
     z-index: 5;
 }
 
-.auth-container.right-panel-active .overlay-container { transform: translateX(-100%); }
-.auth-container.right-panel-active .overlay { transform: translateX(50%); }
-.auth-container.right-panel-active .overlay-left { transform: translateX(0); }
-.auth-container.right-panel-active .overlay-right { transform: translateX(20%); }
+.auth-container.right-panel-active .overlay-container {
+    transform: translateX(-100%);
+}
+
+.auth-container.right-panel-active .overlay {
+    transform: translateX(50%);
+}
+
+.auth-container.right-panel-active .overlay-left {
+    transform: translateX(0);
+}
+
+.auth-container.right-panel-active .overlay-right {
+    transform: translateX(20%);
+}
 
 /* INPUTS & BUTTONS */
 input {
     background-color: #f4f4f4;
     border: none;
     padding: 12px 15px;
-    margin: 10px 0; 
+    margin: 10px 0;
     width: 100%;
     border-radius: 5px;
     outline: none;
@@ -179,7 +201,7 @@ input {
     text-transform: uppercase;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 25px; 
+    margin-top: 25px;
     transition: transform 80ms ease-in;
 }
 
@@ -234,7 +256,8 @@ input {
     transition: 0.3s;
 }
 
-.nav-menu a:hover, .nav-menu a.active {
+.nav-menu a:hover,
+.nav-menu a.active {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
@@ -248,7 +271,7 @@ input {
     background: white;
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
 }
 
@@ -286,7 +309,7 @@ input {
 .floating-message.success {
     background: linear-gradient(to right, #2b0303, #000000);
     color: #fff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .floating-message.error {
@@ -297,8 +320,15 @@ input {
 }
 
 @keyframes popIn {
-    from { opacity: 0; transform: translateX(-50%) scale(0.9); }
-    to { opacity: 1; transform: translateX(-50%) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
 }
 
 /* =========================================
@@ -308,75 +338,195 @@ input {
 /* Main Container Fix */
 #weaving-studio {
     width: 100%;
+    height: 100vh;
     background-color: #1a1a1e !important;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
     border: 1px solid #333;
+    position: relative;
+    overflow: hidden;
+}
+
+#bg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ── OVERLAY CENTERING FIX ── */
+#modeSelectionOverlay,
+#setupOverlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    z-index: 999 !important;
 }
 
 /* Make the Setup Windows Smaller and Centered */
-#modeSelectionOverlay > div, 
-#setupOverlay > div {
-    max-width: 400px; /* Reduced width */
-    width: 90%;
-    padding: 25px !important; /* Compact padding */
+#modeSelectionOverlay>div,
+#setupOverlay>div {
+    max-width: clamp(280px, 90vw, 450px);
+    width: auto;
+    padding: clamp(20px, 5vw, 30px) !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px); /* Glass effect */
-    background: rgba(30, 30, 35, 0.95) !important;
+    backdrop-filter: blur(10px);
+    background: rgba(30, 30, 35, 0.98) !important;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
 /* Typography adjustments for smaller windows */
-#modeSelectionOverlay h2, 
+#modeSelectionOverlay h2,
 #setupOverlay h2 {
-    font-size: 1.5rem !important;
-    margin-bottom: 15px !important;
+    font-size: clamp(1.3rem, 3vw, 1.8rem) !important;
+    margin-bottom: clamp(12px, 2vw, 20px) !important;
     letter-spacing: 1px !important;
+    color: white;
+}
+
+#modeSelectionOverlay p,
+#setupOverlay p {
+    font-size: clamp(13px, 2vw, 15px);
+    color: #aaa;
+    margin-bottom: 15px;
 }
 
 /* Remove "Excess Box" behavior from inputs */
-#setupOverlay input, 
+#setupOverlay input,
 #setupOverlay select {
     background-color: #25252b !important;
     border: 1px solid #444 !important;
     color: #fff !important;
-    margin: 5px 0 15px 0 !important; /* Controlled spacing */
-    padding: 10px !important;
+    margin: 8px 0 12px 0 !important;
+    padding: 10px 12px !important;
     height: auto !important;
+    width: 100% !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
 }
 
 #setupOverlay label {
-    font-size: 12px !important;
+    font-size: clamp(11px, 1.5vw, 12px) !important;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     color: #888 !important;
+    display: block;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+/* Form group wrapper */
+#setupOverlay>div>label+input {
+    margin-bottom: 15px;
 }
 
 /* Action Buttons inside Studio */
-#startWeaving, .goToSetupBtn {
-    padding: 12px !important;
-    font-size: 14px !important;
-    margin-top: 10px !important;
+#startWeaving,
+.goToSetupBtn,
+#modeSelectionOverlay .btn-primary {
+    padding: clamp(10px, 2vw, 14px) clamp(20px, 4vw, 30px) !important;
+    font-size: clamp(13px, 1.5vw, 15px) !important;
+    margin-top: clamp(8px, 1vw, 15px) !important;
     transition: all 0.3s ease;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
 }
 
 #startWeaving:hover {
     background-color: #45a049 !important;
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
 }
 
-/* Responsive fix to prevent "Cut Off" look on small screens */
-@media (max-height: 700px) {
-    #setupOverlay > div {
-        transform: scale(0.85);
-        transform-origin: center;
+.goToSetupBtn:hover {
+    background-color: #555 !important;
+    transform: translateY(-2px);
+}
+
+/* ── DESKTOP: Controls top-right, pattern bottom-right ── */
+@media (min-width: 901px) {
+    .loom-panel {
+        max-height: 60vh;
+    }
+
+    .loom-pattern-panel {
+        max-height: 35vh;
+        max-width: 35vw;
     }
 }
 
-/* Fix for the Loom Control panel positioning */
-.loom-control-panel {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    z-index: 100;
+/* ── TABLET: Adjusted sizes ── */
+@media (min-width: 601px) and (max-width: 900px) {
+    .loom-panel {
+        max-height: 55vh;
+    }
+
+    .loom-pattern-panel {
+        max-height: 30vh;
+        max-width: 40vw;
+    }
+
+    #modeSelectionOverlay>div,
+    #setupOverlay>div {
+        max-width: 85vw;
+        max-height: 80vh;
+    }
+}
+
+/* ── MOBILE: Stack vertically, full width ── */
+@media (max-width: 600px) {
+
+    #modeSelectionOverlay>div,
+    #setupOverlay>div {
+        max-width: 95vw;
+        width: 95vw !important;
+        padding: 20px !important;
+        border-radius: 12px;
+    }
+
+    #modeSelectionOverlay h2,
+    #setupOverlay h2 {
+        font-size: 1.3rem !important;
+    }
+
+    .loom-panel {
+        top: auto !important;
+        bottom: clamp(120px, 32vw, 180px) !important;
+        right: 8px !important;
+        left: 8px !important;
+        width: auto !important;
+        max-height: 42vh !important;
+        max-width: unset;
+    }
+
+    .loom-pattern-panel {
+        bottom: 8px !important;
+        right: 8px !important;
+        left: 8px !important;
+        width: auto !important;
+        max-width: unset;
+        max-height: 26vh !important;
+        height: auto;
+    }
+
+    #patternContainer {
+        max-height: 18vh;
+    }
+
+    #startWeaving,
+    .goToSetupBtn {
+        width: 100% !important;
+    }
 }
 
 /* Compact Save Notification */
@@ -387,22 +537,22 @@ input {
     transform: translateX(-50%);
     background: rgba(40, 167, 69, 0.9);
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 30px;
     font-size: 14px;
     z-index: 2000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
 }
 
-#patternPreview {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 320px;
-    height: 320px;
-    background: #111;
-    border-radius: 14px;
-    border: 2px solid #444;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    z-index: 50;
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }

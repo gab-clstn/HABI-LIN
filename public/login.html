@@ -1,78 +1,593 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HABI-LIN | Auth</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ── RESET ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* ── VARIABLES (matches dashboard/collection/about) ── */
+        :root {
+            --brand: #2b0303;
+            --brand-mid: #4a0606;
+            --brand-light: #fdf2f2;
+            --bg: #faf9f6;
+            --surface: #ffffff;
+            --border-color: #eee;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --text-faint: #999;
+            --danger: #d93025;
+            --card-radius: 20px;
+            --transition: all 0.6s ease-in-out;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: clamp(16px, 4vw, 40px);
+            overflow-x: hidden;
+        }
+
+        /* ── AUTH CONTAINER ── */
+        .auth-container {
+            background: var(--surface);
+            border-radius: var(--card-radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            width: min(820px, 100%);
+            min-height: clamp(500px, 62vh, 580px);
+        }
+
+        /* ── FORM PANELS ── */
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transition: var(--transition);
+        }
+
+        .sign-in-container {
+            left: 0;
+            z-index: 2;
+        }
+
+        .sign-up-container {
+            left: 0;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        form {
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: clamp(28px, 5%, 52px) clamp(24px, 6%, 52px);
+            height: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        /* ── HEADING ── */
+        .auth-container h1 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 800;
+            color: var(--brand);
+            margin-bottom: clamp(12px, 2vh, 18px);
+            letter-spacing: -0.5px;
+        }
+
+        /* ── SOCIAL BUTTONS ── */
+        .social-icons {
+            margin: clamp(8px, 1.5vh, 12px) 0;
+        }
+
+        .social-btn {
+            border: 1.5px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 6px;
+            height: clamp(36px, 5vh, 44px);
+            width: clamp(36px, 5vh, 44px);
+            color: #555;
+            text-decoration: none;
+            font-size: 0.9rem;
+            background: var(--surface);
+            transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        }
+
+        .social-btn:hover {
+            background: linear-gradient(135deg, var(--brand), #000);
+            color: #fff;
+            border-color: var(--brand);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(43, 3, 3, 0.25);
+        }
+
+        /* ── DIVIDER TEXT ── */
+        .form-container span.divider {
+            font-size: clamp(0.75rem, 1.1vw, 0.83rem);
+            margin: clamp(8px, 1.5vh, 14px) 0;
+            display: block;
+            color: var(--text-faint);
+            font-weight: 500;
+        }
+
+        /* ── INPUTS ── */
+        .auth-input {
+            background: #f4f4f4;
+            border: 1.5px solid transparent;
+            padding: clamp(10px, 1.5vh, 13px) 14px;
+            margin: clamp(4px, 0.7vh, 7px) 0;
+            width: 100%;
+            border-radius: 10px;
+            outline: none;
+            font-size: clamp(0.85rem, 1.2vw, 0.93rem);
+            color: var(--text);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-input:focus {
+            background: var(--surface);
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(43, 3, 3, 0.07);
+        }
+
+        .auth-input::placeholder {
+            color: #bbb;
+        }
+
+        /* ── FORGOT LINK ── */
+        .forgot {
+            color: var(--text-muted);
+            font-size: clamp(0.73rem, 1vw, 0.8rem);
+            text-decoration: none;
+            margin: clamp(6px, 1vh, 10px) 0;
+            align-self: flex-end;
+            transition: color 0.2s;
+        }
+
+        .forgot:hover {
+            color: var(--brand);
+            text-decoration: underline;
+        }
+
+        /* ── PRIMARY BUTTON ── */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand), #000);
+            color: #fff;
+            border: none;
+            padding: clamp(11px, 1.6vh, 14px) clamp(28px, 4vw, 44px);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: clamp(0.78rem, 1.1vw, 0.86rem);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            margin-top: clamp(14px, 2.2vh, 24px);
+            width: 100%;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.88;
+            box-shadow: 0 6px 20px rgba(43, 3, 3, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        /* ── FORM MESSAGES (slide-in) ── */
+        .form-message {
+            width: 100%;
+            border-radius: 10px;
+            font-size: clamp(0.74rem, 1vw, 0.8rem);
+            font-weight: 600;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease, margin 0.35s ease;
+            text-align: center;
+        }
+
+        .form-message.success {
+            background: var(--brand-light);
+            color: var(--brand);
+            border: 1.5px solid rgba(43, 3, 3, 0.15);
+            max-height: 60px;
+            opacity: 1;
+            padding: 9px 14px;
+            margin-bottom: 6px;
+        }
+
+        .form-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1.5px solid #fca5a5;
+            max-height: 60px;
+            opacity: 1;
+            padding: 9px 14px;
+            margin-bottom: 6px;
+        }
+
+        /* ── OVERLAY ── */
+        .overlay-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .overlay {
+            background: linear-gradient(135deg, var(--brand) 0%, #110101 50%, var(--brand-mid) 100%);
+            color: #fff;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: clamp(24px, 5%, 48px);
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-panel h1 {
+            color: white;
+            font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+            font-weight: 800;
+            margin-bottom: clamp(10px, 1.5vh, 16px);
+            letter-spacing: -0.5px;
+        }
+
+        .overlay-panel p {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+            line-height: 1.65;
+            margin-bottom: clamp(16px, 2.5vh, 28px);
+            max-width: 220px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.65);
+            color: #fff;
+            padding: clamp(10px, 1.4vh, 13px) clamp(26px, 3.5vw, 40px);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: clamp(0.76rem, 1vw, 0.84rem);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: background 0.25s, border-color 0.25s, transform 0.15s;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        /* HABI-LIN watermark on overlay */
+        .overlay-brand {
+            position: absolute;
+            bottom: clamp(14px, 2.5vh, 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.6rem, 0.9vw, 0.68rem);
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* ── OVERLAY POSITIONS ── */
+        .overlay-left {
+            transform: translateX(-20%);
+        }
+
+        .overlay-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        /* ── SLIDE ANIMATION ── */
+        .auth-container.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+        }
+
+        .auth-container.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+        }
+
+        .auth-container.right-panel-active .overlay-container {
+            transform: translateX(-100%);
+        }
+
+        .auth-container.right-panel-active .overlay {
+            transform: translateX(50%);
+        }
+
+        .auth-container.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .auth-container.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+
+        /* ── MOBILE TOGGLE (shown only on mobile) ── */
+        .mobile-toggle {
+            display: none;
+        }
+
+        /* ── TABLET (601–900px) ── */
+        @media (min-width: 601px) and (max-width: 900px) {
+            .auth-container {
+                min-height: clamp(460px, 58vh, 540px);
+            }
+        }
+
+        /* ── MOBILE (≤600px): stack forms, hide overlay ── */
+        @media (max-width: 600px) {
+            body {
+                align-items: flex-start;
+                padding: 24px 16px 40px;
+                overflow-y: auto;
+            }
+
+            .auth-container {
+                width: 100%;
+                min-height: unset;
+                border-radius: 16px;
+                box-shadow: 0 10px 32px rgba(0, 0, 0, .1);
+            }
+
+            .overlay-container {
+                display: none;
+            }
+
+            .form-container {
+                position: static;
+                width: 100%;
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none;
+                display: none;
+            }
+
+            .sign-in-container {
+                display: block;
+            }
+
+            .auth-container.right-panel-active .sign-in-container {
+                display: none;
+                transform: none;
+            }
+
+            .auth-container.right-panel-active .sign-up-container {
+                display: block;
+                opacity: 1;
+                transform: none;
+                z-index: 5;
+            }
+
+            form {
+                padding: 36px 24px 40px;
+            }
+
+            .mobile-toggle {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                margin-top: 18px;
+                font-size: 0.85rem;
+                color: var(--text-muted);
+            }
+
+            .mobile-toggle a {
+                color: var(--brand);
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+            .mobile-toggle a:hover {
+                text-decoration: underline;
+            }
+        }
+
+        /* ── VERY SMALL (≤380px) ── */
+        @media (max-width: 380px) {
+            .auth-container h1 {
+                font-size: 1.4rem;
+            }
+
+            form {
+                padding: 28px 18px 36px;
+            }
+        }
+    </style>
+
+    <!-- ── SVG ICON SPRITE ── -->
+    <style>
+        .icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+    </style>
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+
+        <!-- Facebook -->
+        <symbol id="icon-facebook" viewBox="0 0 320 512">
+            <path
+                d="M279.14 288l14.22-92.66h-88.91V133.41c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+        </symbol>
+
+        <!-- Google -->
+        <symbol id="icon-google" viewBox="0 0 488 512">
+            <path
+                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
+        </symbol>
+
+    </svg>
 </head>
-<body class="login-body">
+
+<body>
     <div class="auth-container" id="auth-container">
-        
+
+        <!-- ── SIGN UP PANEL ── -->
         <div class="form-container sign-up-container">
-            <form id="signupForm">
+            <form id="signupForm" novalidate>
                 <h1>Create Account</h1>
-                
+
                 <div id="signupMsg" class="form-message"></div>
 
                 <div class="social-icons">
-                    <a href="/auth/facebook" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-                    <a href="/auth/google" class="social-btn"><i class="fab fa-google"></i></a>
+                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook"><svg class="icon"
+                            aria-hidden="true">
+                            <use href="#icon-facebook" />
+                        </svg></a>
+                    <a href="/auth/google" class="social-btn" title="Continue with Google"><svg class="icon"
+                            aria-hidden="true">
+                            <use href="#icon-google" />
+                        </svg></a>
                 </div>
-                <span>or use your email for registration</span>
-                <input type="text" name="name" placeholder="Name" required />
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
+
+                <span class="divider">or register with your email</span>
+
+                <input class="auth-input" type="text" name="name" placeholder="Full Name" autocomplete="name"
+                    required />
+                <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" required />
+                <input class="auth-input" type="password" name="password" placeholder="Password"
+                    autocomplete="new-password" required />
+
                 <button type="submit" class="btn-primary">Sign Up</button>
+
+                <div class="mobile-toggle">
+                    Already have an account? <a href="#" id="mobileSignIn">Sign In</a>
+                </div>
             </form>
         </div>
 
+        <!-- ── SIGN IN PANEL ── -->
         <div class="form-container sign-in-container">
-            <form id="loginForm">
+            <form id="loginForm" novalidate>
                 <h1>Sign In</h1>
 
                 <div id="loginMsg" class="form-message"></div>
 
                 <div class="social-icons">
-                    <a href="/auth/facebook" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-                    <a href="/auth/google" class="social-btn"><i class="fab fa-google"></i></a>
+                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook"><svg class="icon"
+                            aria-hidden="true">
+                            <use href="#icon-facebook" />
+                        </svg></a>
+                    <a href="/auth/google" class="social-btn" title="Continue with Google"><svg class="icon"
+                            aria-hidden="true">
+                            <use href="#icon-google" />
+                        </svg></a>
                 </div>
-                <span>or use your account</span>
-                <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Password" required />
+
+                <span class="divider">or use your account</span>
+
+                <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" required />
+                <input class="auth-input" type="password" name="password" placeholder="Password"
+                    autocomplete="current-password" required />
+
                 <a href="#" class="forgot">Forgot your password?</a>
+
                 <button type="submit" class="btn-primary">Sign In</button>
+
+                <div class="mobile-toggle">
+                    Don't have an account? <a href="#" id="mobileSignUp">Sign Up</a>
+                </div>
             </form>
         </div>
 
+        <!-- ── OVERLAY (desktop slide panel) ── -->
         <div class="overlay-container">
             <div class="overlay">
+
                 <div class="overlay-panel overlay-left">
                     <h1>Welcome Back!</h1>
-                    <p>To keep connected with us please login with your personal info</p>
+                    <p>Good to see you again. Sign in to continue your weaving journey.</p>
                     <button class="btn-ghost" id="signIn">Sign In</button>
+                    <span class="overlay-brand">HABI-LIN</span>
                 </div>
+
                 <div class="overlay-panel overlay-right">
                     <h1>Hello, Weaver!</h1>
-                    <p>Enter your personal details and start your journey with us</p>
+                    <p>Join us and start preserving the art of traditional Filipino weaving.</p>
                     <button class="btn-ghost" id="signUp">Sign Up</button>
+                    <span class="overlay-brand">HABI-LIN</span>
                 </div>
+
             </div>
         </div>
-    </div>
+
+    </div><!-- /.auth-container -->
 
     <script>
         const container = document.getElementById('auth-container');
         const signUpBtn = document.getElementById('signUp');
         const signInBtn = document.getElementById('signIn');
+        const mobileSignIn = document.getElementById('mobileSignIn');
+        const mobileSignUp = document.getElementById('mobileSignUp');
 
-        // Function to switch to Sign In
-        const showSignIn = () => container.classList.remove("right-panel-active");
-        // Function to switch to Sign Up
-        const showSignUp = () => container.classList.add("right-panel-active");
+        const showSignIn = () => container.classList.remove('right-panel-active');
+        const showSignUp = () => container.classList.add('right-panel-active');
 
-        // Clear messages when manually clicking buttons
         const clearMsgs = () => {
             document.querySelectorAll('.form-message').forEach(m => {
                 m.textContent = '';
@@ -82,69 +597,63 @@
 
         signUpBtn.addEventListener('click', () => { clearMsgs(); showSignUp(); });
         signInBtn.addEventListener('click', () => { clearMsgs(); showSignIn(); });
+        mobileSignIn?.addEventListener('click', (e) => { e.preventDefault(); clearMsgs(); showSignIn(); });
+        mobileSignUp?.addEventListener('click', (e) => { e.preventDefault(); clearMsgs(); showSignUp(); });
 
-        const displayMsg = (elementId, message, type) => {
-            const el = document.getElementById(elementId);
+        /* ── MESSAGE HELPER ── */
+        const displayMsg = (id, message, type) => {
+            const el = document.getElementById(id);
             el.textContent = message;
             el.className = `form-message ${type}`;
         };
 
-        // Handle Local Login
+        /* ── LOGIN ── */
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
+            const data = Object.fromEntries(new FormData(e.target));
             try {
                 const res = await fetch('/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 if (res.ok) {
-                    window.location.href = '/dashboard.html';
+                    displayMsg('loginMsg', 'Login successful! Redirecting…', 'success');
+                    setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
                 } else {
                     displayMsg('loginMsg', 'Invalid email or password.', 'error');
                 }
-            } catch (err) {
-                displayMsg('loginMsg', 'System error. Try again.', 'error');
+            } catch {
+                displayMsg('loginMsg', 'Connection error. Please try again.', 'error');
             }
         });
 
-        // Handle Local Signup
+        /* ── SIGNUP ── */
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
+            const data = Object.fromEntries(new FormData(e.target));
             try {
                 const res = await fetch('/auth/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 if (res.ok) {
-                    // 1. Show message on the Sign Up side
-                    displayMsg('signupMsg', 'Account created! Redirecting to Sign In...', 'success');
+                    displayMsg('signupMsg', 'Account created! Redirecting to Sign In…', 'success');
                     e.target.reset();
-
-                    // 2. Wait 2 seconds, then slide back to Sign In automatically
                     setTimeout(() => {
                         showSignIn();
-                        // Optional: show a message on the login side too
-                        displayMsg('loginMsg', 'Success! You can now sign in.', 'success');
+                        displayMsg('loginMsg', 'Account ready — please sign in.', 'success');
                     }, 2000);
-
                 } else {
-                    const errData = await res.json();
-                    displayMsg('signupMsg', errData.message || 'Signup failed.', 'error');
+                    const errData = await res.json().catch(() => ({}));
+                    displayMsg('signupMsg', errData.message || 'Signup failed. Please try again.', 'error');
                 }
-            } catch (err) {
-                displayMsg('signupMsg', 'Connection error.', 'error');
+            } catch {
+                displayMsg('signupMsg', 'Connection error. Please try again.', 'error');
             }
         });
     </script>
 </body>
+
 </html>

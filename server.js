@@ -53,6 +53,7 @@ mongoose.connect(process.env.MONGO_URI)
 const patternSchema = new mongoose.Schema(
     {
         userId:      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        creatorName: { type: String, default: "Unknown" },  // ← ADD THIS
         name:        { type: String,  default: "Untitled Weave" },
         type:        { type: String,  default: "plain" },
         loom:        { type: String,  default: "standard" },
@@ -248,11 +249,11 @@ app.post("/api/patterns/save", async (req, res) => {
     try {
         const { name, type, loom, steps, patternRows, weftColor, created } = req.body;
 
-        // Server-side debug: confirm data is arriving correctly
         console.log(`[PATTERN SAVE] user=${req.user._id} | name="${name}" | rows=${Array.isArray(patternRows) ? patternRows.length : "?"}`);
 
         const newPattern = await Pattern.create({
             userId:      req.user._id,
+            creatorName: req.user.name,  // ← ADD THIS
             name:        name        || "Untitled Weave",
             type:        type        || "plain",
             loom:        loom        || "standard",
@@ -279,11 +280,12 @@ app.get("/api/patterns/my-weaves", async (req, res) => {
 });
 
 // 3. GET   /api/patterns  — fetch all patterns for collection page
+// GET /api/patterns — fetch ALL patterns for collection page (from all users)
 app.get("/api/patterns", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
-        const patterns = await Pattern.find({ userId: req.user._id }).sort({ created: -1 });
-        console.log(`[PATTERN FETCH] user=${req.user._id} | found ${patterns.length} pattern(s)`);
+        const patterns = await Pattern.find({}).sort({ created: -1 });
+        console.log(`[PATTERN FETCH] user=${req.user._id} | found ${patterns.length} pattern(s) total`);
         res.json(patterns);
     } catch (err) {
         console.error("Pattern Fetch Error:", err);

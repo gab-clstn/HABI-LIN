@@ -13,8 +13,9 @@
     }
   </script>
   <title>HABI-LIN | Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- ── INLINE SVG ICON SPRITE ─────────────────────────────── -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
   <style>
     .icon {
       display: inline-block;
@@ -24,71 +25,71 @@
       fill: currentColor;
       flex-shrink: 0;
     }
-    /* size helpers */
-    .icon-sm  { width: 0.85em; height: 0.85em; }
-    .icon-lg  { width: 1.25em; height: 1.25em; }
-    .icon-xl  { width: 1.6em;  height: 1.6em;  }
-    .icon-2xl { width: 2em;    height: 2em;    }
+
+    .icon-sm {
+      width: 0.85em;
+      height: 0.85em;
+    }
+
+    .icon-lg {
+      width: 1.25em;
+      height: 1.25em;
+    }
+
+    .icon-xl {
+      width: 1.6em;
+      height: 1.6em;
+    }
+
+    .icon-2xl {
+      width: 2em;
+      height: 2em;
+    }
   </style>
 
-  <!-- Hidden SVG symbol definitions -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-
-    <!-- magnifying-glass (search) -->
-    <symbol id="icon-search" viewBox="0 0 512 512">
-      <path d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zm48 299.3-120.4-120.4C387.8 344 352 368 312 379.6V416h-16v-48h-16v48h-16v-36.4C188 368 152.2 344 105.4 387.3L-14.3 507l-22.6-22.6 119.7-119.7C70.4 328 48 291.1 48 248c0-88.4 71.6-160 160-160s160 71.6 160 160c0 43.1-22.4 80-56.7 102.7L431 470.7 464 507l-22.6 22.6z"/>
-    </symbol>
-
-    <!-- magnifying-glass simple (Font Awesome solid path) -->
     <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
-      <path d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z"/>
+      <path
+        d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
     </symbol>
-
-    <!-- user -->
     <symbol id="icon-user" viewBox="0 0 448 512">
-      <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
+      <path
+        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
     </symbol>
-
-    <!-- bars (hamburger) -->
     <symbol id="icon-bars" viewBox="0 0 448 512">
-      <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
+      <path
+        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
     </symbol>
-
-    <!-- xmark (close) -->
     <symbol id="icon-xmark" viewBox="0 0 384 512">
-      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+      <path
+        d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
     </symbol>
-
-    <!-- plus -->
     <symbol id="icon-plus" viewBox="0 0 448 512">
-      <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"/>
+      <path
+        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
     </symbol>
-
-    <!-- book-open -->
     <symbol id="icon-book-open" viewBox="0 0 576 512">
-      <path d="M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5l0-377.4c0-7.1-4.7-13.3-11.5-15.1C222.4 52.7 192.2 48 160 48C129.2 48 100.9 51.8 75.2 58.4C56.7 63 48 79.8 48 98L48 432c0 17.5 16.4 29.6 33.2 25C106.6 450.4 132.5 448 160 448c45 0 87.1 8 129.6 23.5zm76.8 0C368.9 456 411 448 456 448c27.5 0 53.4 2.4 78.8 9c16.8 4.6 33.2-7.5 33.2-25L568 98c0-18.2-8.7-35-27.2-39.6C515.1 51.8 486.8 48 456 48c-32.2 0-62.4 4.7-100.5 15.5c-6.8 1.8-11.5 8-11.5 15.1l0 377.4c0 11.4 11.6 19.3 22.4 15.5z"/>
+      <path
+        d="M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5l0-377.4c0-7.1-4.7-13.3-11.5-15.1C222.4 52.7 192.2 48 160 48C129.2 48 100.9 51.8 75.2 58.4C56.7 63 48 79.8 48 98L48 432c0 17.5 16.4 29.6 33.2 25C106.6 450.4 132.5 448 160 448c45 0 87.1 8 129.6 23.5zm76.8 0C368.9 456 411 448 456 448c27.5 0 53.4 2.4 78.8 9c16.8 4.6 33.2-7.5 33.2-25L568 98c0-18.2-8.7-35-27.2-39.6C515.1 51.8 486.8 48 456 48c-32.2 0-62.4 4.7-100.5 15.5c-6.8 1.8-11.5 8-11.5 15.1l0 377.4c0 11.4 11.6 19.3 22.4 15.5z" />
     </symbol>
-
-    <!-- triangle-exclamation (warning) -->
     <symbol id="icon-warning" viewBox="0 0 512 512">
-      <path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/>
+      <path
+        d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
     </symbol>
-
-    <!-- trash-can (delete) -->
     <symbol id="icon-trash" viewBox="0 0 448 512">
-      <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64L32 128zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/>
+      <path
+        d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64L32 128zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
     </symbol>
-
-    <!-- chevron-right -->
     <symbol id="icon-chevron-right" viewBox="0 0 320 512">
-      <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/>
+      <path
+        d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
     </symbol>
-
   </svg>
 
   <style>
-    /* ─── RESET & BASE ─────────────────────────────────────── */
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -96,48 +97,50 @@
     }
 
     :root {
-      --brand:       #2b0303;
-      --brand-mid:   #4a0606;
+      --nav-height: 70px;
+      --brand: #2b0303;
+      --brand-mid: #4a0606;
       --brand-light: #fdf2f2;
-      --bg:          #fcfcfb;
-      --surface:     #ffffff;
-      --border:      #f0f0f0;
-      --text:        #1a1a1a;
-      --muted:       #888;
-      --danger:      #d93025;
-
-      --sidebar-h:   64px;       /* mobile top-bar height */
-      --sidebar-w:   0px;        /* desktop: set to 0 (top nav) */
+      --bg: #fcfcfb;
+      --surface: #ffffff;
+      --border: #f0f0f0;
+      --border-color: #eee;
+      --text: #1a1a1a;
+      --muted: #888;
+      --danger: #d93025;
+      --content-px: clamp(20px, 5vw, 80px);
+      --card-radius: 20px;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    html, body {
+    html,
+    body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
     }
 
-    /* ─── LAYOUT ────────────────────────────────────────────── */
     .dashboard-wrapper {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-    /* ─── TOP NAV (shared across all sizes) ─────────────────── */
+    /* ── TOP NAV ── */
     .sidebar {
       width: 100%;
-      height: var(--sidebar-h);
+      height: var(--nav-height);
       background: var(--surface);
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      padding: 0 24px;
+      padding: 0 var(--content-px);
       position: fixed;
       top: 0;
       left: 0;
       z-index: 1000;
-      gap: 12px;
+      gap: 8px;
     }
 
     .sidebar-header h2 {
@@ -149,9 +152,10 @@
     }
 
     .logo-link,
-    .logo-link h2 { text-decoration: none; }
+    .logo-link h2 {
+      text-decoration: none;
+    }
 
-    /* Desktop nav links */
     .sidebar-nav {
       display: flex;
       flex-direction: row;
@@ -165,7 +169,7 @@
       color: #666;
       text-decoration: none;
       padding: 8px 12px;
-      font-size: 0.9rem;
+      font-size: clamp(0.82rem, 1.3vw, 0.9rem);
       font-weight: 500;
       position: relative;
       white-space: nowrap;
@@ -185,14 +189,30 @@
       transition: width 0.3s ease;
     }
 
-    .nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .nav-item:hover {
+      color: var(--brand);
+      background: var(--brand-light);
+    }
+
     .nav-item:hover::after,
-    .nav-item.active::after { width: calc(100% - 24px); }
-    .nav-item.active { color: var(--brand); font-weight: 700; }
+    .nav-item.active::after {
+      width: calc(100% - 24px);
+    }
 
-    .nav-spacer { margin-left: auto; }
+    .nav-item.active {
+      color: var(--brand);
+      font-weight: 700;
+    }
 
-    /* Search */
+    .nav-spacer {
+      margin-left: auto;
+    }
+
+    .logout {
+      color: var(--danger) !important;
+      font-weight: 600;
+    }
+
     .search-container {
       display: flex;
       align-items: center;
@@ -206,7 +226,7 @@
     .search-container:focus-within {
       background: #fff;
       border-color: var(--brand);
-      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
     }
 
     .search-input {
@@ -219,7 +239,9 @@
       transition: width 0.3s;
     }
 
-    .search-container:focus-within .search-input { width: 180px; }
+    .search-container:focus-within .search-input {
+      width: 180px;
+    }
 
     .search-icon-btn {
       background: none;
@@ -232,9 +254,6 @@
       align-items: center;
     }
 
-    .logout { color: var(--danger) !important; font-weight: 600; }
-
-    /* Hamburger (hidden on desktop) */
     .hamburger {
       display: none;
       background: none;
@@ -248,13 +267,14 @@
       transition: background 0.2s;
     }
 
-    .hamburger:hover { background: var(--brand-light); }
+    .hamburger:hover {
+      background: var(--brand-light);
+    }
 
-    /* Mobile drawer */
     .mobile-drawer {
       display: none;
       position: fixed;
-      top: var(--sidebar-h);
+      top: var(--nav-height);
       left: 0;
       width: 100%;
       background: var(--surface);
@@ -263,7 +283,7 @@
       padding: 12px 20px 20px;
       flex-direction: column;
       gap: 4px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
       transform: translateY(-10px);
       opacity: 0;
       transition: transform 0.25s ease, opacity 0.25s ease;
@@ -305,17 +325,17 @@
       font-size: 0.9rem;
     }
 
-    /* ─── MAIN ──────────────────────────────────────────────── */
+    /* ── MAIN ── */
     .main-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      margin-top: var(--sidebar-h);
+      margin-top: var(--nav-height);
       overflow-x: hidden;
     }
 
     .top-header {
-      padding: 20px 40px;
+      padding: clamp(16px, 3vw, 25px) var(--content-px);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -329,7 +349,9 @@
       font-weight: 500;
     }
 
-    .active-crumb { color: var(--brand); }
+    .active-crumb {
+      color: var(--brand);
+    }
 
     .user-info {
       display: flex;
@@ -337,7 +359,9 @@
       gap: 12px;
     }
 
-    .user-text { text-align: right; }
+    .user-text {
+      text-align: right;
+    }
 
     .greeting {
       display: block;
@@ -363,7 +387,7 @@
       justify-content: center;
       align-items: center;
       border: 2px solid white;
-      box-shadow: 0 4px 10px rgba(0,0,0,.06);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
       text-decoration: none;
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s;
@@ -372,21 +396,20 @@
 
     .profile-circle:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(0,0,0,.12);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
     }
 
-    /* ─── DASHBOARD CONTENT ──────────────────────────────────── */
+    /* ── DASHBOARD CONTENT ── */
     .dashboard-content {
-      padding: 0 40px 60px;
+      padding: 0 var(--content-px) clamp(32px, 6vw, 60px);
     }
 
-    /* Welcome banner */
     .welcome-banner {
       background: linear-gradient(45deg, var(--brand) 0%, var(--brand-mid) 100%);
-      padding: clamp(28px, 5vw, 50px);
+      padding: clamp(36px, 6vw, 70px) clamp(32px, 5vw, 60px);
       border-radius: 20px;
       color: white;
-      margin-bottom: 36px;
+      margin-bottom: 40px;
       position: relative;
       overflow: hidden;
     }
@@ -396,24 +419,24 @@
       position: absolute;
       right: -60px;
       top: -60px;
-      width: 260px;
-      height: 260px;
+      width: 320px;
+      height: 320px;
       border-radius: 50%;
-      background: rgba(255,255,255,.04);
+      background: rgba(255, 255, 255, .04);
       pointer-events: none;
     }
 
     .welcome-banner h1 {
-      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-size: clamp(1.8rem, 4vw, 3rem);
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
 
     .welcome-banner p {
       opacity: .78;
       font-weight: 300;
-      max-width: 500px;
-      font-size: clamp(0.85rem, 1.5vw, 1rem);
+      max-width: 600px;
+      font-size: clamp(0.95rem, 1.5vw, 1.1rem);
     }
 
     .section-title {
@@ -425,55 +448,54 @@
       letter-spacing: 1.5px;
     }
 
-    /* ─── CARD GRID ─────────────────────────────────────────── */
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 24px;
     }
 
     .action-card {
       background: var(--surface);
       border-radius: 18px;
-      padding: 28px;
+      padding: 36px;
       display: flex;
       align-items: flex-start;
-      gap: 22px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.03);
-      transition: transform 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s;
+      gap: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .03);
+      transition: transform 0.3s cubic-bezier(.4, 0, .2, 1), box-shadow 0.3s;
       border: 1px solid var(--border);
     }
 
     .action-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 18px 36px rgba(0,0,0,.08);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, .08);
     }
 
     .card-visual {
-      width: 52px;
-      height: 52px;
+      width: 60px;
+      height: 60px;
       background: var(--brand-light);
-      border-radius: 14px;
+      border-radius: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 1.15rem;
+      font-size: 1.4rem;
       color: var(--brand);
       flex-shrink: 0;
     }
 
     .card-info h4 {
       color: var(--text);
-      margin-bottom: 8px;
-      font-size: 1.05rem;
+      margin-bottom: 10px;
+      font-size: 1.15rem;
       font-weight: 600;
     }
 
     .card-info p {
-      font-size: 0.875rem;
+      font-size: 0.95rem;
       color: #666;
       line-height: 1.6;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
 
     .card-btn {
@@ -488,7 +510,9 @@
       transition: background 0.2s;
     }
 
-    .card-btn:hover { background: var(--brand-mid); }
+    .card-btn:hover {
+      background: var(--brand-mid);
+    }
 
     .card-btn-outline {
       background: transparent;
@@ -507,7 +531,7 @@
       color: var(--brand);
     }
 
-    /* ─── OVERLAYS ──────────────────────────────────────────── */
+    /* ── OVERLAYS ── */
     .overlay-card,
     .setup-card {
       background: #1e1e21;
@@ -516,7 +540,7 @@
       text-align: center;
       width: min(480px, 92vw);
       color: white;
-      box-shadow: 0 30px 60px rgba(0,0,0,.4);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, .4);
     }
 
     .overlay-card h2,
@@ -610,235 +634,88 @@
       color: #555;
     }
 
-    .full-width { width: 100%; margin-top: 8px; }
+    .full-width {
+      width: 100%;
+      margin-top: 8px;
+    }
 
-    /* ─── WEAVING STUDIO ────────────────────────────────────── */
+    /* ── WEAVING STUDIO ── */
     #weaving-studio {
       position: relative;
       width: 100%;
-      height: calc(100vh - var(--sidebar-h) - 80px);
+      height: calc(100vh - var(--nav-height) - 80px);
       min-height: 400px;
       background: #121214;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0,0,0,.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
     }
 
     #bg {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: block;
     }
 
-    /* ─── COLLECTION ────────────────────────────────────────── */
-    .collection-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-text h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      color: var(--brand);
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .header-text p { color: #666; font-size: 0.92rem; }
-
-    .pattern-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-      gap: 24px;
-    }
-
-    .pattern-card {
-      background: var(--surface);
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid #eee;
-      transition: transform 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s, border-color 0.3s;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pattern-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 14px 32px rgba(0,0,0,.08);
-      border-color: var(--brand);
-    }
-
-    .pattern-preview {
-      height: 170px;
-      background: #f9f9f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .pattern-preview canvas {
-      width: 100%;
-      height: 100%;
-      image-rendering: pixelated;
-    }
-
-    .pattern-details { padding: 20px; }
-
-    .pattern-details h4 {
-      color: var(--text);
-      margin-bottom: 6px;
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
-    .pattern-details p {
-      font-size: 0.82rem;
-      color: #888;
-      margin-bottom: 14px;
-    }
-
-    .tag-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pattern-tag {
-      font-size: 0.68rem;
-      background: var(--brand-light);
-      color: var(--brand);
-      padding: 4px 11px;
-      border-radius: 50px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-new {
-      background: var(--brand);
-      color: white;
-      text-decoration: none;
-      padding: 11px 22px;
-      border-radius: 11px;
-      font-weight: 600;
-      font-size: 0.88rem;
-      transition: background 0.3s, box-shadow 0.3s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .btn-new:hover {
-      background: var(--brand-mid);
-      box-shadow: 0 4px 14px rgba(43,3,3,.2);
-    }
-
-    /* Empty / loading states */
-    .empty-state {
-      grid-column: 1/-1;
-      text-align: center;
-      padding: 70px 20px;
-      color: #aaa;
-    }
-
-    .empty-state i { font-size: 2.6rem; margin-bottom: 18px; color: #ddd; display: block; }
-    .empty-state h3 { font-size: 1.1rem; color: #666; margin-bottom: 6px; }
-    .empty-state p { font-size: 0.88rem; }
-
-    .loading-state {
-      grid-column: 1/-1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 70px 20px;
-      gap: 12px;
-      color: #888;
-      font-size: 0.88rem;
-    }
-
-    .spinner {
-      width: 22px; height: 22px;
-      border: 3px solid #f0f0f0;
-      border-top-color: var(--brand);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .pattern-card .delete-btn {
-      opacity: 0;
-      position: absolute;
-      top: 10px; right: 10px;
-      background: rgba(43,3,3,.85);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 0.72rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      z-index: 5;
-    }
-
-    .pattern-card:hover .delete-btn { opacity: 1; }
-
-    /* Page fade-in */
-    #overview-section,
-    #weaving-studio,
-    #collection-section { animation: fadeIn 0.35s ease-out; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ─── LEARN SELECT ──────────────────────────────────────── */
+    /* ── LEARN SELECT ── */
     #learnSelectOverlay {
       overflow-y: auto;
     }
 
-    #learnSelectOverlay > div {
+    #learnSelectOverlay>div {
       width: min(600px, 94vw);
       max-height: 90vh;
       overflow-y: auto;
       padding: clamp(20px, 4vw, 40px);
     }
 
-    /* ─── RESPONSIVE BREAKPOINTS ─────────────────────────────
-       ≤ 768px  → mobile
-       ≤ 1024px → tablet (some tweaks)
-    ────────────────────────────────────────────────────────── */
-
-    /* ── TABLET (≤1024px) ── */
-    @media (max-width: 1024px) {
-      .sidebar { padding: 0 20px; }
-      .sidebar-nav { margin-left: 20px; gap: 0; }
-      .nav-item { padding: 8px 10px; font-size: 0.85rem; }
-      .search-input { width: 110px; }
-      .dashboard-content { padding: 0 28px 48px; }
-      .top-header { padding: 18px 28px; }
+    /* ── ANIMATIONS ── */
+    #overview-section,
+    #weaving-studio {
+      animation: fadeIn 0.35s ease-out;
     }
 
-    /* ── MOBILE (≤768px) ── */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .sidebar-nav {
+        margin-left: 12px;
+        gap: 0;
+      }
+
+      .nav-item {
+        padding: 8px 8px;
+        font-size: clamp(0.8rem, 1.4vw, 0.9rem);
+      }
+
+      .search-input {
+        width: clamp(80px, 10vw, 130px);
+      }
+    }
+
     @media (max-width: 768px) {
-      /* Show hamburger, hide desktop nav links */
-      .hamburger { display: flex; align-items: center; justify-content: center; }
+      .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
       .sidebar-nav {
-        display: none; /* replaced by mobile-drawer */
+        display: none;
       }
 
       .sidebar {
@@ -846,560 +723,389 @@
         gap: 8px;
       }
 
-      /* Content padding */
-      .dashboard-content { padding: 0 16px 48px; }
-      .top-header { padding: 16px 16px 8px; }
+      .dashboard-content {
+        padding: 0 16px 48px;
+      }
 
-      /* User info: hide name text on very small screens */
-      .user-text { display: none; }
+      .top-header {
+        padding: 16px 16px 8px;
+      }
 
-      /* Welcome banner */
-      .welcome-banner { padding: 26px 22px; border-radius: 16px; margin-bottom: 24px; }
+      .user-text {
+        display: none;
+      }
 
-      /* Cards: single column */
-      .card-grid { grid-template-columns: 1fr; gap: 16px; }
-      .action-card { padding: 22px; border-radius: 14px; }
+      .welcome-banner {
+        padding: 26px 22px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+      }
 
-      /* Overlay btns: stack */
-      .overlay-btns { flex-direction: column; }
-      .btn-primary, .btn-secondary { min-width: unset; }
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
 
-      /* Studio */
-      #weaving-studio {
-        height: calc(100svh - var(--sidebar-h) - 60px);
-        min-height: 350px;
+      .welcome-banner {
         border-radius: 14px;
       }
 
-      /* Collection header: stack */
-      .collection-header { flex-direction: column; align-items: flex-start; }
-      .pattern-grid { grid-template-columns: 1fr; gap: 16px; }
+      .action-card {
+        padding: 22px;
+        border-radius: 14px;
+      }
 
-      /* Section title */
-      .section-title { font-size: 0.72rem; }
+      .overlay-btns {
+        flex-direction: column;
+      }
 
-      /* Touch-friendly delete always visible on mobile */
-      .pattern-card .delete-btn { opacity: 0.85; }
+      .btn-primary,
+      .btn-secondary {
+        min-width: unset;
+      }
+
+      #weaving-studio {
+        height: calc(100svh - var(--nav-height) - 60px);
+        min-height: 350px;
+        border-radius: 14px;
+      }
     }
 
-    /* ── VERY SMALL (≤420px) ── */
     @media (max-width: 420px) {
-      .sidebar-header h2 { font-size: 1rem; }
-      .profile-circle { width: 34px; height: 34px; font-size: 0.8rem; }
-      .card-visual { width: 44px; height: 44px; font-size: 1rem; border-radius: 11px; }
+      :root {
+        --nav-height: 56px;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1rem;
+      }
+
+      .profile-circle {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+      }
+
+      .card-visual {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+        border-radius: 11px;
+      }
+
+      .welcome-banner h1 {
+        font-size: 1.4rem;
+      }
     }
+
+    /* no max-width cap — content fills the full viewport width */
   </style>
 </head>
 
 <body>
-<div class="dashboard-wrapper">
+  <div class="dashboard-wrapper">
 
-  <!-- ── TOP NAV ──────────────────────────────────────────────── -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <a href="#" class="logo-link" onclick="showDashboard()">
-        <h2>HABI-LIN</h2>
-      </a>
-    </div>
-
-    <!-- Desktop nav (hidden on mobile via CSS) -->
-    <nav class="sidebar-nav">
-      <a href="#" class="nav-item active" id="home-link"       onclick="showDashboard()">Home</a>
-      <a href="#" class="nav-item"        id="collection-link" onclick="showCollection()">Collection</a>
-      <a href="about.html" class="nav-item" id="about-link">About</a>
-      <div class="nav-spacer"></div>
-      <div class="search-container">
-        <input type="text" class="search-input" id="search-input" placeholder="Search patterns…" />
-        <button class="search-icon-btn"><svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"/></svg></button>
+    <!-- ── TOP NAV ── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="dashboard.html" class="logo-link" onclick="showDashboard(); return false;">
+          <h2>HABI-LIN</h2>
+        </a>
       </div>
-      <a href="settings.html" class="nav-item">Settings</a>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active" id="home-link"
+          onclick="showDashboard(); return false;">Home</a>
+        <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
+        <a href="about.html" class="nav-item" id="about-link">About</a>
+        <div class="nav-spacer"></div>
+        <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+        <a href="/auth/logout" class="nav-item logout">Logout</a>
+      </nav>
+
+      <div class="user-info" style="margin-left:auto;">
+        <div class="user-text">
+          <span class="greeting">Hello,</span>
+          <strong id="user-firstname">Weaver</strong>
+        </div>
+        <a href="user-settings.html" class="profile-circle" id="profile-btn">
+          <svg class="icon" id="default-avatar-icon" aria-hidden="true">
+            <use href="#icon-user" />
+          </svg>
+          <img id="user-photo" src="" alt=""
+            style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+        </a>
+      </div>
+
+      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+        <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
+          <use href="#icon-bars" />
+        </svg>
+      </button>
+    </aside>
+
+    <!-- Mobile drawer -->
+    <div class="mobile-drawer" id="mobile-drawer" role="navigation">
+      <a href="dashboard.html" class="nav-item" onclick="showDashboard(); closeDrawer(); return false;">Home</a>
+      <a href="collection.html" class="nav-item" onclick="closeDrawer()">Collection</a>
+      <a href="about.html" class="nav-item" onclick="closeDrawer()">About</a>
+      <a href="settings.html" class="nav-item" onclick="closeDrawer()">Settings</a>
       <a href="/auth/logout" class="nav-item logout">Logout</a>
-    </nav>
-
-    <!-- User avatar (always visible) -->
-    <div class="user-info" style="margin-left:auto;">
-      <div class="user-text">
-        <span class="greeting">Hello,</span>
-        <strong id="user-firstname">Weaver</strong>
+      <div class="mobile-search">
+        <input type="text" id="mobile-search-input" placeholder="Search patterns…" />
+        <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true">
+          <use href="#icon-magnifying-glass" />
+        </svg>
       </div>
-      <a href="user-settings.html" class="profile-circle" id="profile-btn">
-        <svg class="icon" id="default-avatar-icon" aria-hidden="true"><use href="#icon-user"/></svg>
-        <img id="user-photo" src="" alt=""
-          style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
-      </a>
     </div>
 
-    <!-- Hamburger (visible on mobile) -->
-    <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
-      <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true"><use href="#icon-bars"/></svg>
-    </button>
-  </aside>
+    <!-- ── MAIN ── -->
+    <main class="main-container">
+      <header class="top-header">
+        <div class="header-breadcrumb">
+          <span>Dashboard</span> / <span class="active-crumb">Overview</span>
+        </div>
+      </header>
 
-  <!-- Mobile slide-down drawer -->
-  <div class="mobile-drawer" id="mobile-drawer" role="navigation">
-    <a href="#" class="nav-item" onclick="showDashboard(); closeDrawer()">Home</a>
-    <a href="#" class="nav-item" onclick="showCollection(); closeDrawer()">Collection</a>
-    <a href="about.html" class="nav-item">About</a>
-    <a href="#" class="nav-item">Settings</a>
-    <a href="/auth/logout" class="nav-item logout">Logout</a>
-    <div class="mobile-search">
-      <input type="text" id="mobile-search-input" placeholder="Search patterns…" />
-      <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true"><use href="#icon-magnifying-glass"/></svg>
-    </div>
+      <section class="dashboard-content">
+
+        <!-- WEAVING STUDIO -->
+        <div id="weaving-studio" style="display:none;">
+          <canvas id="bg"></canvas>
+
+          <div id="modeSelectionOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,.95);
+                 display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
+            <div class="overlay-card">
+              <h2>Handloom Weaving</h2>
+              <p>Select your preferred creative mode</p>
+              <div class="overlay-btns">
+                <button onclick="goToSetup()" class="btn-primary">Create Weave Pattern</button>
+                <button onclick="goToLearnSelect()" class="btn-secondary">Learn Weave Pattern</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="setupOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
+                 display:none;justify-content:center;align-items:center;z-index:15;overflow-y:auto;padding:20px;">
+            <div class="setup-card">
+              <h2>Weaving Setup</h2>
+              <div class="form-group-grid">
+                <div class="input-wrap">
+                  <label>Pattern Name</label>
+                  <input type="text" id="patternName" placeholder="Ex: Plain Weave Practice" />
+                </div>
+                <div class="input-wrap">
+                  <label>Handloom Equipment</label>
+                  <select id="loomType">
+                    <option value="standard">Modern (4 Pedals)</option>
+                    <option value="traditional">Traditional (2 Pedals)</option>
+                  </select>
+                </div>
+                <div class="input-wrap">
+                  <label>Beginner Pattern</label>
+                  <select id="patternType">
+                    <option value="plain">Plain Weave (Tabby)</option>
+                    <option value="twill">Twill</option>
+                  </select>
+                </div>
+                <div class="input-wrap">
+                  <label>Textile Size (cm)</label>
+                  <div class="dual-input">
+                    <input type="number" id="clothWidth" value="6.5" />
+                    <span>×</span>
+                    <input type="number" id="clothHeight" value="10" />
+                  </div>
+                </div>
+                <button id="startWeaving" class="btn-primary full-width">Start Weaving</button>
+                <button onclick="backToMenu()" class="btn-ghost">Back to Menu</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="learnSelectOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;
+                 display:none;justify-content:center;align-items:center;z-index:18;">
+            <div style="box-sizing:border-box;">
+              <div
+                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+                <div>
+                  <h2 style="color:white;font-size:1.4rem;font-weight:700;margin-bottom:4px;">Learn a Pattern</h2>
+                  <p style="color:#666;font-size:0.82rem;">Select a saved pattern to practice on the 3D loom</p>
+                </div>
+                <button onclick="backToMenu()"
+                  style="background:none;border:1px solid #333;color:#888;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.78rem;white-space:nowrap;">←
+                  Back</button>
+              </div>
+              <div id="learnPatternList" style="display:flex;flex-direction:column;gap:12px;">
+                <div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERVIEW (homepage content) -->
+        <div id="overview-section">
+          <div class="welcome-banner">
+            <h1>Welcome back, <span id="user-firstname-display">Weaver</span>!</h1>
+            <p>Pick up where you left off or explore new traditional techniques.</p>
+          </div>
+          <h3 class="section-title">Quick Actions</h3>
+          <div class="card-grid">
+            <div class="action-card">
+              <div class="card-visual"><svg class="icon icon-lg" aria-hidden="true">
+                  <use href="#icon-plus" />
+                </svg></div>
+              <div class="card-info">
+                <h4>Create New Weave</h4>
+                <p>Start a blank pattern draft from scratch using our 3D loom.</p>
+                <button class="card-btn" onclick="showLoom()">Get Started</button>
+              </div>
+            </div>
+            <div class="action-card" onclick="window.location.href='collection.html'" style="cursor:pointer;">
+              <div class="card-visual"><svg class="icon icon-lg" aria-hidden="true">
+                  <use href="#icon-book-open" />
+                </svg></div>
+              <div class="card-info">
+                <h4>Pattern Library</h4>
+                <p>Browse through your saved collection and community favorites.</p>
+                <button class="card-btn-outline">Open Library</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
   </div>
 
-  <!-- ── MAIN ─────────────────────────────────────────────────── -->
-  <main class="main-container">
-    <header class="top-header">
-      <div class="header-breadcrumb">
-        <span>Dashboard</span> / <span class="active-crumb">Overview</span>
-      </div>
-    </header>
+  <script>
+    /* ── HAMBURGER ── */
+    const hamburgerBtn = document.getElementById("hamburger-btn");
+    const mobileDrawer = document.getElementById("mobile-drawer");
 
-    <section class="dashboard-content">
-
-      <!-- WEAVING STUDIO -->
-      <div id="weaving-studio" style="display:none;">
-        <canvas id="bg"></canvas>
-
-        <!-- Mode selection overlay -->
-        <div id="modeSelectionOverlay"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,.95);
-                 display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
-          <div class="overlay-card">
-            <h2>Handloom Weaving</h2>
-            <p>Select your preferred creative mode</p>
-            <div class="overlay-btns">
-              <button onclick="goToSetup()" class="btn-primary">Create Weave Pattern</button>
-              <button onclick="goToLearnSelect()" class="btn-secondary">Learn Weave Pattern</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Setup overlay -->
-        <div id="setupOverlay"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
-                 display:none;justify-content:center;align-items:center;z-index:15;overflow-y:auto;padding:20px;">
-          <div class="setup-card">
-            <h2>Weaving Setup</h2>
-            <div class="form-group-grid">
-              <div class="input-wrap">
-                <label>Pattern Name</label>
-                <input type="text" id="patternName" placeholder="Ex: Plain Weave Practice" />
-              </div>
-              <div class="input-wrap">
-                <label>Handloom Equipment</label>
-                <select id="loomType">
-                  <option value="standard">Modern (4 Pedals)</option>
-                  <option value="traditional">Traditional (2 Pedals)</option>
-                </select>
-              </div>
-              <div class="input-wrap">
-                <label>Beginner Pattern</label>
-                <select id="patternType">
-                  <option value="plain">Plain Weave (Tabby)</option>
-                  <option value="twill">Twill</option>
-                </select>
-              </div>
-              <div class="input-wrap">
-                <label>Textile Size (cm)</label>
-                <div class="dual-input">
-                  <input type="number" id="clothWidth" value="6.5" />
-                  <span>×</span>
-                  <input type="number" id="clothHeight" value="10" />
-                </div>
-              </div>
-              <button id="startWeaving" class="btn-primary full-width">Start Weaving</button>
-              <button onclick="backToMenu()" class="btn-ghost">Back to Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Learn pattern selector overlay -->
-        <div id="learnSelectOverlay"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;
-                 display:none;justify-content:center;align-items:center;z-index:18;">
-          <div style="box-sizing:border-box;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-              <div>
-                <h2 style="color:white;font-size:1.4rem;font-weight:700;margin-bottom:4px;">Learn a Pattern</h2>
-                <p style="color:#666;font-size:0.82rem;">Select a saved pattern to practice on the 3D loom</p>
-              </div>
-              <button onclick="backToMenu()"
-                style="background:none;border:1px solid #333;color:#888;border-radius:8px;
-                       padding:8px 14px;cursor:pointer;font-size:0.78rem;white-space:nowrap;">← Back</button>
-            </div>
-            <div id="learnPatternList" style="display:flex;flex-direction:column;gap:12px;">
-              <div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- OVERVIEW -->
-      <div id="overview-section">
-        <div class="welcome-banner">
-          <h1>Welcome back, <span id="user-firstname-display">Weaver</span>!</h1>
-          <p>Pick up where you left off or explore new traditional techniques.</p>
-        </div>
-        <h3 class="section-title">Quick Actions</h3>
-        <div class="card-grid">
-          <div class="action-card">
-            <div class="card-visual"><svg class="icon icon-lg" aria-hidden="true"><use href="#icon-plus"/></svg></div>
-            <div class="card-info">
-              <h4>Create New Weave</h4>
-              <p>Start a blank pattern draft from scratch using our 3D loom.</p>
-              <button class="card-btn" onclick="showLoom()">Get Started</button>
-            </div>
-          </div>
-          <div class="action-card" onclick="showCollection()" style="cursor:pointer;">
-            <div class="card-visual"><svg class="icon icon-lg" aria-hidden="true"><use href="#icon-book-open"/></svg></div>
-            <div class="card-info">
-              <h4>Pattern Library</h4>
-              <p>Browse through your saved collection and community favorites.</p>
-              <button class="card-btn-outline">Open Library</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- COLLECTION -->
-      <div id="collection-section" style="display:none;">
-        <div class="collection-header">
-          <div class="header-text">
-            <h1>Digital Patterns</h1>
-            <p>Your saved weave drafts from the loom studio.</p>
-          </div>
-          <button onclick="showLoom()" class="btn-new">
-            <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg> New Design
-          </button>
-        </div>
-        <div class="pattern-grid" id="pattern-grid"></div>
-      </div>
-
-    </section>
-  </main>
-</div>
-
-<script>
-/* ─── HAMBURGER ──────────────────────────────────────────────── */
-const hamburgerBtn = document.getElementById("hamburger-btn");
-const mobileDrawer = document.getElementById("mobile-drawer");
-
-hamburgerBtn.addEventListener("click", () => {
-  const isOpen = mobileDrawer.classList.toggle("open");
-  hamburgerBtn.setAttribute("aria-expanded", isOpen);
-  document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
-});
-
-function closeDrawer() {
-  mobileDrawer.classList.remove("open");
-  hamburgerBtn.setAttribute("aria-expanded", "false");
-  document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
-}
-
-// Close drawer on outside tap
-document.addEventListener("click", (e) => {
-  if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-    closeDrawer();
-  }
-});
-
-/* ─── MOBILE SEARCH SYNC ─────────────────────────────────────── */
-document.getElementById("mobile-search-input").addEventListener("input", (e) => {
-  document.getElementById("search-input").value = e.target.value;
-  document.getElementById("search-input").dispatchEvent(new Event("input"));
-});
-
-/* ─── USER SESSION ───────────────────────────────────────────── */
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const res = await fetch("/auth/user");
-    if (!res.ok) throw new Error("No session");
-    const user = await res.json();
-    if (user) {
-      const firstName = user.name.split(" ")[0];
-      document.getElementById("user-firstname").textContent = firstName + "!";
-      document.getElementById("user-firstname-display").textContent = firstName;
-      if (user.photo) {
-        document.getElementById("user-photo").src = user.photo;
-        document.getElementById("user-photo").style.display = "block";
-        document.getElementById("default-avatar-icon").style.display = "none";
-      }
-    }
-  } catch (e) { console.log("Session not ready."); }
-});
-
-/* ─── NAVIGATION ─────────────────────────────────────────────── */
-function showDashboard() {
-  document.getElementById("overview-section").style.display   = "block";
-  document.getElementById("weaving-studio").style.display    = "none";
-  document.getElementById("collection-section").style.display= "none";
-  document.querySelector(".active-crumb").textContent = "Overview";
-  updateActiveLink("home-link");
-  closeDrawer();
-}
-
-async function showCollection() {
-  document.getElementById("overview-section").style.display   = "none";
-  document.getElementById("weaving-studio").style.display    = "none";
-  document.getElementById("collection-section").style.display= "block";
-  document.querySelector(".active-crumb").textContent = "Collection";
-  updateActiveLink("collection-link");
-  closeDrawer();
-  await loadPatterns();
-}
-
-async function showLoom() {
-  document.getElementById("overview-section").style.display   = "none";
-  document.getElementById("collection-section").style.display= "none";
-  document.getElementById("weaving-studio").style.display    = "block";
-  document.querySelector(".active-crumb").textContent = "Weaving Studio";
-  updateActiveLink("");
-  document.getElementById("modeSelectionOverlay").style.display = "flex";
-  document.getElementById("setupOverlay").style.display = "none";
-  closeDrawer();
-  if (window.loomStarted) return;
-  window.loomStarted = true;
-  await import("./loom.js").then(m => m.startLoom && m.startLoom());
-}
-
-function updateActiveLink(id) {
-  document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-  if (id) document.getElementById(id)?.classList.add("active");
-}
-
-function goToSetup() {
-  document.getElementById("modeSelectionOverlay").style.display = "none";
-  document.getElementById("setupOverlay").style.display = "flex";
-}
-
-function backToMenu() {
-  document.getElementById("modeSelectionOverlay").style.display = "flex";
-  document.getElementById("setupOverlay").style.display = "none";
-  document.getElementById("learnSelectOverlay").style.display = "none";
-}
-
-/* ─── LEARN MODE ─────────────────────────────────────────────── */
-async function goToLearnSelect() {
-  document.getElementById("overview-section").style.display   = "none";
-  document.getElementById("collection-section").style.display = "none";
-  document.getElementById("weaving-studio").style.display     = "block";
-  document.getElementById("modeSelectionOverlay").style.display= "none";
-  document.getElementById("setupOverlay").style.display       = "none";
-  document.getElementById("learnSelectOverlay").style.display = "flex";
-
-  const list = document.getElementById("learnPatternList");
-  list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
-
-  try {
-    const res = await fetch("/api/patterns");
-    if (!res.ok) throw new Error("fetch failed");
-    const patterns = await res.json();
-
-    if (!patterns || patterns.length === 0) {
-      list.innerHTML = `
-        <div style="color:#555;text-align:center;padding:40px;">
-          <div style="font-size:2rem;margin-bottom:12px;">🪡</div>
-          <div style="font-weight:600;color:#888;margin-bottom:6px;">No saved patterns yet</div>
-          <div style="font-size:0.82rem;">Create and save a weave first, then come back to learn it.</div>
-        </div>`;
-      return;
-    }
-
-    list.innerHTML = "";
-    patterns.forEach(pattern => {
-      const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-      const rowCount   = (pattern.patternRows && pattern.patternRows.length) || 0;
-      const typeLabel  = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-      const date       = pattern.created
-        ? new Date(pattern.created).toLocaleDateString("en-PH", { month:"short", day:"numeric", year:"numeric" })
-        : "";
-
-      const card = document.createElement("div");
-      card.style.cssText = `
-        background:#161620;border:1px solid #2a2a35;border-radius:14px;
-        padding:16px 20px;display:flex;justify-content:space-between;
-        align-items:center;cursor:pointer;transition:all 0.2s;gap:14px;`;
-      card.onmouseenter = () => { card.style.borderColor="#00e5ff"; card.style.background="#111a1f"; };
-      card.onmouseleave = () => { card.style.borderColor="#2a2a35"; card.style.background="#161620"; };
-      card.innerHTML = `
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:700;color:white;font-size:0.95rem;margin-bottom:4px;
-                      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            ${escapeHtml(pattern.name)}</div>
-          <div style="font-size:0.75rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows · ${date}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          <span style="background:#0a2a2e;color:#00e5ff;font-size:0.68rem;font-weight:700;
-                       padding:4px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px;">Learn</span>
-          <span style="color:#555;font-size:0.85rem;">→</span>
-        </div>`;
-      card.addEventListener("click", () => startLearnMode(pattern));
-      list.appendChild(card);
+    hamburgerBtn.addEventListener("click", () => {
+      const isOpen = mobileDrawer.classList.toggle("open");
+      hamburgerBtn.setAttribute("aria-expanded", isOpen);
+      document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
     });
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;font-size:0.88rem;">
-      Could not load patterns. Is the server running?</div>`;
-  }
-}
 
-async function startLearnMode(pattern) {
-  ["learnSelectOverlay","modeSelectionOverlay","setupOverlay"].forEach(id => {
-    document.getElementById(id).style.display = "none";
-  });
-  document.getElementById("learnHUD")?.remove();
-  document.getElementById("learnPatternCanvas")?.closest("div[style*='bottom:20px']")?.remove();
-  window.loomStarted = false;
-  await import("./learn.js").then(m => m.startLearn && m.startLearn(pattern));
-}
-
-/* ─── PATTERN PREVIEW HELPERS ────────────────────────────────── */
-function simulatePatternFromSteps(steps, shaftCount) {
-  const history  = [];
-  const warpCount = 60;
-  const threading = Array.from({ length: warpCount + 1 }, (_, i) => i % shaftCount);
-  let pressedPedals = new Set();
-
-  for (const step of steps) {
-    if (step.action === "pedal")  pressedPedals.add(step.value);
-    else if (step.action === "pedals") pressedPedals = new Set(step.value);
-    else if (step.action === "beat") {
-      const shed = Array.from({ length: shaftCount }, (_, i) => !pressedPedals.has(i));
-      history.push(threading.map(shaft => shed[shaft]));
+    function closeDrawer() {
+      mobileDrawer.classList.remove("open");
+      hamburgerBtn.setAttribute("aria-expanded", "false");
+      document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
     }
-  }
-  return history;
-}
 
-function drawPatternOnCanvas(canvas, patternRows, weftColor = "#c0392b") {
-  if (!canvas || !patternRows || patternRows.length === 0) return;
-  const warpCount = patternRows[0].length;
-  const rowCount  = patternRows.length;
-  const cellSize  = Math.min(Math.floor(canvas.width / warpCount), Math.floor(canvas.height / rowCount), 8);
-  canvas.width  = warpCount * cellSize;
-  canvas.height = rowCount  * cellSize;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#f5f0eb";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  patternRows.forEach((rowStates, rowIndex) => {
-    const y = (rowCount - 1 - rowIndex) * cellSize;
-    rowStates.forEach((isWarpUp, warpIndex) => {
-      const x = warpIndex * cellSize;
-      if (!isWarpUp) {
-        ctx.fillStyle = weftColor;
-        ctx.fillRect(x, y, cellSize, cellSize);
-      } else {
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(x + cellSize * 0.75, y, cellSize * 0.25, cellSize);
-      }
+    document.addEventListener("click", (e) => {
+      if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
     });
-  });
-}
 
-/* ─── LOAD PATTERNS ──────────────────────────────────────────── */
-let allPatterns = [];
+    document.getElementById("mobile-search-input").addEventListener("input", (e) => {
+      document.getElementById("search-input").value = e.target.value;
+    });
 
-async function loadPatterns() {
-  const grid = document.getElementById("pattern-grid");
-  grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
-  try {
-    const res = await fetch("/api/patterns");
-    if (!res.ok) throw new Error("Failed to fetch");
-    allPatterns = await res.json();
-    renderPatternGrid(allPatterns);
-  } catch (err) {
-    console.error("Collection fetch error:", err);
-    grid.innerHTML = `
-      <div class="empty-state">
-        <svg class="icon icon-2xl" style="color:#ddd;display:block;margin:0 auto 18px;" aria-hidden="true"><use href="#icon-warning"/></svg>
-        <h3>Could not load patterns</h3>
-        <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
-      </div>`;
-  }
-}
-
-function renderPatternGrid(patterns) {
-  const grid = document.getElementById("pattern-grid");
-  if (!patterns || patterns.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <span style="font-size:2.8rem;display:block;margin-bottom:16px;">🪡</span>
-        <h3>No patterns saved yet</h3>
-        <p>Head to the Weaving Studio and save your first design!</p>
-      </div>`;
-    return;
-  }
-  grid.innerHTML = "";
-  patterns.forEach(pattern => {
-    const shaftCount  = pattern.loom === "traditional" ? 2 : 4;
-    const weftColor   = pattern.weftColor || "#c0392b";
-    const patternRows = pattern.patternRows?.length
-      ? pattern.patternRows
-      : simulatePatternFromSteps(pattern.steps || [], shaftCount);
-    const createdAt = pattern.created
-      ? new Date(pattern.created).toLocaleDateString("en-PH", { month:"short", day:"numeric", year:"numeric" })
-      : "Unknown date";
-    const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-
-    const card = document.createElement("div");
-    card.className = "pattern-card";
-    card.innerHTML = `
-      <div class="pattern-preview">
-        <canvas class="pattern-canvas" width="300" height="180"></canvas>
-        <button class="delete-btn" title="Delete pattern"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-trash"/></svg></button>
-      </div>
-      <div class="pattern-details">
-        <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
-        <p>Saved ${createdAt} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}</p>
-        <div class="tag-row">
-          <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
-          <svg class="icon icon-sm" style="color:#ccc;" aria-hidden="true"><use href="#icon-chevron-right"/></svg>
-        </div>
-      </div>`;
-
-    requestAnimationFrame(() =>
-      drawPatternOnCanvas(card.querySelector(".pattern-canvas"), patternRows, weftColor)
-    );
-
-    card.querySelector(".delete-btn").addEventListener("click", async (e) => {
-      e.stopPropagation();
-      if (!confirm(`Delete "${pattern.name}"?`)) return;
+    /* ── USER SESSION ── */
+    document.addEventListener("DOMContentLoaded", async () => {
       try {
-        const res = await fetch(`/api/patterns/${pattern._id}`, { method:"DELETE" });
-        if (res.ok) {
-          card.style.transition = "opacity 0.3s,transform 0.3s";
-          card.style.opacity = "0";
-          card.style.transform = "scale(0.95)";
-          setTimeout(() => card.remove(), 300);
-        } else { alert("Could not delete pattern."); }
-      } catch (err) { console.error(err); alert("Server error while deleting."); }
+        const res = await fetch("/auth/user");
+        if (!res.ok) throw new Error("No session");
+        const user = await res.json();
+        if (user) {
+          const firstName = user.name.split(" ")[0];
+          document.getElementById("user-firstname").textContent = firstName + "!";
+          document.getElementById("user-firstname-display").textContent = firstName;
+          if (user.photo) {
+            document.getElementById("user-photo").src = user.photo;
+            document.getElementById("user-photo").style.display = "block";
+            document.getElementById("default-avatar-icon").style.display = "none";
+          }
+        }
+      } catch (e) { console.log("Session not ready."); }
     });
 
-    grid.appendChild(card);
-  });
-}
+    /* ── NAVIGATION ── */
+    function showDashboard() {
+      document.getElementById("overview-section").style.display = "block";
+      document.getElementById("weaving-studio").style.display = "none";
+      document.querySelector(".active-crumb").textContent = "Overview";
+      document.getElementById("home-link").classList.add("active");
+      document.getElementById("collection-link").classList.remove("active");
+      closeDrawer();
+    }
 
-/* ─── SEARCH ─────────────────────────────────────────────────── */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("search-input").addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase().trim();
-    if (!document.getElementById("collection-section").offsetParent) return;
-    renderPatternGrid(allPatterns.filter(p =>
-      (p.name || "").toLowerCase().includes(q) ||
-      (p.type || "").toLowerCase().includes(q) ||
-      (p.loom || "").toLowerCase().includes(q)
-    ));
-  });
-});
+    async function showLoom() {
+      document.getElementById("overview-section").style.display = "none";
+      document.getElementById("weaving-studio").style.display = "block";
+      document.querySelector(".active-crumb").textContent = "Weaving Studio";
+      document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+      document.getElementById("modeSelectionOverlay").style.display = "flex";
+      document.getElementById("setupOverlay").style.display = "none";
+      closeDrawer();
+      if (window.loomStarted) return;
+      window.loomStarted = true;
+      await import("./loom.js").then(m => m.startLoom && m.startLoom());
+    }
 
-/* ─── UTILITY ────────────────────────────────────────────────── */
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-</script>
+    function goToSetup() {
+      document.getElementById("modeSelectionOverlay").style.display = "none";
+      document.getElementById("setupOverlay").style.display = "flex";
+    }
+
+    function backToMenu() {
+      document.getElementById("modeSelectionOverlay").style.display = "flex";
+      document.getElementById("setupOverlay").style.display = "none";
+      document.getElementById("learnSelectOverlay").style.display = "none";
+    }
+
+    async function goToLearnSelect() {
+      document.getElementById("overview-section").style.display = "none";
+      document.getElementById("weaving-studio").style.display = "block";
+      document.getElementById("modeSelectionOverlay").style.display = "none";
+      document.getElementById("setupOverlay").style.display = "none";
+      document.getElementById("learnSelectOverlay").style.display = "flex";
+
+      const list = document.getElementById("learnPatternList");
+      list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
+
+      try {
+        const res = await fetch("/api/patterns");
+        if (!res.ok) throw new Error("fetch failed");
+        const patterns = await res.json();
+        if (!patterns || patterns.length === 0) {
+          list.innerHTML = `<div style="color:#555;text-align:center;padding:40px;"><div style="font-size:2rem;margin-bottom:12px;">🪡</div><div style="font-weight:600;color:#888;margin-bottom:6px;">No saved patterns yet</div><div style="font-size:0.82rem;">Create and save a weave first, then come back to learn it.</div></div>`;
+          return;
+        }
+        list.innerHTML = "";
+        patterns.forEach(pattern => {
+          const shaftCount = pattern.loom === "traditional" ? 2 : 4;
+          const rowCount = (pattern.patternRows && pattern.patternRows.length) || 0;
+          const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
+          const date = pattern.created ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "";
+          const card = document.createElement("div");
+          card.style.cssText = `background:#161620;border:1px solid #2a2a35;border-radius:14px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all 0.2s;gap:14px;`;
+          card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
+          card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
+          card.innerHTML = `<div style="flex:1;min-width:0;"><div style="font-weight:700;color:white;font-size:0.95rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(pattern.name)}</div><div style="font-size:0.75rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows · ${date}</div></div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;"><span style="background:#0a2a2e;color:#00e5ff;font-size:0.68rem;font-weight:700;padding:4px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px;">Learn</span><span style="color:#555;font-size:0.85rem;">→</span></div>`;
+          card.addEventListener("click", () => startLearnMode(pattern));
+          list.appendChild(card);
+        });
+      } catch (err) {
+        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;font-size:0.88rem;">Could not load patterns. Is the server running?</div>`;
+      }
+    }
+
+    async function startLearnMode(pattern) {
+      ["learnSelectOverlay", "modeSelectionOverlay", "setupOverlay"].forEach(id => {
+        document.getElementById(id).style.display = "none";
+      });
+      document.getElementById("learnHUD")?.remove();
+      document.getElementById("learnPatternCanvas")?.closest("div[style*='bottom:20px']")?.remove();
+      window.loomStarted = false;
+      await import("./learn.js").then(m => m.startLearn && m.startLearn(pattern));
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+  </script>
 </body>
+
 </html>

@@ -1,236 +1,764 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weaver Profile | HABI-LIN</title>
-<link rel="stylesheet" href="dashboard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weaver Profile | HABI-LIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
 
-<style>
+    <style>
+        .icon {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
 
-body{
-    background: linear-gradient(180deg,#fcfcfb 0%,#f3efe9 100%);
-}
+        .icon-sm {
+            width: 0.85em;
+            height: 0.85em;
+        }
 
-/* PROFILE HERO */
-.profile-wrapper{
-    margin-top:80px;
-    padding:40px;
-    display:flex;
-    justify-content:center;
-}
+        .icon-lg {
+            width: 1.25em;
+            height: 1.25em;
+        }
 
-.profile-card{
-    width:900px;
-    background:white;
-    border-radius:24px;
-    padding:40px;
-    box-shadow:0 25px 60px rgba(0,0,0,0.08);
-    position:relative;
-    overflow:hidden;
-}
+        .icon-2xl {
+            width: 2em;
+            height: 2em;
+        }
+    </style>
 
-/* decorative weaving stripe */
-.profile-card::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:6px;
-    background: repeating-linear-gradient(
-        90deg,
-        #2b0303 0px,
-        #2b0303 18px,
-        #c89f65 18px,
-        #c89f65 36px
-    );
-}
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+        <symbol id="icon-user" viewBox="0 0 448 512">
+            <path
+                d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
+        </symbol>
+        <symbol id="icon-arrow-left" viewBox="0 0 448 512">
+            <path
+                d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" />
+        </symbol>
+        <symbol id="icon-bars" viewBox="0 0 448 512">
+            <path
+                d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
+        </symbol>
+        <symbol id="icon-xmark" viewBox="0 0 384 512">
+            <path
+                d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+        </symbol>
+        <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
+            <path
+                d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
+        </symbol>
+    </svg>
 
-/* HEADER */
-.profile-header{
-    display:flex;
-    align-items:center;
-    gap:30px;
-    margin-bottom:30px;
-}
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-/* avatar */
-.profile-avatar{
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    background:#f0f0f0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
-    border:4px solid #fff;
-    box-shadow:0 10px 30px rgba(0,0,0,0.15);
-}
+        :root {
+            --nav-height: 70px;
+            --brand: #2b0303;
+            --brand-mid: #4a0606;
+            --brand-light: #fdf2f2;
+            --wood: #c89f65;
+            --bg: #fcfcfb;
+            --surface: #ffffff;
+            --border: #f0f0f0;
+            --border-color: #eee;
+            --text: #1a1a1a;
+            --danger: #d93025;
+            --content-px: clamp(20px, 5vw, 80px);
+        }
 
-.profile-avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
+        html,
+        body {
+            height: 100%;
+            background: linear-gradient(180deg, #fcfcfb 0%, #f3efe9 100%);
+            color: var(--text);
+            overflow-x: hidden;
+        }
 
-.profile-avatar i{
-    font-size:40px;
-    color:#2b0303;
-}
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-/* name */
-.profile-name{
-    font-size:2rem;
-    font-weight:700;
-    color:#1a1a1a;
-}
+        /* === TOP NAVBAR === */
+        .sidebar {
+            width: 100%;
+            height: var(--nav-height);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--content-px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
 
-.profile-title{
-    color:#c89f65;
-    font-weight:600;
-    margin-top:6px;
-    letter-spacing:1px;
-}
+        .sidebar-header h2 {
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--brand);
+            white-space: nowrap;
+        }
 
-/* bio */
-.profile-bio{
-    margin-top:15px;
-    color:#555;
-    line-height:1.6;
-    max-width:520px;
-}
+        .logo-link,
+        .logo-link h2 {
+            text-decoration: none;
+            color: var(--brand);
+        }
 
-/* stats */
-.profile-stats{
-    margin-top:35px;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:20px;
-}
+        .sidebar-nav {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            flex: 1;
+            gap: 4px;
+            margin-left: 32px;
+        }
 
-.stat-box{
-    background:#faf7f2;
-    border-radius:18px;
-    padding:22px;
-    text-align:center;
-}
+        .nav-item {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 12px;
+            font-size: clamp(0.82rem, 1.3vw, 0.9rem);
+            font-weight: 500;
+            position: relative;
+            white-space: nowrap;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+        }
 
-.stat-number{
-    font-size:1.7rem;
-    font-weight:700;
-    color:#2b0303;
-}
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            left: 12px;
+            bottom: 4px;
+            width: 0;
+            height: 2px;
+            background: var(--brand);
+            transition: width 0.3s ease;
+        }
 
-.stat-label{
-    font-size:0.8rem;
-    letter-spacing:1px;
-    color:#777;
-    margin-top:6px;
-}
+        .nav-item:hover {
+            color: var(--brand);
+            background: var(--brand-light);
+        }
 
-/* back button */
-.back-btn{
-    margin-top:45px;
-    display:inline-block;
-    text-decoration:none;
-    background:#2b0303;
-    color:white;
-    padding:12px 24px;
-    border-radius:10px;
-    font-weight:600;
-    transition:0.2s;
-}
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            width: calc(100% - 24px);
+        }
 
-.back-btn:hover{
-    background:#4a0606;
-}
+        .nav-item.active {
+            color: var(--brand);
+            font-weight: 700;
+        }
 
-</style>
+        .nav-spacer {
+            margin-left: auto;
+        }
 
+        .logout {
+            color: var(--danger) !important;
+            font-weight: 600;
+        }
+
+        .logout:hover {
+            color: #a01f20 !important;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            color: var(--brand);
+            font-size: 1.2rem;
+            margin-left: auto;
+            transition: background 0.2s;
+        }
+
+        .hamburger:hover {
+            background: var(--brand-light);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .user-text {
+            text-align: right;
+        }
+
+        .greeting {
+            display: block;
+            font-size: 0.72rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .user-info strong {
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .profile-circle {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            color: var(--brand);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .profile-circle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+        }
+
+        .profile-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mobile-drawer {
+            display: none;
+            position: fixed;
+            top: var(--nav-height);
+            left: 0;
+            width: 100%;
+            background: var(--surface);
+            border-bottom: 1px solid #eee;
+            z-index: 999;
+            padding: 12px 20px 20px;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .mobile-drawer.open {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .mobile-drawer .nav-item {
+            display: block;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* === MAIN CONTENT === */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: var(--nav-height);
+            overflow-x: hidden;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: clamp(20px, 4vw, 50px) var(--content-px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* === PROFILE CARD === */
+        .profile-card {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 24px;
+            padding: clamp(24px, 5vw, 40px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Decorative weaving stripe */
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(90deg,
+                    var(--brand) 0px,
+                    var(--brand) 18px,
+                    var(--wood) 18px,
+                    var(--wood) 36px);
+        }
+
+        /* === PROFILE HEADER === */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: clamp(16px, 4vw, 30px);
+            margin-bottom: clamp(20px, 4vw, 30px);
+            flex-wrap: wrap;
+        }
+
+        /* Avatar */
+        .profile-avatar {
+            width: clamp(80px, 20vw, 120px);
+            height: clamp(80px, 20vw, 120px);
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar .icon {
+            width: clamp(40px, 10vw, 50px);
+            height: clamp(40px, 10vw, 50px);
+            color: var(--brand);
+        }
+
+        /* Name and title */
+        .profile-info h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .profile-title {
+            color: var(--wood);
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+        }
+
+        /* Bio */
+        .profile-bio {
+            color: #555;
+            line-height: 1.6;
+            max-width: 520px;
+            font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+        }
+
+        /* === STATS === */
+        .profile-stats {
+            margin-top: clamp(20px, 4vw, 35px);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+            gap: clamp(12px, 3vw, 20px);
+        }
+
+        .stat-box {
+            background: #faf7f2;
+            border-radius: 18px;
+            padding: clamp(16px, 3vw, 22px);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-number {
+            font-size: clamp(1.3rem, 3vw, 1.7rem);
+            font-weight: 700;
+            color: var(--brand);
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            letter-spacing: 1px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* === BUTTONS === */
+        .back-btn {
+            margin-top: clamp(24px, 4vw, 45px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: var(--brand);
+            color: white;
+            padding: clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: var(--brand-mid);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 3, 3, 0.2);
+        }
+
+        .back-btn .icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* === DARK MODE === */
+        body.dark-mode {
+            background: linear-gradient(180deg, #1a1a1d 0%, #0f0f12 100%);
+        }
+
+        body.dark-mode .sidebar {
+            background: #1a1a1d;
+            border-color: #333;
+        }
+
+        body.dark-mode .profile-card {
+            background: #1a1a1d;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .profile-info h1 {
+            color: #fff;
+        }
+
+        body.dark-mode .profile-bio {
+            color: #bbb;
+        }
+
+        body.dark-mode .stat-box {
+            background: #2a2a2d;
+        }
+
+        body.dark-mode .mobile-drawer {
+            background: #1a1a1d;
+            border-color: #333;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .sidebar-nav {
+                display: none;
+            }
+
+            .sidebar {
+                padding: 0 16px;
+                gap: 8px;
+            }
+
+            .user-text {
+                display: none;
+            }
+
+            .content-wrapper {
+                padding: clamp(16px, 3vw, 30px) 16px;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --nav-height: 56px;
+            }
+
+            .sidebar-header h2 {
+                font-size: 1rem;
+            }
+
+            .profile-circle {
+                width: 34px;
+                height: 34px;
+            }
+
+            .profile-card {
+                border-radius: 18px;
+                padding: 20px;
+            }
+
+            .profile-info h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <div class="page-wrapper">
 
-<div class="profile-wrapper">
-    <div class="profile-card">
-        
-        
-    <div class="profile-header">
+        <!-- TOP NAVBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="dashboard.html" class="logo-link">
+                    <h2>HABI-LIN</h2>
+                </a>
+            </div>
 
-        <div class="profile-avatar">
-            <img id="settings-photo" style="display:none;">
-            <i class="fa-solid fa-user" id="settings-icon"></i>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
+                <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
+                <a href="about.html" class="nav-item" id="about-link">About</a>
+                <div class="nav-spacer"></div>
+                <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+                <a href="/auth/logout" class="nav-item logout">Logout</a>
+            </nav>
+
+            <div class="user-info">
+                <div class="user-text">
+                    <span class="greeting">Hello,</span>
+                    <strong id="user-firstname">Weaver</strong>
+                </div>
+                <a href="#" class="profile-circle" id="profile-btn">
+                    <svg class="icon" id="default-avatar-icon" aria-hidden="true">
+                        <use href="#icon-user" />
+                    </svg>
+                    <img id="user-photo" src="" alt="" style="display:none;" />
+                </a>
+            </div>
+
+            <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+                <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
+                    <use href="#icon-bars" />
+                </svg>
+            </button>
+        </aside>
+
+        <!-- MOBILE DRAWER -->
+        <div class="mobile-drawer" id="mobile-drawer" role="navigation">
+            <a href="dashboard.html" class="nav-item">Home</a>
+            <a href="collection.html" class="nav-item">Collection</a>
+            <a href="about.html" class="nav-item">About</a>
+            <a href="settings.html" class="nav-item">Settings</a>
+            <a href="/auth/logout" class="nav-item logout">Logout</a>
         </div>
 
-        <div>
-            <div class="profile-name" id="settings-name">Weaver</div>
-            <div class="profile-title">Traditional Textile Apprentice</div>
+        <!-- MAIN CONTAINER -->
+        <main class="main-container">
+            <div class="content-wrapper">
+                <div class="profile-card">
 
-            <p class="profile-bio">
-                A digital weaver preserving the heritage of Filipino handloom textiles.
-                Practicing patterns, exploring structures, and keeping ancestral
-                weaving knowledge alive through technology.
-            </p>
-        </div>
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img id="settings-photo" style="display:none;">
+                            <svg class="icon" id="settings-icon" aria-hidden="true">
+                                <use href="#icon-user" />
+                            </svg>
+                        </div>
 
+                        <div class="profile-info">
+                            <h1 id="settings-name">Weaver</h1>
+                            <div class="profile-title">Traditional Textile Apprentice</div>
+                            <p class="profile-bio">
+                                A digital weaver preserving the heritage of Filipino handloom textiles.
+                                Practicing patterns, exploring structures, and keeping ancestral
+                                weaving knowledge alive through technology.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <div class="stat-number" id="stats-patterns">0</div>
+                            <div class="stat-label">Patterns Created</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-number" id="stats-level">Beginner</div>
+                            <div class="stat-label">Weaver Level</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <div class="stat-number" id="stats-favorite">Plain</div>
+                            <div class="stat-label">Favorite Weave</div>
+                        </div>
+                    </div>
+
+                    <a href="dashboard.html" class="back-btn">
+                        <svg class="icon" aria-hidden="true">
+                            <use href="#icon-arrow-left" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div class="profile-stats">
-        <div class="stat-box">
-            <div class="stat-number">0</div>
-            <div class="stat-label">PATTERNS CREATED</div>
-        </div>
+    <script>
+        // === HAMBURGER MENU ===
+        const hamburgerBtn = document.getElementById("hamburger-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        hamburgerBtn.addEventListener("click", () => {
+            const isOpen = mobileDrawer.classList.toggle("open");
+            hamburgerBtn.setAttribute("aria-expanded", isOpen);
+            document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
+        });
 
-        <div class="stat-box">
-            <div class="stat-number">Beginner</div>
-            <div class="stat-label">WEAVER LEVEL</div>
-        </div>
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            hamburgerBtn.setAttribute("aria-expanded", "false");
+            document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
+        }
 
-        <div class="stat-box">
-            <div class="stat-number">Plain</div>
-            <div class="stat-label">FAVORITE WEAVE</div>
-        </div>
-    </div>
+        document.addEventListener("click", (e) => {
+            if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
+        });
 
-    <a href="dashboard.html" class="back-btn">
-        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-    </a>
+        // === LOAD USER DATA ===
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("/auth/user", {
+                    credentials: "include"
+                });
 
-</div>
+                if (!response.ok) {
+                    window.location.href = "/login.html";
+                    return;
+                }
 
+                const user = await response.json();
 
-</div>
+                if (!user) {
+                    window.location.href = "/login.html";
+                    return;
+                }
 
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
+                // Update user data
+                const firstName = user.name.split(" ")[0];
+                document.getElementById("settings-name").textContent = user.name;
+                document.getElementById("user-firstname").textContent = firstName;
 
-    const response = await fetch("/auth/user", {
-        credentials:"include"
-    });
+                // Update avatar
+                if (user.photo) {
+                    const img = document.getElementById("settings-photo");
+                    img.src = user.photo;
+                    img.style.display = "block";
+                    document.getElementById("settings-icon").style.display = "none";
 
-    
+                    const navPhoto = document.getElementById("user-photo");
+                    navPhoto.src = user.photo;
+                    navPhoto.style.display = "block";
+                    document.getElementById("default-avatar-icon").style.display = "none";
+                }
 
-    const user = await response.json();
+                // Fetch patterns for stats
+                try {
+                    const patternsRes = await fetch("/api/patterns");
+                    const patterns = await patternsRes.json();
+                    const patternCount = patterns.length;
+                    document.getElementById("stats-patterns").textContent = patternCount;
 
-    if(!user){
-        window.location.href="/login.html";
-        return;
-    }
+                    // Determine weaver level based on pattern count
+                    let level = "Beginner";
+                    if (patternCount >= 5) level = "Intermediate";
+                    if (patternCount >= 15) level = "Advanced";
+                    if (patternCount >= 30) level = "Expert Weaver";
+                    document.getElementById("stats-level").textContent = level;
 
-    document.getElementById("settings-name").textContent = user.name;
+                    // Find favorite weave type
+                    if (patterns.length > 0) {
+                        const weaveTypes = {};
+                        patterns.forEach(p => {
+                            weaveTypes[p.type] = (weaveTypes[p.type] || 0) + 1;
+                        });
+                        const favorite = Object.keys(weaveTypes).reduce((a, b) => weaveTypes[a] > weaveTypes[b] ? a : b);
+                        document.getElementById("stats-favorite").textContent = favorite.charAt(0).toUpperCase() + favorite.slice(1);
+                    }
+                } catch (err) {
+                    console.log("Could not load pattern stats:", err);
+                }
 
-    if(user.photo){
-        const img = document.getElementById("settings-photo");
-        img.src = user.photo;
-        img.style.display="block";
-        document.getElementById("settings-icon").style.display="none";
-    }
-});
-</script>
+            } catch (error) {
+                console.error("Session error:", error);
+                window.location.href = "/login.html";
+            }
+        });
+    </script>
 
 </body>
+
 </html>

@@ -1,171 +1,637 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HABI-LIN | About the Project</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="about.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
-  <!-- ── INLINE SVG ICON SPRITE (no CDN needed) ── -->
   <style>
     .icon {
       display: inline-block;
-      width: 1em; height: 1em;
+      width: 1em;
+      height: 1em;
       vertical-align: -0.125em;
       fill: currentColor;
       flex-shrink: 0;
     }
-    .icon-sm  { width: 0.85em; height: 0.85em; }
-    .icon-lg  { width: 1.25em; height: 1.25em; }
+
+    .icon-sm {
+      width: 0.85em;
+      height: 0.85em;
+    }
+
+    .icon-lg {
+      width: 1.25em;
+      height: 1.25em;
+    }
   </style>
 
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
-      <path d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z"/>
+      <path
+        d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
     </symbol>
     <symbol id="icon-bars" viewBox="0 0 448 512">
-      <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
+      <path
+        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
     </symbol>
     <symbol id="icon-xmark" viewBox="0 0 384 512">
-      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
+      <path
+        d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
     </symbol>
     <symbol id="icon-user" viewBox="0 0 448 512">
-      <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
+      <path
+        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
     </symbol>
   </svg>
+
+  <style>
+    /* ── RESET ── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    /* ── VARIABLES ── */
+    :root {
+      --nav-height: 70px;
+      --brand: #2b0303;
+      --brand-mid: #4a0606;
+      --brand-light: #fdf2f2;
+      --bg: #fcfcfb;
+      --surface: #ffffff;
+      --border-color: #eee;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --text-faint: #888;
+      --danger: #d93025;
+      --content-px: clamp(20px, 5vw, 80px);
+      --content-max-width: 1200px;
+      --card-radius: 20px;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    .sidebar {
+      width: 100%;
+      height: var(--nav-height);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0 var(--content-px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      gap: 8px;
+    }
+
+    .logo-link,
+    .logo-link h2 {
+      text-decoration: none;
+    }
+
+    .sidebar-header h2 {
+      font-weight: 800;
+      letter-spacing: -1px;
+      white-space: nowrap;
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--brand);
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex: 1;
+      gap: 4px;
+      margin-left: 32px;
+    }
+
+    .nav-item {
+      color: #666;
+      text-decoration: none;
+      padding: 8px 12px;
+      font-size: clamp(0.82rem, 1.3vw, 0.9rem);
+      font-weight: 500;
+      position: relative;
+      white-space: nowrap;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-item::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      bottom: 4px;
+      width: 0;
+      height: 2px;
+      background: var(--brand);
+      transition: width 0.3s ease;
+    }
+
+    .nav-item:hover {
+      color: var(--brand);
+      background: var(--brand-light);
+    }
+
+    .nav-item:hover::after,
+    .nav-item.active::after {
+      width: calc(100% - 24px);
+    }
+
+    .nav-item.active {
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .nav-spacer {
+      margin-left: auto;
+    }
+
+    .logout {
+      color: var(--danger) !important;
+      font-weight: 600;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .search-container:focus-within {
+      background: var(--surface);
+      border-color: var(--brand);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+    }
+
+    .search-input {
+      width: 130px;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.83rem;
+      color: #333;
+      transition: width 0.3s;
+    }
+
+    .search-container:focus-within .search-input {
+      width: 180px;
+    }
+
+    .search-icon-btn {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      margin-left: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-text {
+      text-align: right;
+    }
+
+    .greeting {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info strong {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .profile-circle {
+      width: 40px;
+      height: 40px;
+      background: #f0f0f0;
+      color: var(--brand);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      flex-shrink: 0;
+    }
+
+    .profile-circle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+    }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      color: var(--brand);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .hamburger:hover {
+      background: var(--brand-light);
+    }
+
+    /* ── MOBILE DRAWER ── */
+    .mobile-drawer {
+      display: none;
+      position: fixed;
+      top: var(--nav-height);
+      left: 0;
+      width: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 999;
+      padding: 12px 20px 20px;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+      transform: translateY(-10px);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .mobile-drawer.open {
+      display: flex;
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .mobile-drawer .nav-item {
+      display: block;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+
+    .mobile-search {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1px solid transparent;
+    }
+
+    .mobile-search:focus-within {
+      background: var(--surface);
+      border-color: var(--brand);
+    }
+
+    .mobile-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-container {
+      margin-top: var(--nav-height);
+      padding: clamp(48px, 7vw, 90px) var(--content-px) clamp(48px, 8vw, 80px);
+      max-width: var(--content-max-width);
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── ABOUT HERO ── */
+    .about-hero {
+      text-align: center;
+      margin-bottom: clamp(48px, 8vw, 100px);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .subtitle {
+      display: inline-block;
+      color: var(--brand);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .about-hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      color: var(--brand);
+      margin: 16px 0 24px;
+      line-height: 1.15;
+    }
+
+    .about-hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── DETAIL GRID ── */
+    .about-details {
+      margin-bottom: clamp(40px, 6vw, 80px);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+      gap: clamp(20px, 4vw, 48px);
+    }
+
+    .detail-card {
+      background: var(--surface);
+      padding: clamp(28px, 4vw, 52px);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .02);
+      transition: var(--transition-smooth);
+    }
+
+    .detail-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, .06);
+    }
+
+    .detail-card h3 {
+      color: var(--brand);
+      margin-bottom: 16px;
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+    }
+
+    .detail-card p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    /* ── FOOTER ── */
+    .about-footer {
+      text-align: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: clamp(24px, 4vw, 40px);
+      color: #888;
+      font-size: 0.88rem;
+    }
+
+    /* ── ANIMATION ── */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .sidebar-nav {
+        margin-left: 12px;
+      }
+
+      .nav-item {
+        padding: 8px 8px;
+        font-size: clamp(0.8rem, 1.4vw, 0.88rem);
+      }
+
+      .search-input {
+        width: clamp(70px, 8vw, 110px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar-nav {
+        display: none;
+      }
+
+      .user-text {
+        display: none;
+      }
+
+      .sidebar {
+        padding: 0 16px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      :root {
+        --nav-height: 56px;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1rem;
+      }
+
+      .profile-circle {
+        width: 34px;
+        height: 34px;
+      }
+
+      .about-hero h1 {
+        font-size: 1.5rem;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      :root {
+        --content-max-width: 1100px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="page-wrapper">
+  <div class="page-wrapper">
 
-  <!-- ── TOP NAV ── -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <a href="dashboard.html" class="logo-link">
-        <h2>HABI-LIN</h2>
-      </a>
-    </div>
-
-    <!-- Desktop nav -->
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
-      <a href="dashboard.html#collection" class="nav-item" id="collection-link">Collection</a>
-      <a href="about.html" class="nav-item active" id="about-link">About</a>
-      <div class="nav-spacer"></div>
-      <div class="search-container">
-        <input type="text" class="search-input" placeholder="Search patterns…" />
-        <button class="search-icon-btn">
-          <svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"/></svg>
-        </button>
+    <!-- ── TOP NAV ── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="dashboard.html" class="logo-link">
+          <h2>HABI-LIN</h2>
+        </a>
       </div>
-      <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
+        <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
+        <a href="about.html" class="nav-item active" id="about-link">About</a>
+        <div class="nav-spacer"></div>
+        <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+        <a href="/auth/logout" class="nav-item logout">Logout</a>
+      </nav>
+
+      <div class="user-info">
+        <div class="user-text">
+          <span class="greeting">Hello,</span>
+          <strong id="user-firstname">Weaver</strong>
+        </div>
+        <a href="user-settings.html" class="profile-circle" id="profile-btn">
+          <svg class="icon" id="default-avatar-icon" aria-hidden="true">
+            <use href="#icon-user" />
+          </svg>
+          <img id="user-photo" src="" alt=""
+            style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+        </a>
+      </div>
+
+      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+        <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
+          <use href="#icon-bars" />
+        </svg>
+      </button>
+    </aside>
+
+    <!-- Mobile drawer -->
+    <div class="mobile-drawer" id="mobile-drawer" role="navigation">
+      <a href="dashboard.html" class="nav-item">Home</a>
+      <a href="collection.html" class="nav-item">Collection</a>
+      <a href="about.html" class="nav-item active">About</a>
+      <a href="settings.html" class="nav-item">Settings</a>
       <a href="/auth/logout" class="nav-item logout">Logout</a>
-    </nav>
-
-    <!-- User avatar -->
-    <div class="user-info">
-      <div class="user-text">
-        <span class="greeting">Hello,</span>
-        <strong id="user-firstname">Weaver</strong>
+      <div class="mobile-search">
+        <input type="text" placeholder="Search patterns…" />
+        <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true">
+          <use href="#icon-magnifying-glass" />
+        </svg>
       </div>
-      <a href="user-settings.html" class="profile-circle" id="profile-btn">
-        <svg class="icon" id="default-avatar-icon" aria-hidden="true"><use href="#icon-user"/></svg>
-        <img id="user-photo" src="" alt=""
-          style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
-      </a>
     </div>
 
-    <!-- Hamburger (mobile only) -->
-    <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
-      <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true"><use href="#icon-bars"/></svg>
-    </button>
-  </aside>
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-container">
+      <section class="about-hero">
+        <span class="subtitle">Our Mission</span>
+        <h1>Digitalizing the Dying Art of Traditional Filipino Weaving</h1>
+        <p>HABI-LIN is a bridge between ancestral wisdom and modern technology, designed to preserve the intricate
+          patterns of the Philippines for the digital age.</p>
+      </section>
 
-  <!-- Mobile slide-down drawer -->
-  <div class="mobile-drawer" id="mobile-drawer" role="navigation">
-    <a href="dashboard.html" class="nav-item">Home</a>
-    <a href="dashboard.html#collection" class="nav-item">Collection</a>
-    <a href="about.html" class="nav-item active">About</a>
-    <a href="settings.html" class="nav-item">Settings</a>
-    <a href="/auth/logout" class="nav-item logout">Logout</a>
-    <div class="mobile-search">
-      <input type="text" placeholder="Search patterns…" />
-      <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true">
-        <use href="#icon-magnifying-glass"/>
-      </svg>
-    </div>
+      <section class="about-details">
+        <div class="detail-grid">
+          <div class="detail-card">
+            <h3>The Problem</h3>
+            <p>Traditional handloom weaving is a labor-intensive art form that is slowly disappearing as younger
+              generations move toward digital careers. The complex patterns often exist only in the memory of master
+              weavers.</p>
+          </div>
+          <div class="detail-card">
+            <h3>The Solution</h3>
+            <p>By using 3D modeling and data signal processing, HABI-LIN captures the movement of the loom, allowing
+              weavers to create, store, and share digital pattern drafts globally.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="about-footer">
+        <p>&copy; 2026 HABI-LIN Project | Bulacan State University</p>
+      </footer>
+    </main>
   </div>
 
-  <!-- ── MAIN CONTENT ── -->
-  <main class="main-container">
-    <section class="about-hero">
-      <span class="subtitle">Our Mission</span>
-      <h1>Digitalizing the Dying Art of Traditional Filipino Weaving</h1>
-      <p>HABI-LIN is a bridge between ancestral wisdom and modern technology, designed to preserve the intricate patterns of the Philippines for the digital age.</p>
-    </section>
-
-    <section class="about-details">
-      <div class="detail-grid">
-        <div class="detail-card">
-          <h3>The Problem</h3>
-          <p>Traditional handloom weaving is a labor-intensive art form that is slowly disappearing as younger generations move toward digital careers. The complex patterns often exist only in the memory of master weavers.</p>
-        </div>
-        <div class="detail-card">
-          <h3>The Solution</h3>
-          <p>By using 3D modeling and data signal processing, HABI-LIN captures the movement of the loom, allowing weavers to create, store, and share digital pattern drafts globally.</p>
-        </div>
-      </div>
-    </section>
-
-    <footer class="about-footer">
-      <p>&copy; 2026 HABI-LIN Project | Bulacan State University</p>
-    </footer>
-  </main>
-</div>
-
-<script>
-  /* ── USER SESSION ── */
-  document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      const res = await fetch("/auth/user");
-      if (!res.ok) throw new Error("No session");
-      const user = await res.json();
-      if (user) {
-        const firstName = user.name.split(" ")[0];
-        document.getElementById("user-firstname").textContent = firstName + "!";
-        if (user.photo) {
-          document.getElementById("user-photo").src = user.photo;
-          document.getElementById("user-photo").style.display = "block";
-          document.getElementById("default-avatar-icon").style.display = "none";
+  <script>
+    /* ── USER SESSION ── */
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch("/auth/user");
+        if (!res.ok) throw new Error("No session");
+        const user = await res.json();
+        if (user) {
+          const firstName = user.name.split(" ")[0];
+          document.getElementById("user-firstname").textContent = firstName + "!";
+          if (user.photo) {
+            document.getElementById("user-photo").src = user.photo;
+            document.getElementById("user-photo").style.display = "block";
+            document.getElementById("default-avatar-icon").style.display = "none";
+          }
         }
+      } catch (e) { console.log("Session not ready."); }
+    });
+
+    /* ── HAMBURGER ── */
+    const hamburgerBtn = document.getElementById("hamburger-btn");
+    const mobileDrawer = document.getElementById("mobile-drawer");
+    hamburgerBtn.addEventListener("click", () => {
+      const isOpen = mobileDrawer.classList.toggle("open");
+      hamburgerBtn.setAttribute("aria-expanded", isOpen);
+      document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
+    });
+    document.addEventListener("click", (e) => {
+      if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+        mobileDrawer.classList.remove("open");
+        hamburgerBtn.setAttribute("aria-expanded", "false");
+        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
       }
-    } catch (e) { console.log("Session not ready."); }
-  });
-
-  /* ── HAMBURGER ── */
-  const hamburgerBtn = document.getElementById("hamburger-btn");
-  const mobileDrawer = document.getElementById("mobile-drawer");
-
-  hamburgerBtn.addEventListener("click", () => {
-    const isOpen = mobileDrawer.classList.toggle("open");
-    hamburgerBtn.setAttribute("aria-expanded", isOpen);
-    document.getElementById("hamburger-icon").querySelector("use")
-      .setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
-  });
-
-  function closeDrawer() {
-    mobileDrawer.classList.remove("open");
-    hamburgerBtn.setAttribute("aria-expanded", "false");
-    document.getElementById("hamburger-icon").querySelector("use")
-      .setAttribute("href", "#icon-bars");
-  }
-
-  document.addEventListener("click", (e) => {
-    if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-      closeDrawer();
-    }
-  });
-</script>
+    });
+  </script>
 </body>
+
 </html>
