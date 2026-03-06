@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import MongoStore from "connect-mongo";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -73,6 +74,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: { maxAge: 24 * 60 * 60 * 1000, sameSite: "lax" }
 }));
 
