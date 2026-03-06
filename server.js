@@ -12,7 +12,9 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import User from "./models/user.js";
 
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+    dotenv.config();
+}
 
 const app = express();
 
