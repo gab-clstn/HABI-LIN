@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-
     email: {
         type: String,
         unique: true,
@@ -13,31 +12,25 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-
     password: {
         type: String
     },
-
     provider: {
         type: String,
         default: "local"
     },
-
     providerId: {
         type: String
     },
-
     photo: {
-        type: String
+        type: String,
+        default: "" // Keep it as a string for Base64 data
     },
-
-    /* --- NEW: PREFERENCE FIELD --- */
     theme: {
         type: String,
         enum: ["light", "dark"],
         default: "light"
     },
-
     createdAt: {
         type: Date,
         default: Date.now
