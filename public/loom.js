@@ -8,37 +8,161 @@ let recordedSteps = [];
 let loomConfig = null;
 let threading = [];
 let beatTimer = 0;
-
-const BEAT_DURATION = 18; // frames (~0.3 sec at 60fps)
+let heddleThreading = [0, 1, 2, 3];
+let warpColors = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+const BEAT_DURATION = 10; // Sped up from 18
 
 //////////////////////////////////////////////////
 // SETUP OVERLAY — Entry point
 //////////////////////////////////////////////////
 function attachStartButton() {
-    const startBtn = document.getElementById("startWeaving");
+    const nextBtn = document.getElementById("startSetup");
+    const startBtn = document.getElementById("startWeavingFromHeddles");
+    const heddlesOverlay = document.getElementById("heddlesOverlay");
+    const setupOverlay = document.getElementById("setupOverlay");
 
-    if (!startBtn) {
+    // Wait until elements exist
+    if (!nextBtn || !startBtn || !setupOverlay || !heddlesOverlay) {
         requestAnimationFrame(attachStartButton);
         return;
     }
 
-    startBtn.onclick = () => {
-        loomConfig = {
-            patternName: document.getElementById("patternName").value,
-            loomType: document.getElementById("loomType").value,
-            patternType: document.getElementById("patternType").value,
-            width: parseFloat(document.getElementById("clothWidth").value),
-            height: parseFloat(document.getElementById("clothHeight").value)
-        };
+    // 1. NEXT BUTTON: Validate Name, Uniqueness & Configure Heddles
+    nextBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const patternNameInput = document.getElementById("patternName");
+        const patternName = patternNameInput ? patternNameInput.value.trim() : "";
 
-        if (!loomConfig.patternName) {
-            alert("Please enter a pattern name.");
+        if (!patternName) {
+            alert("Please enter a pattern name before proceeding.");
+            return; 
+        }
+
+        // --- UNIQUE NAME CHECK ---
+        try {
+            const response = await fetch("/api/patterns");
+            if (response.ok) {
+                const existingPatterns = await response.json();
+                const isDuplicate = existingPatterns.some(p => p.name.toLowerCase() === patternName.toLowerCase());
+                if (isDuplicate) {
+                    alert("Pattern name already exists! Please choose a unique name for your design.");
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error("Could not verify pattern name uniqueness", err);
+        }
+
+        const loomType = document.getElementById("loomType").value;
+        const h3Wrap = document.getElementById("wrap-heddle3");
+        const h4Wrap = document.getElementById("wrap-heddle4");
+        const w3Wrap = document.getElementById("wrap-warpColor3");
+        const w4Wrap = document.getElementById("wrap-warpColor4");
+
+        if (loomType === "traditional") {
+            if (h3Wrap) h3Wrap.style.display = "none";
+            if (h4Wrap) h4Wrap.style.display = "none";
+            if (w3Wrap) w3Wrap.style.display = "none";
+            if (w4Wrap) w4Wrap.style.display = "none";
+        } else {
+            if (h3Wrap) h3Wrap.style.display = "block";
+            if (h4Wrap) h4Wrap.style.display = "block";
+            if (w3Wrap) w3Wrap.style.display = "flex";
+            if (w4Wrap) w4Wrap.style.display = "flex";
+        }
+
+        setupOverlay.style.display = "none";
+        heddlesOverlay.style.display = "flex";
+    });
+
+    // 2. BACK BUTTON: Return to initial setup screen
+    const backBtn = document.getElementById("backToSetup2"); 
+    if (backBtn) {
+        backBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            heddlesOverlay.style.display = "none";
+            setupOverlay.style.display = "flex";
+        });
+    }
+
+    // 3. START WEAVING: Strict Manual Entry (Validation Only)
+    startBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const patternSize = parseInt(document.getElementById("patternSize").value);
+
+        if (isNaN(patternSize) || patternSize <= 0) {
+            alert("Please enter a valid pattern size.");
             return;
         }
 
-        document.getElementById("setupOverlay").style.display = "none";
+        const parseHeddle = (id) => {
+            const el = document.getElementById(id);
+            if (!el || !el.value.trim()) return [];
+            return el.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+        };
+
+        const loomType = document.getElementById("loomType").value;
+
+        const h1 = parseHeddle("heddle1");
+        const h2 = parseHeddle("heddle2");
+        const h3 = loomType === "traditional" ? [] : parseHeddle("heddle3");
+        const h4 = loomType === "traditional" ? [] : parseHeddle("heddle4");
+
+        const allAssigned = [...h1, ...h2, ...h3, ...h4];
+        const uniqueAssigned = new Set(allAssigned);
+
+        // --- STRICT MANUAL VALIDATION ---
+        if (allAssigned.length !== patternSize || uniqueAssigned.size !== patternSize) {
+            alert(`Error: Assign exactly 1 to ${patternSize} without duplicates.`, "error");
+            return;
+        }
+
+        const outOfBounds = allAssigned.some(n => n < 1 || n > patternSize);
+        if (outOfBounds) {
+            alert(`Error: Thread numbers must be between 1 and ${patternSize}.`);
+            return;
+        }
+
+        let finalThreadingMap = new Array(patternSize).fill(0);
+        h1.forEach(n => finalThreadingMap[n - 1] = 0);
+        h2.forEach(n => finalThreadingMap[n - 1] = 1);
+        h3.forEach(n => finalThreadingMap[n - 1] = 2);
+        h4.forEach(n => finalThreadingMap[n - 1] = 3);
+
+        const maxThreads = 120;
+        const repeats = Math.floor(maxThreads / patternSize);
+        const totalThreads = repeats * patternSize;
+
+        if (totalThreads === 0) {
+            alert("Pattern size is too large (max 120).");
+            return;
+        }
+
+        loomConfig = {
+            patternName: document.getElementById("patternName").value,
+            loomType: loomType,
+            patternType: document.getElementById("patternType").value,
+            width: parseFloat(document.getElementById("clothWidth").value),
+            patternSize: patternSize,
+            totalThreads: totalThreads,
+            customThreadingMap: finalThreadingMap
+        };
+
+        warpColors = [
+            document.getElementById("warp1")?.value || "#ffffff",
+            document.getElementById("warp2")?.value || "#ffffff",
+            document.getElementById("warp3")?.value || "#ffffff",
+            document.getElementById("warp4")?.value || "#ffffff"
+        ];
+
+        if (loomType === "traditional") {
+            warpColors = [warpColors[0], warpColors[1]];
+        }
+
+        heddlesOverlay.style.display = "none";
         initLoom();
-    };
+    });
 }
 
 //////////////////////////////////////////////////
@@ -55,13 +179,12 @@ function injectLoomStyles() {
             top: clamp(10px, 2%, 20px);
             left: clamp(10px, 2%, 20px);
             width: clamp(160px, 18vw, 220px);
-            max-height: clamp(200px, 35vh, 380px);
-            overflow-y: auto;
+            max-height: 80vh; /* Increased so the Save button isn't cut off */
             background: rgba(13, 13, 18, 0.96);
             color: #e0e0e0;
             border: 1px solid #2a2a35;
             border-radius: 14px;
-            padding: clamp(10px, 2%, 16px);
+            padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -69,12 +192,23 @@ function injectLoomStyles() {
             box-shadow: 0 8px 32px rgba(0,0,0,0.55);
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: clamp(10px, 1.1vw, 12px);
-            scrollbar-width: thin;
-            scrollbar-color: #333 transparent;
             box-sizing: border-box;
+            transition: all 0.3s ease;
+            overflow-y: auto;
         }
-        .loom-panel::-webkit-scrollbar { width: 4px; }
-        .loom-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        /* THE COLLAPSED STATE */
+        .loom-panel.collapsed {
+            max-height: 48px !important; /* Just tall enough for the header & back button */
+            min-height: 48px !important;
+            padding-bottom: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Hide everything EXCEPT the header when collapsed */
+        .loom-panel.collapsed > :not(.loom-panel__header) {
+            display: none !important;
+        }
 
         .loom-panel__header {
             display: flex;
@@ -83,7 +217,18 @@ function injectLoomStyles() {
             padding-bottom: 8px;
             border-bottom: 1px solid #2a2a35;
             gap: 6px;
+            cursor: pointer; /* Makes the whole header area clickable */
+            user-select: none;
+            margin-bottom: 0;
         }
+
+        /* Remove the line under the header when collapsed */
+        .loom-panel.collapsed .loom-panel__header {
+            border-bottom: none;
+            padding-bottom: 0;
+            height: 100%;
+        }
+
         .loom-panel__title {
             font-weight: 700;
             font-size: clamp(11px, 1.2vw, 13px);
@@ -122,9 +267,9 @@ function injectLoomStyles() {
         }
         .loom-btn:hover  { opacity: 0.88; }
         .loom-btn:active { transform: scale(0.97); }
-        .loom-btn--ble    { background: #1a6fc4; }
-        .loom-btn--export { background: #1e8f45; }
-        .loom-btn--save   { background: #c45a00; }
+        .loom-btn--ble    { background: #007bff; }
+        .loom-btn--export { background: #28a745; }
+        .loom-btn--save   { background: #fd7e14; }
 
         .loom-hint {
             font-size: clamp(9px, 0.95vw, 10px);
@@ -229,49 +374,36 @@ function injectLoomStyles() {
             }
         }
 
-        /* ── MOBILE (≤600px): Stacked layout ── */
+        /* ── MOBILE (≤600px): Re-arranged for better visibility ── */
         @media (max-width: 600px) {
             .loom-panel {
-                top: auto;
-                left: 8px;
-                bottom: clamp(120px, 30vw, 160px);
-                width: auto;
-                max-height: 35vh;
-                max-width: calc(100% - 16px);
-            }
-            
-            .loom-panel__header {
-                flex-wrap: wrap;
-            }
-
-            .loom-hint {
-                display: none;
-            }
-            
-            .loom-btn {
-                font-size: 10px;
-                padding: 6px 8px;
+                top: 10px !important;
+                left: 10px !important;
+                bottom: auto !important;
+                width: auto !important;
+                min-width: 180px;
+                max-height: 60vh !important; /* Give plenty of room for Save button */
+                padding: 10px !important;
             }
 
             .loom-pattern-panel {
-                bottom: 8px;
-                right: 8px;
-                left: 8px;
-                width: auto;
-                max-width: calc(100% - 16px);
-                height: clamp(100px, 25vw, 150px);
+                bottom: 0 !important;
+                right: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 28vh !important; /* Made this a teeny bit shorter! */
+                max-width: none !important;
+                border-radius: 16px 16px 0 0 !important;
+                border-bottom: none;
             }
-        }
 
-        /* ── HIDE PANELS WHEN OVERLAY IS SHOWN ── */
-        #modeSelectionOverlay[style*="flex"],
-        #setupOverlay[style*="flex"] {
-            ~ .loom-panel,
-            ~ .loom-pattern-panel {
-                display: none !important;
+            #patternCanvas {
+                width: 100% !important;
+                height: auto !important;
             }
         }
     `;
+    
     document.head.appendChild(style);
 }
 
@@ -279,6 +411,7 @@ function injectLoomStyles() {
 // MAIN LOOM INITIALIZER
 //////////////////////////////////////////////////
 function initLoom() {
+    let hasUnsavedChanges = false;
     console.log("Loom Config:", loomConfig);
 
     //----------------------------------------------
@@ -310,6 +443,8 @@ function initLoom() {
     const ROW_SPACING = 0.02;
     const BEATER_HIT_Z = BASE_FRONT - 0.2;
     const MAX_ROWS_BEFORE_TAKEUP = 100;
+    const TOTAL_THREADS = loomConfig.totalThreads;
+    const PATTERN_SIZE = loomConfig.patternSize;
 
     // Z-positions for heddle frames (front to back)
     let zPositions = [];
@@ -328,33 +463,42 @@ function initLoom() {
     const warpGroups = [];
     for (let i = 0; i < SHAFT_COUNT; i++) warpGroups.push([]);
 
+    // Multi-pedal support
     let currentPressedPedals = new Set();
 
     let beaterGroup, shuttleGroup, clothRoller;
     let weftThreads = [];
     let activeWeft = null;
-    let patternHistory = [];
+    let patternHistory = loomConfig.resumeHistory || [];
     let rowCounter = 0;
+    let weftColorHistory = (loomConfig.rowColors && Array.isArray(loomConfig.rowColors)) ? Array.from(loomConfig.rowColors) : [];
     let fellZ = BASE_FRONT - 0.12;
+    
+    // ACTION QUEUE - Prevents skipped beats during hardware latency
+    let queuedBeat = false;
 
+    // Shuttle pass state
     let shuttleSideToggle = false;
     let shuttleArmed = false;
     let shuttleInserted = false;
     let shuttleStartSide = -1;
     let shuttleCrossed = false;
 
+    // Direction-change void tracking
     let shuttleDirectionChanges = 0;
     let shuttleMovingPositive = null;
     let lastShuttleX = 0;
 
+    // Treadling / auto-pattern state
     let treadlingSequence = [];
     let treadlingIndex = 0;
     let weftReadyToBeat = false;
-    let shuttleCurrentSide = -1;
+    let shuttleCurrentSide = -1; // -1 = left, 1 = right
 
+    // Auto-shuttle for traditional loom
     let pedalHoldTimer = 0;
     let pedalHoldActive = false;
-    const PEDAL_AUTO_SHUTTLE_DELAY = 30;
+    const PEDAL_AUTO_SHUTTLE_DELAY = 30; // ~0.5 sec at 60fps
     let lastPedalState = false;
 
     //----------------------------------------------
@@ -382,8 +526,10 @@ function initLoom() {
 
     function resizeRenderer() {
         const rect = container.getBoundingClientRect();
-        renderer.setSize(rect.width, rect.height, false);
-        camera.aspect = rect.width / rect.height;
+        const width = rect.width;
+        const height = rect.height;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
         camera.updateProjectionMatrix();
     }
 
@@ -446,16 +592,16 @@ function initLoom() {
     //----------------------------------------------
     function generateTreadling(patternType) {
         if (SHAFT_COUNT === 2) {
-            if (patternType === "plain") treadlingSequence = [0, 1];
+            if (patternType === "plain")   treadlingSequence = [0, 1];
             else if (patternType === "basket") treadlingSequence = [0, 0, 1, 1];
-            else if (patternType === "rib") treadlingSequence = [0, 0, 0, 1, 1, 1];
-            else treadlingSequence = [0, 1];
+            else if (patternType === "rib")    treadlingSequence = [0, 0, 0, 1, 1, 1];
+            else                               treadlingSequence = [0, 1];
         } else {
-            if (patternType === "plain") treadlingSequence = [0, 1];
-            else if (patternType === "twill") treadlingSequence = [0, 1, 2, 3];
+            if (patternType === "plain")   treadlingSequence = [0, 1];
+            else if (patternType === "twill")  treadlingSequence = [0, 1, 2, 3];
             else if (patternType === "basket") treadlingSequence = [0, 0, 1, 1, 2, 2, 3, 3];
-            else if (patternType === "rib") treadlingSequence = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3];
-            else treadlingSequence = [0, 1, 2, 3];
+            else if (patternType === "rib")    treadlingSequence = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3];
+            else                               treadlingSequence = [0, 1, 2, 3];
         }
         console.log("Generated treadling:", treadlingSequence);
     }
@@ -474,18 +620,18 @@ function initLoom() {
     // LOOM FRAME CONSTRUCTION
     //----------------------------------------------
     function buildFrame() {
-        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT, LEG_HEIGHT / 2, BASE_FRONT);
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT,  LEG_HEIGHT / 2, BASE_FRONT);
         woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BASE_FRONT);
-        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT, LEG_HEIGHT / 2, BACK);
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT,  LEG_HEIGHT / 2, BACK);
         woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BACK);
 
         const SIDE_LEN = Math.abs(BASE_FRONT - BACK);
         const SIDE_CEN = (BASE_FRONT + BACK) / 2;
-        woodBar(0.3, 0.3, SIDE_LEN, LEFT, LEG_HEIGHT, SIDE_CEN);
+        woodBar(0.3, 0.3, SIDE_LEN, LEFT,  LEG_HEIGHT, SIDE_CEN);
         woodBar(0.3, 0.3, SIDE_LEN, RIGHT, LEG_HEIGHT, SIDE_CEN);
 
         const TOWER_H = 3.5;
-        woodBar(0.3, TOWER_H, 0.3, LEFT, LEG_HEIGHT + TOWER_H / 2, TOWER_Z);
+        woodBar(0.3, TOWER_H, 0.3, LEFT,  LEG_HEIGHT + TOWER_H / 2, TOWER_Z);
         woodBar(0.3, TOWER_H, 0.3, RIGHT, LEG_HEIGHT + TOWER_H / 2, TOWER_Z);
 
         const TOP_BEAM_Y = LEG_HEIGHT + TOWER_H;
@@ -516,7 +662,7 @@ function initLoom() {
 
         function addConnectedRoller(zPos) {
             woodCylinder(0.06, ROLLER_SPAN, 0, ROLLER_Y, zPos, true, group);
-            woodBar(0.15, 0.15, 0.15, LEFT + 0.15, ROLLER_Y, zPos, group);
+            woodBar(0.15, 0.15, 0.15, LEFT  + 0.15, ROLLER_Y, zPos, group);
             woodBar(0.15, 0.15, 0.15, RIGHT - 0.15, ROLLER_Y, zPos, group);
         }
 
@@ -539,16 +685,16 @@ function initLoom() {
                 scene.add(new THREE.Line(cordGeo, stringMaterial));
             });
 
-            woodBar(FRAME_W, 0.1, 0.1, 0, FRAME_H / 2, 0, frameGroup);
-            woodBar(FRAME_W, 0.1, 0.1, 0, -FRAME_H / 2, 0, frameGroup);
-            woodBar(0.1, FRAME_H, 0.1, -FRAME_W / 2, 0, 0, frameGroup);
-            woodBar(0.1, FRAME_H, 0.1, FRAME_W / 2, 0, 0, frameGroup);
+            woodBar(FRAME_W, 0.1, 0.1, 0,          FRAME_H / 2,  0, frameGroup);
+            woodBar(FRAME_W, 0.1, 0.1, 0,         -FRAME_H / 2,  0, frameGroup);
+            woodBar(0.1, FRAME_H, 0.1, -FRAME_W / 2, 0,          0, frameGroup);
+            woodBar(0.1, FRAME_H, 0.1,  FRAME_W / 2, 0,          0, frameGroup);
 
             const hPoints = [];
             for (let h = 0; h <= 110; h++) {
                 const hx = (h / 110) * (FRAME_W - 0.14) - (FRAME_W - 0.14) / 2;
                 hPoints.push(
-                    new THREE.Vector3(hx, FRAME_H / 2 - 0.05, 0),
+                    new THREE.Vector3(hx,  FRAME_H / 2 - 0.05, 0),
                     new THREE.Vector3(hx, -FRAME_H / 2 + 0.05, 0)
                 );
             }
@@ -573,7 +719,7 @@ function initLoom() {
         beaterGroup.position.set(0, BREAST_BEAM_Y + 0.25, BEATER_REST_Z);
 
         const bh = FRAME_H * 0.55;
-        woodBar(WIDTH - 0.5, 0.2, 0.3, 0, bh / 2, 0, beaterGroup);
+        woodBar(WIDTH - 0.5, 0.2,  0.3, 0,  bh / 2,  0,    beaterGroup);
         woodBar(WIDTH - 0.5, 0.15, 0.6, 0, -bh / 2, -0.1, beaterGroup);
 
         const reed = new THREE.Mesh(
@@ -666,9 +812,10 @@ function initLoom() {
     // WARP THREADS & CLOTH BASE
     //----------------------------------------------
     function createDynamicWarp() {
-        for (let i = 0; i < 120; i++) {
-            const x = (i / 120) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
-            const hIdx = i % SHAFT_COUNT;
+        for (let i = 0; i < TOTAL_THREADS; i++) {
+            const x = (i / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const threadInBlock = i % PATTERN_SIZE; 
+            const hIdx = loomConfig.customThreadingMap[threadInBlock];
             threading[i] = hIdx;
 
             const points = [
@@ -677,9 +824,11 @@ function initLoom() {
                 new THREE.Vector3(x, SHED_OPEN_Y, zPositions[hIdx]),
                 new THREE.Vector3(x, WARP_BEAM_Y + 0.3, BACK)
             ];
+            const color = warpColors[hIdx];
+
             const thread = new THREE.Line(
                 new THREE.BufferGeometry().setFromPoints(points),
-                threadMaterial
+                new THREE.LineBasicMaterial({ color })
             );
             scene.add(thread);
             warpGroups[hIdx].push(thread);
@@ -687,8 +836,8 @@ function initLoom() {
     }
 
     function createClothBase() {
-        for (let i = 0; i <= 120; i++) {
-            const x = (i / 120) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+        for (let i = 0; i < TOTAL_THREADS; i++) {
+            const x = (i / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
             const wobble = Math.sin(i * 0.6) * 0.015;
             const points = [
                 new THREE.Vector3(x + wobble, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
@@ -721,12 +870,17 @@ function initLoom() {
         if (pedalHoldActive && pedalPressed) {
             pedalHoldTimer--;
             if (pedalHoldTimer <= 0) {
-                if (isShedOpenEnough()) handleHardwareInput("S");
+                if (isShedOpenEnough()) {
+                    handleHardwareInput("S");
+                }
                 pedalHoldActive = false;
             }
         }
 
-        if (!pedalPressed) pedalHoldActive = false;
+        if (!pedalPressed) {
+            pedalHoldActive = false;
+        }
+
         lastPedalState = pedalPressed;
     }
 
@@ -735,15 +889,19 @@ function initLoom() {
     //----------------------------------------------
     function addWeftThread() {
         if (activeWeft) return;
+        hasUnsavedChanges = true;
 
-        const warpCount = 60;
+        const warpCount = TOTAL_THREADS;
         const points = [];
+
         const shed = [];
-        for (let i = 0; i < SHAFT_COUNT; i++) shed.push(!currentPressedPedals.has(i));
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            shed.push(!currentPressedPedals.has(i));
+        }
 
         const rowStates = [];
-        for (let i = 0; i <= warpCount; i++) {
-            const x = (i / warpCount) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+        for (let i = 0; i < warpCount; i++) {
+            const x = (i / (warpCount - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
             const shaft = threading[i % threading.length];
             const isUp = shed[shaft];
             rowStates.push(isUp);
@@ -819,7 +977,7 @@ function initLoom() {
         }
 
         const cellSize = 15;
-        const warpCount = 60;
+        const warpCount = loomConfig.totalThreads; 
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = warpCount * cellSize;
         exportCanvas.height = patternHistory.length * cellSize;
@@ -832,17 +990,23 @@ function initLoom() {
             rowStates.forEach((isWarpUp, warpIndex) => {
                 const y = (patternHistory.length - 1 - rowIndex) * cellSize;
                 if (!isWarpUp) {
-                    ctx.fillStyle = document.getElementById('shuttleColor').value;
+                    const fallbackColor = "#" + shuttleThreadMaterial.color.getHexString();
+                    ctx.fillStyle = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackColor;
                     ctx.fillRect(warpIndex * cellSize, y, cellSize, cellSize);
                 } else {
-                    ctx.fillStyle = "#000000";
-                    ctx.fillRect(warpIndex * cellSize + (cellSize * 0.8), y, cellSize * 0.2, cellSize);
+                    const hIdx = threading[warpIndex % threading.length];
+                    ctx.fillStyle = warpColors[hIdx];
+                    ctx.fillRect(warpIndex * cellSize, y, cellSize, cellSize);
                 }
             });
         });
 
         const link = document.createElement('a');
-        link.download = 'woven-pattern-done.png';
+        const safeName = loomConfig.patternName 
+            ? loomConfig.patternName.replace(/[^a-z0-9]/gi, '_').toLowerCase() 
+            : 'woven_pattern';
+            
+        link.download = `${safeName}.png`;
         link.href = exportCanvas.toDataURL('image/png');
         link.click();
     }
@@ -852,7 +1016,7 @@ function initLoom() {
     //----------------------------------------------
     async function connectBLE() {
         const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const TX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+        const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
         const btn = document.getElementById('bleConnect');
 
         try {
@@ -862,16 +1026,16 @@ function initLoom() {
             });
             const server = await device.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
-            const char = await service.getCharacteristic(TX_CHAR_UUID);
+            const characteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
 
-            await char.startNotifications();
-            char.addEventListener('characteristicvaluechanged', (e) => {
+            await characteristic.startNotifications();
+            characteristic.addEventListener('characteristicvaluechanged', (e) => {
                 const val = new TextDecoder().decode(e.target.value).trim();
                 handleHardwareInput(val);
             });
 
             btn.style.background = "#28a745";
-            btn.textContent = "Loom Connected";
+            btn.innerHTML = "Loom Connected";
         } catch (err) {
             console.error("BLE Error:", err);
         }
@@ -904,7 +1068,13 @@ function initLoom() {
         }
 
         if (data === "B") {
-            beatTimer = BEAT_DURATION;
+            // STACKING LOGIC: If shuttle hasn't landed yet, queue the beat
+            if (activeWeft && !weftReadyToBeat) {
+                queuedBeat = true;
+                console.log("Input Stacked: Beat queued for shuttle arrival.");
+            } else {
+                beatTimer = BEAT_DURATION;
+            }
             recordedSteps.push({ action: "beat" });
             return;
         }
@@ -915,12 +1085,16 @@ function initLoom() {
                 scene.remove(activeWeft.line);
                 activeWeft.line.geometry.dispose();
                 activeWeft.line.material.dispose();
+
                 weftThreads.pop();
                 patternHistory.pop();
+
                 activeWeft = null;
                 weftReadyToBeat = false;
+
                 shuttleCurrentSide = shuttleStartSide;
                 shuttleGroup.position.x = shuttleStartSide * SHUTTLE_LIMIT;
+
                 shuttleInserted = false;
                 shuttleArmed = false;
                 return;
@@ -928,8 +1102,10 @@ function initLoom() {
 
             shuttleStartSide = shuttleCurrentSide;
             shuttleCurrentSide = -shuttleCurrentSide;
+
             shuttleInserted = false;
             shuttleArmed = true;
+
             lastShuttleX = shuttleGroup.position.x;
             recordedSteps.push({ action: "shuttle" });
             return;
@@ -944,25 +1120,32 @@ function initLoom() {
         if (e.code === 'Digit2') handleHardwareInput("2");
         if (e.code === 'Digit3') handleHardwareInput("3");
         if (e.code === 'Digit4') handleHardwareInput("4");
-        if (e.code === 'Space') { e.preventDefault(); handleHardwareInput("S"); }
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            handleHardwareInput("S");
+        }
+
         if (e.code === 'Digit0' || e.code === 'Numpad0') {
-            beatTimer = BEAT_DURATION;
+            // Point to Hardware logic to use the new queuing system
             handleHardwareInput("B");
         }
+
         if (e.code === 'KeyZ') undoLastWeft();
     }, true);
 
     window.addEventListener('keyup', (e) => {
         if (['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
-            currentPressedPedals.delete(parseInt(e.code.replace('Digit', '')) - 1);
+            const pedalIdx = parseInt(e.code.replace('Digit', '')) - 1;
+            currentPressedPedals.delete(pedalIdx);
         }
     });
 
     //----------------------------------------------
-    // UI PANEL — responsive via CSS classes
+    // UI PANEL
     //----------------------------------------------
     function createUI() {
-        injectLoomStyles();
+        injectLoomStyles(); // Inject the new responsive classes
 
         // ── Control Panel ──
         const gui = document.createElement('div');
@@ -976,21 +1159,12 @@ function initLoom() {
             <button id="bleConnect" class="loom-btn loom-btn--ble">Connect ESP32</button>
 
             <div class="loom-hint">
-                1–4: Shed &nbsp;|&nbsp; Space: Shuttle<br>
-                0: Beat &nbsp;|&nbsp; Z: Undo
+                1-4: Shed &nbsp;|&nbsp; Space: Shuttle<br>0: Beat &nbsp;|&nbsp; Z: Undo
             </div>
 
             <hr class="loom-divider" />
 
             <div class="loom-color-row">
-                <label class="loom-color-label">
-                    Warp
-                    <input type="color" id="warpColor" value="#ffffff" />
-                </label>
-                <label class="loom-color-label">
-                    Cloth
-                    <input type="color" id="clothColor" value="#f0eadf" />
-                </label>
                 <label class="loom-color-label">
                     Shuttle
                     <input type="color" id="shuttleColor" value="#f0eadf" />
@@ -999,10 +1173,21 @@ function initLoom() {
 
             <hr class="loom-divider" />
 
-            <button id="convertBtn"  class="loom-btn loom-btn--export">Export Pattern</button>
+            <button id="convertBtn" class="loom-btn loom-btn--export">Export Pattern</button>
             <button id="savePattern" class="loom-btn loom-btn--save">Save to Learning Library</button>
         `;
         document.getElementById("weaving-studio").appendChild(gui);
+
+        const panelHeader = gui.querySelector('.loom-panel__header');
+        panelHeader.addEventListener('click', (e) => {
+            if (e.target.closest('.loom-btn-back')) return;
+            
+            gui.classList.toggle('collapsed');
+        });
+
+        if (window.innerWidth <= 600) {
+            gui.classList.add('collapsed');
+        }
 
         // ── 2D Pattern Panel ──
         const patternPanel = document.createElement("div");
@@ -1018,70 +1203,81 @@ function initLoom() {
         render2DPattern();
 
         // ── Event Listeners ──
-        document.getElementById('warpColor').addEventListener('input', e => threadMaterial.color.set(e.target.value));
-        document.getElementById('clothColor').addEventListener('input', e => clothThreadMaterial.color.set(e.target.value));
-        document.getElementById('shuttleColor').addEventListener('input', e => shuttleThreadMaterial.color.set(e.target.value));
+        document.getElementById('shuttleColor').addEventListener('input', (e) =>
+            shuttleThreadMaterial.color.set(e.target.value)
+        );
+
+        if (loomConfig && loomConfig.weftColor) {
+            const shuttleInput = document.getElementById('shuttleColor');
+            if (shuttleInput) {
+                shuttleInput.value = loomConfig.weftColor;
+                shuttleThreadMaterial.color.set(loomConfig.weftColor);
+            }
+        }
 
         document.getElementById('convertBtn').addEventListener('click', exportPatternImage);
         document.getElementById('bleConnect').addEventListener('click', connectBLE);
+        
 
-        // ── FIXED: Back button now hides panels AND shows overlay ──
+        // FIXED Back button logic to show overlay and hide panels
         document.getElementById('backToMenuBtn').addEventListener('click', () => {
-            const modeOverlay = document.getElementById('modeSelectionOverlay');
-            const loomPanel = document.querySelector('.loom-panel');
-            const patternPanel = document.querySelector('.loom-pattern-panel');
-
-            // Show overlay
-            modeOverlay.style.display = 'flex';
-
-            // Hide loom panels
-            loomPanel.style.display = 'none';
-            patternPanel.style.display = 'none';
+            window.location.href = 'dashboard.html';
         });
-
-        document.getElementById("savePattern").addEventListener("click", async () => {
+        
+        // OG Save Pattern logic
+            document.getElementById("savePattern").addEventListener("click", async () => {
             if (patternHistory.length === 0) {
                 alert("Weave and beat at least one row before saving!");
                 return;
             }
 
             const shuttleColorEl = document.getElementById("shuttleColor");
-            const weftColor = shuttleColorEl
-                ? shuttleColorEl.value
-                : "#" + shuttleThreadMaterial.color.getHexString();
+            const weftColor = shuttleColorEl ? shuttleColorEl.value : "#" + shuttleThreadMaterial.color.getHexString();
+            const currentUser = window.windowCurrentUserObj || { name: "Unknown" };
 
             const data = {
-                name: loomConfig.patternName || "Untitled Weave",
-                type: loomConfig.patternType,
-                loom: loomConfig.loomType,
-                steps: recordedSteps,
-                patternRows: patternHistory,
-                weftColor,
-                created: Date.now()
+                name:         loomConfig.patternName || "Untitled",
+                type:         loomConfig.patternType,
+                loom:         loomConfig.loomType,
+                steps:        recordedSteps,
+                patternRows:  patternHistory,
+                rowColors:    weftColorHistory,
+                weftColor:    weftColor,
+                created:      loomConfig.created || Date.now(), 
+                warpColors:   warpColors,
+                totalThreads: loomConfig.totalThreads,
+                threadingMap: loomConfig.customThreadingMap,
+                creator:      currentUser.name,
+                isImported:   false 
             };
 
-            console.log("[SAVE] name:", data.name, "| rows:", data.patternRows.length, "| loom:", data.loom);
-
             try {
+                if (loomConfig.patternId) {
+                    await fetch(`/api/patterns/${loomConfig.patternId}`, { method: "DELETE" });
+                }
+
                 const res = await fetch("/api/patterns/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(data)
                 });
+
                 if (res.ok) {
-                    alert("✨ Pattern saved to your Library successfully!");
+                    const savedData = await res.json().catch(() => ({}));
+                    if (savedData && savedData._id) loomConfig.patternId = savedData._id;
+                    
+                    hasUnsavedChanges = false;
+                    alert("Pattern saved and updated successfully!");
                 } else {
-                    const errBody = await res.json().catch(() => ({}));
-                    console.error("Save failed:", res.status, errBody);
-                    alert("Save failed (" + res.status + ") — " + (errBody.error || errBody.message || "check server logs"));
+                    alert("Save failed. Check server logs.");
                 }
             } catch (err) {
-                console.error("Save fetch error:", err);
                 alert("Could not connect to the server.");
             }
         });
+
+        
     }
-    createUI();
 
     //----------------------------------------------
     // 2D PATTERN RENDERER
@@ -1093,41 +1289,49 @@ function initLoom() {
         const ctx = patternCanvas.getContext("2d");
 
         if (patternHistory.length === 0) {
-            patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
+            patternCanvas.width  = patternCanvas.parentElement.clientWidth  || 200;
             patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
             ctx.fillStyle = "#111";
             ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
             return;
         }
 
-        const warpCount = 60;
-        const wrap = patternCanvas.parentElement;
-        const containerW = (wrap.clientWidth || 200) - 8;
-        const containerH = (wrap.clientHeight || 100) - 8;
-        const cellW = containerW / warpCount;
-        const cellH = containerH / patternHistory.length;
-        const cellSize = Math.max(2, Math.min(cellW, cellH));
+        const warpCount = loomConfig.totalThreads; 
+        const container = patternCanvas.parentElement;
+        const containerWidth  = container.clientWidth  - 10;
+        const containerHeight = container.clientHeight - 10;
 
-        patternCanvas.width = warpCount * cellSize;
+        const cellWidth  = containerWidth  / warpCount;
+        const cellHeight = containerHeight / patternHistory.length;
+        const cellSize   = Math.max(2, Math.min(cellWidth, cellHeight));
+
+        patternCanvas.width  = warpCount * cellSize;
         patternCanvas.height = patternHistory.length * cellSize;
 
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
 
         patternHistory.forEach((rowStates, rowIndex) => {
+            const y = (patternHistory.length - 1 - rowIndex) * cellSize;
+            
+            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
+            const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
+
             rowStates.forEach((isWarpUp, warpIndex) => {
-                const y = (patternHistory.length - 1 - rowIndex) * cellSize;
-                if (!isWarpUp) {
-                    ctx.fillStyle = shuttleThreadMaterial.color.getStyle();
-                    ctx.fillRect(warpIndex * cellSize, y, cellSize, cellSize);
-                } else {
-                    ctx.fillStyle = "#000000";
-                    ctx.fillRect(warpIndex * cellSize + cellSize * 0.8, y, cellSize * 0.2, cellSize);
+                const x = warpIndex * cellSize;
+                const shaft = threading[warpIndex % threading.length] || 0;
+                
+                ctx.fillStyle = currentRowColor;
+                ctx.fillRect(x, y, cellSize, cellSize);
+
+                if (isWarpUp) {
+                    ctx.fillStyle = warpColors[shaft] || "#ffffff";
+                    ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize); 
                 }
             });
         });
 
-        wrap.scrollTop = wrap.scrollHeight;
+        patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
     }
 
     //----------------------------------------------
@@ -1137,8 +1341,9 @@ function initLoom() {
         if (currentPressedPedals.size === 0) return false;
         let allLow = true;
         currentPressedPedals.forEach(idx => {
-            if (heddleFrames[idx] && Math.abs(heddleFrames[idx].position.y - SHED_CLOSED_Y) > 0.3)
+            if (heddleFrames[idx] && Math.abs(heddleFrames[idx].position.y - SHED_CLOSED_Y) > 0.3) {
                 allLow = false;
+            }
         });
         return allLow;
     }
@@ -1146,14 +1351,15 @@ function initLoom() {
     function updateShafts() {
         for (let i = 0; i < SHAFT_COUNT; i++) {
             const isPressed = currentPressedPedals.has(i);
-            const targetY = isPressed ? SHED_CLOSED_Y : SHED_OPEN_Y;
-            const targetAngle = isPressed ? 3 * (Math.PI / 180) : 13 * (Math.PI / 180);
+            const targetHeddleY = isPressed ? SHED_CLOSED_Y : SHED_OPEN_Y;
+            const targetAngle   = isPressed ? 3 * (Math.PI / 180) : 13 * (Math.PI / 180);
 
+            // Sped up from 0.15 to 0.4
             if (pedalPivotGroups[i])
-                pedalPivotGroups[i].rotation.x += (targetAngle - pedalPivotGroups[i].rotation.x) * 0.15;
+                pedalPivotGroups[i].rotation.x += (targetAngle - pedalPivotGroups[i].rotation.x) * 0.4;
 
             if (heddleFrames[i])
-                heddleFrames[i].position.y += (targetY - heddleFrames[i].position.y) * 0.15;
+                heddleFrames[i].position.y += (targetHeddleY - heddleFrames[i].position.y) * 0.4;
 
             if (warpGroups[i]) {
                 warpGroups[i].forEach(thread => {
@@ -1211,10 +1417,45 @@ function initLoom() {
     function checkWeftInsertion() {
         if (!shuttleArmed || shuttleInserted || !isShedOpenEnough()) return;
 
-        const crossingFromLeft = shuttleStartSide === -1 && shuttleGroup.position.x > 0;
-        const crossingFromRight = shuttleStartSide === 1 && shuttleGroup.position.x < 0;
+        const crossingFromLeft  = shuttleStartSide === -1 && shuttleGroup.position.x > 0;
+        const crossingFromRight = shuttleStartSide ===  1 && shuttleGroup.position.x < 0;
 
         if (crossingFromLeft || crossingFromRight) {
+            if (weftThreads.length > 0 && !activeWeft) {
+                const lastWeft = weftThreads[weftThreads.length - 1];
+                let isUndo = true;
+                for (let i = 0; i < SHAFT_COUNT; i++) {
+                    const isUp = !currentPressedPedals.has(i);
+                    if (lastWeft.capturedShed[i] !== isUp) {
+                        isUndo = false;
+                        break;
+                    }
+                }
+                
+                if (isUndo) {
+                    console.log("Hardware Sync: Pedal match detected, undoing row.");
+                    scene.remove(lastWeft.line);
+                    lastWeft.line.geometry.dispose();
+                    lastWeft.line.material.dispose();
+                    
+                    weftThreads.pop();
+                    patternHistory.pop();
+                    
+                    rowCounter = Math.max(0, rowCounter - 1);
+                    fellZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
+                    
+                    shuttleInserted = true;
+                    
+                    if (window.requestIdleCallback) {
+                        requestIdleCallback(render2DPattern);
+                    } else {
+                        setTimeout(render2DPattern, 0);
+                    }
+                    
+                    return; 
+                }
+            }
+
             addWeftThread();
             shuttleInserted = true;
         }
@@ -1223,13 +1464,20 @@ function initLoom() {
     function checkDirectionChanges() {
         if (!activeWeft || activeWeft.isBeaten || !shuttleInserted) return;
 
-        const reachedRight = shuttleStartSide === -1 && shuttleGroup.position.x > SHUTTLE_LIMIT * 0.9;
-        const reachedLeft = shuttleStartSide === 1 && shuttleGroup.position.x < -SHUTTLE_LIMIT * 0.9;
+        const reachedRight = shuttleStartSide === -1 && shuttleGroup.position.x >  SHUTTLE_LIMIT * 0.9;
+        const reachedLeft  = shuttleStartSide ===  1 && shuttleGroup.position.x < -SHUTTLE_LIMIT * 0.9;
 
         if (activeWeft && (reachedRight || reachedLeft)) {
-            if (reachedRight) shuttleCurrentSide = 1;
-            if (reachedLeft) shuttleCurrentSide = -1;
+            if (reachedRight) shuttleCurrentSide =  1;
+            if (reachedLeft)  shuttleCurrentSide = -1;
             weftReadyToBeat = true;
+
+            // --- QUEUE HANDLER: Cash in the beat if it was pressed while crossing ---
+            if (queuedBeat) {
+                beatTimer = BEAT_DURATION;
+                queuedBeat = false;
+                console.log("Input Stacked: Executing queued beat.");
+            }
         }
 
         const currentX = shuttleGroup.position.x;
@@ -1237,13 +1485,17 @@ function initLoom() {
 
         if (Math.abs(delta) > 0.01) {
             const movingPositive = delta > 0;
+
             if (shuttleMovingPositive === null) {
                 shuttleMovingPositive = movingPositive;
             } else if (movingPositive !== shuttleMovingPositive) {
                 shuttleDirectionChanges++;
-                shuttleMovingPositive = movingPositive;
                 console.log("Direction change count:", shuttleDirectionChanges);
-                if (shuttleDirectionChanges % 2 !== 0) { voidActiveWeft(); return; }
+
+                if (shuttleDirectionChanges % 2 !== 0) {
+                    voidActiveWeft();
+                    return;
+                }
             }
         }
 
@@ -1253,7 +1505,10 @@ function initLoom() {
     function processBeat(beaterPressed, currentHitZ) {
         if (!beaterPressed || beatTimer !== BEAT_DURATION - 1) return;
 
-        if (!activeWeft || !weftReadyToBeat) { beatTimer = 0; return; }
+        if (!activeWeft || !weftReadyToBeat) {
+            beatTimer = 0;
+            return;
+        }
 
         const pos = activeWeft.line.geometry.attributes.position;
         for (let j = 0; j < pos.count; j++) {
@@ -1266,15 +1521,69 @@ function initLoom() {
         activeWeft.live = false;
 
         rowCounter++;
+        weftColorHistory.push("#" + shuttleThreadMaterial.color.getHexString());
         fellZ = currentHitZ;
+
         activeWeft = null;
         weftReadyToBeat = false;
+
         shuttleDirectionChanges = 0;
         shuttleMovingPositive = null;
 
         render2DPattern();
     }
 
+    function reconstructSavedWeave() {
+        if (!loomConfig.resumeHistory || loomConfig.resumeHistory.length === 0) {
+            console.log("No history to reconstruct.");
+            return;
+        }
+
+        console.log("Reconstructing 3D threads...");
+
+        loomConfig.resumeHistory.forEach((rowStates, index) => {
+            const currentHitZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
+            const points = [];
+
+            for (let j = 0; j < TOTAL_THREADS; j++) {
+                const x = (j / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+                const y = BREAST_BEAM_Y + 0.05 + (j % 2 === 0 ? 0.04 : -0.04);
+                points.push(new THREE.Vector3(x, y, currentHitZ));
+            }
+
+            const rowColor = (weftColorHistory && weftColorHistory[index]) ? weftColorHistory[index] : (loomConfig.weftColor || "#f0eadf");
+            const savedMaterial = new THREE.LineBasicMaterial({ color: rowColor });
+
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                savedMaterial
+            );
+            scene.add(line);
+
+            weftThreads.push({
+                line: line,
+                isBeaten: true,
+                live: false,
+                capturedShed: [], 
+                warpPattern: rowStates
+            });
+
+            rowCounter++;
+            fellZ = currentHitZ;
+
+            if (rowCounter >= MAX_ROWS_BEFORE_TAKEUP) {
+                updateClothTakeup();
+            }
+        });
+        
+        console.log("Finished 3D Reconstruction! Total rows built:", weftThreads.length);
+    }
+    
+    // Auto-run reconstruction if resuming
+    if (loomConfig.resumeHistory && loomConfig.resumeHistory.length > 0) {
+        reconstructSavedWeave();
+    }
+    
     //----------------------------------------------
     // MAIN ANIMATION LOOP
     //----------------------------------------------
@@ -1285,8 +1594,9 @@ function initLoom() {
         handleAutoShuttle();
         updateActiveWeftShape();
 
+        // SPEED BOOST: 0.35 multiplier
         const targetX = shuttleCurrentSide * SHUTTLE_LIMIT;
-        shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.12;
+        shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.35;
 
         const beaterPressed = beatTimer > 0;
         if (beatTimer > 0) beatTimer--;
@@ -1295,7 +1605,8 @@ function initLoom() {
 
         const currentHitZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
         const targetBeaterZ = beaterPressed ? currentHitZ : BEATER_REST_Z;
-        const lerpSpeed = beaterPressed ? 0.4 : 0.12;
+        // Beater sped up to 0.6 / 0.35
+        const lerpSpeed = beaterPressed ? 0.6 : 0.35;
         beaterGroup.position.z += (targetBeaterZ - beaterGroup.position.z) * lerpSpeed;
 
         checkWeftInsertion();
@@ -1309,14 +1620,85 @@ function initLoom() {
         renderer.render(scene, camera);
     }
 
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    createUI();
     animate();
 }
 
 //////////////////////////////////////////////////
-// EXPORT
+// EXPORT — called by the parent app to boot the loom
 //////////////////////////////////////////////////
 export async function startLoom() {
     console.log("Initializing Loom Studio...");
     await new Promise(resolve => setTimeout(resolve, 50));
     attachStartButton();
+}
+
+//////////////////////////////////////////////////
+// RESUME SAVED WEAVE
+//////////////////////////////////////////////////
+export async function resumeLoom(data) {
+    console.log("Resuming saved pattern:", data);
+    if (!data) return;
+
+    const isTrad = data.loom === "traditional";
+    const shaftCount = isTrad ? 2 : 4;
+    const defaultMap = isTrad ? [0, 1] : [0, 1, 2, 3];
+    const defaultColors = isTrad ? ["#ffffff", "#ffffff"] : ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+
+    // 1. REBUILD MISSING HISTORY FOR OLD SAVES
+    let history = data.patternRows || [];
+    if (history.length === 0 && data.steps) {
+        const warpCount = data.totalThreads || 60;
+        let pressedPedals = new Set();
+        const map = data.threadingMap || defaultMap;
+
+        for (const step of data.steps) {
+            if (step.action === "pedal") pressedPedals.add(step.value);
+            else if (step.action === "pedals") pressedPedals = new Set(step.value);
+            else if (step.action === "beat") {
+                const shed = [];
+                for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
+                const rowStates = [];
+                for (let i = 0; i < warpCount; i++) {
+                    const shaft = map[i % map.length] || (i % shaftCount);
+                    rowStates.push(shed[shaft]);
+                }
+                history.push(rowStates);
+            }
+        }
+    }
+
+    // 2. PERMANENTLY LOCK IN OLD COLORS
+    let rColors = data.rowColors || [];
+    if (rColors.length === 0 && history.length > 0) {
+        const fallback = data.weftColor || "#f0eadf";
+        rColors = new Array(history.length).fill(fallback);
+    }
+
+    // 3. LOAD CONFIGURATION
+    loomConfig = {
+        patternId: data._id, 
+        patternName: data.name,
+        loomType: data.loom,
+        patternType: data.type || "plain",
+        totalThreads: data.totalThreads || 60,
+        patternSize: data.threadingMap ? data.threadingMap.length : defaultMap.length,
+        customThreadingMap: data.threadingMap || defaultMap,
+        resumeHistory: history, 
+        rowColors: rColors,
+        weftColor: data.weftColor || "#f0eadf",
+        creator: data.creator,        
+        created: data.created        
+    };
+
+    warpColors = data.warpColors || defaultColors;
+    recordedSteps = data.steps || [];
+
+    initLoom();
 }
