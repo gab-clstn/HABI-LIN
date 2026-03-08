@@ -1,6 +1,5 @@
 import express from "express";
 import mongoose from "mongoose";
-import MongoStore from "connect-mongo";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -13,9 +12,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import User from "./models/user.js";
 
-if (process.env.NODE_ENV !== "production") {
-    dotenv.config();
-}
+dotenv.config();
 
 const app = express();
 
@@ -56,7 +53,6 @@ mongoose.connect(process.env.MONGO_URI)
 const patternSchema = new mongoose.Schema(
     {
         userId:      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-        creatorName: { type: String, default: "Unknown" },  // ← ADD THIS
         name:        { type: String,  default: "Untitled Weave" },
         type:        { type: String,  default: "plain" },
         loom:        { type: String,  default: "standard" },
@@ -74,7 +70,6 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: { maxAge: 24 * 60 * 60 * 1000, sameSite: "lax" }
 }));
 
@@ -212,13 +207,24 @@ app.post("/auth/update-theme", async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to save theme" }); }
 });
 
-app.post("/auth/upload-photo", upload.single("photo"), async (req, res) => {
+app.post("/auth/upload-photo", async (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     try {
-        const photoPath = "/uploads/" + req.file.filename;
-        await User.findByIdAndUpdate(req.user._id, { photo: photoPath });
-        res.json({ photo: photoPath });
-    } catch (err) { console.error("Photo upload error:", err); res.status(500).json({ error: "Upload failed" }); }
+        const { photo } = req.body;
+        
+        if (!photo) {
+            return res.status(400).json({ error: "No photo data provided" });
+        }
+        await User.findByIdAndUpdate(
+            req.user._id, 
+            { photo: photo }, 
+            { returnDocument: "after" }
+        );
+        res.json({ photo: photo });
+    } catch (err) { 
+        console.error("Photo upload error:", err); 
+        res.status(500).json({ error: "Upload failed" }); 
+    }
 });
 
 app.get("/auth/logout", (req, res, next) => {
@@ -251,22 +257,14 @@ app.get("/loom", (req, res) => {
 app.post("/api/patterns/save", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
-        const { name, type, loom, steps, patternRows, weftColor, created } = req.body;
-
-        console.log(`[PATTERN SAVE] user=${req.user._id} | name="${name}" | rows=${Array.isArray(patternRows) ? patternRows.length : "?"}`);
-
+        // Use the spread operator to grab everything (warpColors, rowColors, etc.)
         const newPattern = await Pattern.create({
-            userId:      req.user._id,
-            creatorName: req.user.name,  // ← ADD THIS
-            name:        name        || "Untitled Weave",
-            type:        type        || "plain",
-            loom:        loom        || "standard",
-            steps:       steps       || [],
-            patternRows: patternRows || [],
-            weftColor:   weftColor   || "#f0eadf",
-            created:     created     || Date.now()
+            ...req.body,
+            userId: req.user._id,
+            created: req.body.created || Date.now()
         });
 
+        console.log(`[PATTERN SAVE] user=${req.user._id} | name="${newPattern.name}" | Colors Saved: ${!!req.body.warpColors}`);
         res.status(200).json({ message: "Pattern saved successfully!", pattern: newPattern });
     } catch (err) {
         console.error("Pattern Save Error:", err);
@@ -284,12 +282,11 @@ app.get("/api/patterns/my-weaves", async (req, res) => {
 });
 
 // 3. GET   /api/patterns  — fetch all patterns for collection page
-// GET /api/patterns — fetch ALL patterns for collection page (from all users)
 app.get("/api/patterns", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
-        const patterns = await Pattern.find({}).sort({ created: -1 });
-        console.log(`[PATTERN FETCH] user=${req.user._id} | found ${patterns.length} pattern(s) total`);
+        const patterns = await Pattern.find({ userId: req.user._id }).sort({ created: -1 });
+        console.log(`[PATTERN FETCH] user=${req.user._id} | found ${patterns.length} pattern(s)`);
         res.json(patterns);
     } catch (err) {
         console.error("Pattern Fetch Error:", err);
@@ -308,6 +305,26 @@ app.delete("/api/patterns/:id", async (req, res) => {
     } catch (err) {
         console.error("Pattern Delete Error:", err);
         res.status(500).json({ error: "Failed to delete pattern" });
+    }
+});
+
+// 5. PUT /api/patterns/:id — update an existing pattern
+app.put("/api/patterns/:id", async (req, res) => {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    try {
+        const updatedPattern = await Pattern.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user._id },
+            { ...req.body }, // Updates everything sent from the loom
+            { new: true }
+        );
+
+        if (!updatedPattern) return res.status(404).json({ error: "Pattern not found" });
+        
+        console.log(`[PATTERN UPDATE] user=${req.user._id} | id=${req.params.id}`);
+        res.status(200).json({ message: "Pattern updated successfully!", pattern: updatedPattern });
+    } catch (err) {
+        console.error("Pattern Update Error:", err);
+        res.status(500).json({ error: "Failed to update pattern" });
     }
 });
 
