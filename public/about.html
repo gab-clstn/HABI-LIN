@@ -108,6 +108,7 @@
       color: var(--brand);
     }
 
+    /* Update these specific classes to match Dashboard.html exactly */
     .sidebar-nav {
       display: flex;
       flex-direction: row;
@@ -120,39 +121,42 @@
     .nav-item {
       color: #666;
       text-decoration: none;
-      padding: 8px 12px;
-      font-size: clamp(0.82rem, 1.3vw, 0.9rem);
+      padding: 8px 0;
+      margin: 0 15px;
+      font-size: 0.95rem;
       font-weight: 500;
       position: relative;
       white-space: nowrap;
       cursor: pointer;
-      border-radius: 8px;
-      transition: color 0.2s, background 0.2s;
     }
 
     .nav-item::after {
       content: '';
       position: absolute;
-      left: 12px;
-      bottom: 4px;
+      left: 0;
+      bottom: -6px;
       width: 0;
       height: 2px;
-      background: var(--brand);
+      background-color: #2b0303;
       transition: width 0.3s ease;
     }
 
+    .logo-link,
+    .logo-link h2 {
+      text-decoration: none;
+    }
+
     .nav-item:hover {
-      color: var(--brand);
-      background: var(--brand-light);
+      color: #2b0303;
     }
 
     .nav-item:hover::after,
     .nav-item.active::after {
-      width: calc(100% - 24px);
+      width: 100%;
     }
 
     .nav-item.active {
-      color: var(--brand);
+      color: #2b0303;
       font-weight: 700;
     }
 
@@ -545,8 +549,8 @@
         <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
         <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
         <a href="about.html" class="nav-item active" id="about-link">About</a>
-        <div class="nav-spacer"></div>
-        <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+        
+        <div class="nav-spacer"></div> <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
         <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
       </nav>
 
