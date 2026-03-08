@@ -1095,89 +1095,50 @@
       
       // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
       async function uploadAvatar(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-        // Keep it under 2MB so your MongoDB Atlas free tier doesn't fill up
-        if (file.size > 2 * 1024 * 1024) {
-          alert("File is too large! Please choose an image under 2MB.");
-          event.target.value = ""; 
-          return;
-        }
+    // 1. Size Check (Atlas safety)
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Image is too large! Please choose a photo under 2MB.");
+        return;
+    }
 
-        const statusText = document.getElementById("avatar-upload-status");
-        if(statusText) {
-            statusText.style.display = "block";
-            statusText.textContent = "Processing image...";
-            statusText.style.color = "#888";
-        }
+    // 2. Convert image to Base64 text string
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64String = e.target.result;
 
-        // Convert the image file into a Base64 string
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Image = e.target.result;
-
-          try {
-            if(statusText) statusText.textContent = "Saving to database...";
-            
-            // Send as standard JSON
-            const res = await fetch("/auth/upload-photo", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ photo: base64Image })
+        try {
+            const response = await fetch("/auth/upload-photo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ photo: base64String })
             });
 
-            const data = await res.json();
+            const data = await response.json();
 
-            if (res.ok && data.photo) {
-              const newPhotoUrl = data.photo; 
-
-              // 1. Update the large preview circle
-              const largePreview = document.querySelector(".avatar-preview");
-              if (largePreview) {
-                largePreview.innerHTML = `<img src="${newPhotoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:none;" />`;
-                largePreview.style.background = "transparent";
-              }
-              
-              // 2. Update the tiny sidebar circle
-              const sidebarImg = document.getElementById("user-photo");
-              const sidebarIcon = document.getElementById("default-avatar-icon");
-              
-              if (sidebarImg) {
-                sidebarImg.src = newPhotoUrl;
-                sidebarImg.style.display = "block"; 
-              }
-              if (sidebarIcon) {
-                sidebarIcon.style.display = "none"; 
-              }
-
-              if (window.windowCurrentUserObj) {
-                  window.windowCurrentUserObj.photo = newPhotoUrl;
-              }
-
-              if(statusText) {
-                  statusText.textContent = "Avatar updated successfully!";
-                  statusText.style.color = "#28a745";
-              }
+            if (response.ok && data.photo) {
+                // SUCCESS: Update all images on the page immediately
+                document.getElementById("settings-photo").src = data.photo;
+                document.getElementById("user-photo").src = data.photo;
+                
+                // Toggle visibility
+                document.getElementById("settings-photo").style.display = "block";
+                document.getElementById("settings-icon").style.display = "none";
+                
+                alert("Profile picture updated!");
             } else {
-              throw new Error(data.error || "Failed to save avatar");
+                alert("Upload failed: " + (data.error || "Unknown error"));
             }
-          } catch (err) {
-            console.error("Upload error details:", err);
-            if(statusText) {
-                statusText.textContent = "Upload failed. Check terminal for errors.";
-                statusText.style.color = "#d93025";
-            }
-          }
-          
-          if(statusText) {
-              setTimeout(() => { statusText.style.display = "none"; }, 3000);
-          }
-        };
-        
-        // This triggers the conversion
-        reader.readAsDataURL(file);
-      }
+        } catch (err) {
+            console.error("Upload error:", err);
+            alert("Could not connect to server.");
+        }
+    };
+    
+    reader.readAsDataURL(file);
+}
       
             // Sync user DB theme preference with local storage if they mismatch
             if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
