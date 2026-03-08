@@ -59,7 +59,7 @@
     .sidebar-header h2 {
       font-weight: 800;
       letter-spacing: -1px;
-      margin-right: 120px;
+      margin-right: 32px;
       white-space: nowrap;
       font-size: 1.4rem;
       color: #2b0303;
@@ -70,8 +70,8 @@
       flex-direction: row;
       align-items: center;
       flex: 1;
-      gap: 4px;
-      margin-left: 32px;
+      gap: 0;
+      margin-left: 0; 
     }
 
     .nav-item {
@@ -83,7 +83,6 @@
       font-weight: 500;
       position: relative;
       white-space: nowrap;
-      cursor: pointer;
     }
 
     .nav-item::after {
@@ -611,6 +610,24 @@
       animation: spin 0.7s linear infinite;
     }
 
+    #learnSelectOverlay > div {
+        display: flex;
+        flex-direction: column;
+        margin: auto 0; 
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    #learnSelectOverlay > div::-webkit-scrollbar { 
+        display: none; 
+    }
+
+    #learnSelectOverlay {
+        overflow-y: auto;
+        align-items: flex-start !important;
+        padding: 40px 0;
+    }
+
     @keyframes spin {
       to {
         transform: rotate(360deg);
@@ -837,9 +854,9 @@
       <a href="dashboard.html" class="nav-item active" id="home-link">Home</a>
       <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
       <a href="about.html" class="nav-item" id="about-link">About</a>
-      <div class="nav-spacer"></div>
-      <a href="settings.html" class="nav-item">Settings</a>
-      <a href="/auth/logout" class="nav-item logout">Logout</a>
+      
+      <div class="nav-spacer" style="margin-left: auto;"></div> <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+      <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
     </nav>
       
       <div class="user-info" style="margin-left:auto;">
@@ -976,23 +993,28 @@
             </div>
           </div>
 
-          <div id="learnSelectOverlay"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;display:none;justify-content:center;align-items:center;z-index:18;overflow-y:auto;">
-            <div style="width:600px;max-height:90vh;overflow-y:auto;padding:40px;box-sizing:border-box;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
-                <div>
-                  <h2 style="color:white;font-size:1.5rem;font-weight:700;margin-bottom:4px;">Learn a Pattern</h2>
-                  <p style="color:#666;font-size:0.85rem;">Select a saved pattern to practice on the 3D loom</p>
-                </div>
-                <button onclick="backToMenu()"
-                  style="background:none;border:1px solid #333;color:#888;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.8rem;">&larr;
-                  Back</button>
+            <div id="learnSelectOverlay"
+  style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;display:none;justify-content:center;z-index:18;overflow-y:auto;box-sizing:border-box;padding:40px 20px;">
+  
+          <div style="width:100%; max-width:600px; background:transparent; display:flex; flex-direction:column; gap:0;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-shrink:0;">
+              <div>
+                <h2 style="color:white; font-size:1.5rem; font-weight:700; margin-bottom:4px;">Learn a Pattern</h2>
+                <p style="color:#666; font-size:0.85rem;">Select a saved pattern to practice on the 3D loom</p>
               </div>
-              <div id="learnPatternList" style="display:flex;flex-direction:column;gap:12px;">
-                <div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns&hellip;</div>
-              </div>
+              <button onclick="backToMenu()"
+                style="background:none; border:1px solid #333; color:#888; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:0.8rem; white-space:nowrap; margin-left:10px;">
+                &larr; Back
+              </button>
             </div>
+
+            <div id="learnPatternList" style="display:flex; flex-direction:column; gap:12px;">
+              <div style="color:#555; font-size:0.9rem; text-align:center; padding:40px;">Loading patterns&hellip;</div>
+            </div>
+            
           </div>
+        </div>
         </div>
         <div id="overview-section">
           <div class="welcome-banner">
