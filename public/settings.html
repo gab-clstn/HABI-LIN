@@ -911,19 +911,106 @@
     </div>
 
     <script>
-      // === LANGUAGE SAVE FUNCTION ===
+      // === TAB SWITCHING ===
+      function tab(evt, paneId) {
+        document.querySelectorAll(".pane").forEach((p) => p.classList.remove("active"));
+        document.querySelectorAll(".settings-menu-btn").forEach((b) => b.classList.remove("active"));
+        document.getElementById(paneId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+      }
+
+      // === HAMBURGER MENU ===
+      const hamburgerBtn = document.getElementById("hamburger-btn");
+      const mobileDrawer = document.getElementById("mobile-drawer");
+      if (hamburgerBtn) {
+        hamburgerBtn.addEventListener("click", () => {
+          const isOpen = mobileDrawer.classList.toggle("open");
+          hamburgerBtn.setAttribute("aria-expanded", isOpen);
+          document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
+        });
+      }
+
+      function closeDrawer() {
+        if (mobileDrawer) mobileDrawer.classList.remove("open");
+        if (hamburgerBtn) {
+          hamburgerBtn.setAttribute("aria-expanded", "false");
+          document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
+        }
+      }
+
+      document.addEventListener("click", (e) => {
+        if (mobileDrawer && !mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
+      });
+
+      // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
+      async function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image is too large! Please choose a photo under 2MB.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64String = e.target.result;
+          const statusText = document.getElementById("avatar-upload-status");
+          if (statusText) {
+            statusText.style.display = "block";
+            statusText.textContent = "Updating...";
+            statusText.style.color = "#888";
+          }
+
+          try {
+            const response = await fetch("/auth/upload-photo", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ photo: base64String })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.photo) {
+              // Update sidebar nav photo
+              const navPhoto = document.getElementById("user-photo");
+              if (navPhoto) {
+                navPhoto.src = data.photo;
+                navPhoto.style.display = "block";
+                document.getElementById("default-avatar-icon").style.display = "none";
+              }
+
+              // Update the preview circle in the settings page
+              const avatarPreview = document.querySelector(".avatar-preview");
+              if (avatarPreview) {
+                avatarPreview.innerHTML = `<img src="${data.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+              }
+              
+              if (statusText) {
+                statusText.textContent = "Profile picture updated!";
+                statusText.style.color = "#28a745";
+              }
+            } else {
+              alert("Upload failed: " + (data.error || "Unknown error"));
+            }
+          } catch (err) {
+            console.error("Upload error:", err);
+            alert("Could not connect to server.");
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // === LANGUAGE & THEME SAVE ===
       async function saveLanguageSettings(btn) {
-        // 1. Save and apply language
         const selectedLang = document.getElementById("languageSelect").value;
         sessionStorage.setItem("preferredLanguage", selectedLang);
-        if(typeof applyGlobalLanguage === 'function') applyGlobalLanguage();
+        if (typeof applyGlobalLanguage === 'function') applyGlobalLanguage();
 
-        // 2. Save and apply theme
         const isDark = document.getElementById("darkModeToggle").checked;
         const theme = isDark ? "dark" : "light";
-        if(typeof applyGlobalTheme === 'function') applyGlobalTheme(isDark);
+        if (typeof applyGlobalTheme === 'function') applyGlobalTheme(isDark);
 
-        // 3. Persist theme to the server
         try {
           await fetch("/auth/update-theme", {
             method: "POST",
@@ -934,38 +1021,12 @@
           console.error("Theme sync failed", err);
         }
 
-        // 4. Show saved feedback
         btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Saved';
         btn.style.background = "#28a745";
         setTimeout(() => {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Save Preferences';
           btn.style.background = "";
         }, 2000);
-      }
-
-      // === HAMBURGER ===
-      const hamburgerBtn = document.getElementById("hamburger-btn");
-      const mobileDrawer = document.getElementById("mobile-drawer");
-      hamburgerBtn.addEventListener("click", () => {
-        const isOpen = mobileDrawer.classList.toggle("open");
-        hamburgerBtn.setAttribute("aria-expanded", isOpen);
-        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
-      });
-      function closeDrawer() {
-        mobileDrawer.classList.remove("open");
-        hamburgerBtn.setAttribute("aria-expanded", "false");
-        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
-      }
-      document.addEventListener("click", (e) => {
-        if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
-      });
-
-      // === TAB SWITCHING ===
-      function tab(evt, paneId) {
-        document.querySelectorAll(".pane").forEach((p) => p.classList.remove("active"));
-        document.querySelectorAll(".settings-menu-btn").forEach((b) => b.classList.remove("active"));
-        document.getElementById(paneId).classList.add("active");
-        evt.currentTarget.classList.add("active");
       }
 
       // === ACCOUNT UPDATE ===
@@ -986,25 +1047,19 @@
             body: JSON.stringify({ name: fullName, email: email }),
           });
 
-          // Check if the server actually sent JSON
-          const contentType = response.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
-             throw new TypeError("Oops, we haven't got JSON from the server!");
-          }
-
           const data = await response.json();
 
           if (response.ok) {
             btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Changes Saved';
             btn.style.background = "#28a745";
-            document.getElementById("user-firstname-sidebar").textContent = fullName.split(" ")[0];
+            const sidebarName = document.getElementById("user-firstname-sidebar");
+            if (sidebarName) sidebarName.textContent = fullName.split(" ")[0];
           } else {
             throw new Error(data.error || "Update failed");
           }
         } catch (error) {
           console.error("Fetch error:", error);
           alert("Error: " + error.message);
-          btn.innerHTML = 'Error';
           btn.style.background = "#d93025";
         } finally {
           setTimeout(() => {
@@ -1041,10 +1096,9 @@
             document.getElementById("new-password").value = "";
           } else {
             alert(data.error || "Check current password.");
-            btn.innerHTML = 'Update Failed';
           }
         } catch (error) {
-          btn.innerHTML = 'Error';
+          console.error(error);
         } finally {
           setTimeout(() => {
             btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
@@ -1054,25 +1108,22 @@
         }
       }
 
-      // === THEME TOGGLE ===
-      // The checkbox itself does NOT apply the theme immediately.
-      // Theme is only applied + saved when the user clicks "Save Preferences".
+      // === THEME TOGGLE UI ===
       function toggleTheme() {
-        // intentionally empty — actual apply + save happens in saveLanguageSettings()
+        // Handled in saveLanguageSettings
       }
 
       // === INITIALIZATION ===
       document.addEventListener("DOMContentLoaded", async () => {
-        // 1. Check for saved language and inject it
+        // 1. Sync Language UI
         const savedLang = sessionStorage.getItem("preferredLanguage") || "en";
-        document.getElementById("languageSelect").value = savedLang;
-        if(typeof applyGlobalLanguage === 'function') applyGlobalLanguage();
+        const langSelect = document.getElementById("languageSelect");
+        if (langSelect) langSelect.value = savedLang;
 
-        // 2. Sync toggle UI with what global.js already applied to <html>
-        if (localStorage.getItem("theme") === "dark") {
-          document.getElementById("darkModeToggle").checked = true;
-        } else {
-          document.getElementById("darkModeToggle").checked = false;
+        // 2. Sync Theme Toggle UI
+        const themeToggle = document.getElementById("darkModeToggle");
+        if (themeToggle) {
+            themeToggle.checked = localStorage.getItem("theme") === "dark";
         }
 
         // 3. Fetch User Session Data
@@ -1081,72 +1132,35 @@
           const user = await response.json();
           
           if (user) {
-            document.getElementById("user-firstname-sidebar").textContent = user.name.split(" ")[0];
-            document.getElementById("full-name-input").value = user.name || "";
-            document.getElementById("email-input").value = user.email || "";
+            const sidebarName = document.getElementById("user-firstname-sidebar");
+            if (sidebarName) sidebarName.textContent = user.name.split(" ")[0];
+            
+            const nameInput = document.getElementById("full-name-input");
+            const emailInput = document.getElementById("email-input");
+            if (nameInput) nameInput.value = user.name || "";
+            if (emailInput) emailInput.value = user.email || "";
             
             if (user.photo) {
-                const avatarPreview = document.querySelector(".avatar-preview");
-                if(avatarPreview) {
-                    avatarPreview.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
-                    avatarPreview.style.border = "none";
-                }
+              const avatarPreview = document.querySelector(".avatar-preview");
+              if (avatarPreview) {
+                avatarPreview.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+                avatarPreview.style.border = "none";
+              }
+              const navPhoto = document.getElementById("user-photo");
+              if (navPhoto) {
+                navPhoto.src = user.photo;
+                navPhoto.style.display = "block";
+                document.getElementById("default-avatar-icon").style.display = "none";
+              }
             }
-      
-      // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
-      async function uploadAvatar(event) {
-    const file = event.target.files[0];
-    if (!file) return;
 
-    // 1. Size Check (Atlas safety)
-    if (file.size > 2 * 1024 * 1024) {
-        alert("Image is too large! Please choose a photo under 2MB.");
-        return;
-    }
-
-    // 2. Convert image to Base64 text string
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const base64String = e.target.result;
-
-        try {
-            const response = await fetch("/auth/upload-photo", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ photo: base64String })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.photo) {
-                // SUCCESS: Update all images on the page immediately
-                document.getElementById("settings-photo").src = data.photo;
-                document.getElementById("user-photo").src = data.photo;
-                
-                // Toggle visibility
-                document.getElementById("settings-photo").style.display = "block";
-                document.getElementById("settings-icon").style.display = "none";
-                
-                alert("Profile picture updated!");
-            } else {
-                alert("Upload failed: " + (data.error || "Unknown error"));
-            }
-        } catch (err) {
-            console.error("Upload error:", err);
-            alert("Could not connect to server.");
-        }
-    };
-    
-    reader.readAsDataURL(file);
-}
-      
-            // Sync user DB theme preference with local storage if they mismatch
+            // Sync user DB theme preference with local storage
             if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
-              if(typeof applyGlobalTheme === 'function') applyGlobalTheme(true);
-              document.getElementById("darkModeToggle").checked = true;
+              if (typeof applyGlobalTheme === 'function') applyGlobalTheme(true);
+              if (themeToggle) themeToggle.checked = true;
             } else if (user.theme === "light" && localStorage.getItem("theme") !== "light") {
-              if(typeof applyGlobalTheme === 'function') applyGlobalTheme(false);
-              document.getElementById("darkModeToggle").checked = false;
+              if (typeof applyGlobalTheme === 'function') applyGlobalTheme(false);
+              if (themeToggle) themeToggle.checked = false;
             }
           }
         } catch (error) {
