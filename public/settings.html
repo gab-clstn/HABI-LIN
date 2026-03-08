@@ -742,19 +742,19 @@
             <svg class="icon" aria-hidden="true">
               <use href="#icon-sliders" />
             </svg>
-            General
+            <span id="stab-general">General</span>
           </button>
           <button class="settings-menu-btn" onclick="tab(event, 'account')">
             <svg class="icon" aria-hidden="true">
               <use href="#icon-circle-user" />
             </svg>
-            Account
+            <span id="stab-account">Account</span>
           </button>
           <button class="settings-menu-btn" onclick="tab(event, 'security')">
             <svg class="icon" aria-hidden="true">
               <use href="#icon-shield-halved" />
             </svg>
-            Security
+            <span id="stab-security">Security</span>
           </button>
         </aside>
 
@@ -762,12 +762,12 @@
           <div class="form-section">
             <div id="general" class="pane active">
               <div class="pane-header">
-                <h2>General Settings</h2>
-                <p>Manage your workspace preferences and localized experience.</p>
+                <h2 id="s-general-title">General Settings</h2>
+                <p id="s-general-desc">Manage your workspace preferences and localized experience.</p>
               </div>
 
               <div class="form-group">
-                <label>Interface Language</label>
+                <label id="s-lang-label">Interface Language</label>
                 <select class="settings-input" id="languageSelect">
                   <option value="en">English (International)</option>
                   <option value="fil">Filipino (National)</option>
@@ -777,8 +777,8 @@
 
               <div class="toggle-row">
                 <div class="toggle-text">
-                  <h4>Dark Appearance</h4>
-                  <p>Switch between light and dark visual themes for the dashboard.</p>
+                  <h4 id="s-dark-title">Dark Appearance</h4>
+                  <p id="s-dark-desc">Switch between light and dark visual themes for the dashboard.</p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()" />
@@ -788,8 +788,8 @@
 
               <div class="toggle-row">
                 <div class="toggle-text">
-                  <h4>High Fidelity Rendering</h4>
-                  <p>Enable high-precision 3D textures in the Weaving Studio.</p>
+                  <h4 id="s-hifi-title">High Fidelity Rendering</h4>
+                  <p id="s-hifi-desc">Enable high-precision 3D textures in the Weaving Studio.</p>
                 </div>
                 <label class="switch">
                   <input type="checkbox" checked />
@@ -801,14 +801,14 @@
                 <svg class="icon" aria-hidden="true">
                   <use href="#icon-floppy-disk" />
                 </svg>
-                Save Preferences
+                <span id="s-save-btn">Save Preferences</span>
               </button>
             </div>
 
             <div id="account" class="pane">
               <div class="pane-header">
-                <h2>Account Details</h2>
-                <p>Update your personal information and contact details.</p>
+                <h2 id="s-account-title">Account Details</h2>
+                <p id="s-account-desc">Update your personal information and contact details.</p>
               </div>
 
               <div class="avatar-container">
@@ -820,18 +820,18 @@
                 <div>
                   <button class="save-btn avatar-btn"
                     onclick="alert('Please use the profile upload feature on the dashboard for now.')">
-                    Change Avatar
+                    <span id="s-change-avatar">Change Avatar</span>
                   </button>
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Full Legal Name</label>
+                <label id="s-fullname-label">Full Legal Name</label>
                 <input type="text" class="settings-input" id="full-name-input" placeholder="Full Name" />
               </div>
 
               <div class="form-group">
-                <label>Email Address</label>
+                <label id="s-email-label">Email Address</label>
                 <input type="email" class="settings-input" id="email-input" placeholder="email@example.com" />
               </div>
 
@@ -839,30 +839,30 @@
                 <svg class="icon" aria-hidden="true">
                   <use href="#icon-floppy-disk" />
                 </svg>
-                Update Account
+                <span id="s-update-account">Update Account</span>
               </button>
 
               <a href="#" class="danger-link">
                 <svg class="icon" aria-hidden="true">
                   <use href="#icon-trash" />
                 </svg>
-                Permanently delete my account
+                <span id="s-delete-account">Permanently delete my account</span>
               </a>
             </div>
 
             <div id="security" class="pane">
               <div class="pane-header">
-                <h2>Security & Access</h2>
-                <p>Protect your designs and patterns with robust security protocols.</p>
+                <h2 id="s-security-title">Security & Access</h2>
+                <p id="s-security-desc">Protect your designs and patterns with robust security protocols.</p>
               </div>
 
               <div class="form-group">
-                <label>Current Password</label>
+                <label id="s-curr-pass-label">Current Password</label>
                 <input type="password" id="current-password" class="settings-input" placeholder="••••••••" />
               </div>
 
               <div class="form-group">
-                <label>New Secure Password</label>
+                <label id="s-new-pass-label">New Secure Password</label>
                 <input type="password" id="new-password" class="settings-input" placeholder="Enter new password" />
               </div>
 
@@ -870,7 +870,7 @@
                 <svg class="icon" aria-hidden="true">
                   <use href="#icon-lock" />
                 </svg>
-                Update Security
+                <span id="s-update-security">Update Security</span>
               </button>
             </div>
           </div>
@@ -887,7 +887,7 @@
     async function saveLanguageSettings(btn) {
       // 1. Save and apply language
       const selectedLang = document.getElementById("languageSelect").value;
-      localStorage.setItem("preferredLanguage", selectedLang);
+      sessionStorage.setItem("preferredLanguage", selectedLang);
       applyGlobalLanguage();
 
       // 2. Save and apply theme — only happens HERE on Save click, not on toggle
@@ -970,7 +970,7 @@
       } finally {
         setTimeout(() => {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Update Account';
-          btn.style.background = "#2b0303";
+          btn.style.background = "";
           btn.disabled = false;
         }, 2000);
       }
@@ -1007,7 +1007,7 @@
       } finally {
         setTimeout(() => {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
-          btn.style.background = "#2b0303";
+          btn.style.background = "";
           btn.disabled = false;
         }, 2000);
       }
@@ -1024,7 +1024,7 @@
     // === INITIALIZATION ===
     document.addEventListener("DOMContentLoaded", async () => {
       // 1. Check for saved language and inject it
-      const savedLang = localStorage.getItem("preferredLanguage") || "en";
+      const savedLang = sessionStorage.getItem("preferredLanguage") || "en";
       document.getElementById("languageSelect").value = savedLang;
       applyGlobalLanguage();
 

@@ -811,12 +811,12 @@
           <a href="about.html" class="nav-item" id="about-link">About</a>
           <div class="nav-spacer"></div>
           <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
-          <a href="/auth/logout" class="nav-item logout">Logout</a>
+          <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
         </nav>
 
         <div class="user-info" style="margin-left:auto;">
           <div class="user-text">
-            <span class="greeting">Hello,</span>
+            <span class="greeting" id="greeting-text">Hello,</span>
             <strong id="user-firstname">Weaver</strong>
           </div>
           <a href="user-settings.html" class="profile-circle" id="profile-btn">
@@ -877,7 +877,7 @@
                       <use href="#icon-magnifying-glass" />
                     </svg></button>
                 </div>
-                <a href="dashboard.html" onclick="sessionStorage.setItem('openLoom','1')" class="btn-new">
+                <a href="dashboard.html" onclick="sessionStorage.setItem('openLoom','1')" class="btn-new" id="col-new">
                   <svg class="icon" aria-hidden="true">
                     <use href="#icon-plus" />
                   </svg> New Design
@@ -903,8 +903,9 @@
         currentTab = "my";
         myPatternsTab.classList.add("active");
         allPatternsTab.classList.remove("active");
-        sectionTitle.textContent = "Digital Patterns";
-        sectionSubtitle.textContent = "Your saved weave drafts from the loom studio.";
+        const lang = sessionStorage.getItem("preferredLanguage") || "en";
+        sectionTitle.textContent = (translations[lang] && translations[lang]["section-title"]) || "Digital Patterns";
+        sectionSubtitle.textContent = (translations[lang] && translations[lang]["section-subtitle"]) || "Your saved weave drafts from the loom studio.";
         document.getElementById("collection-search-input").value = "";
         renderPatternGrid(allPatterns.filter(p => p.userId === currentUserId));
       });
@@ -913,8 +914,9 @@
         currentTab = "all";
         allPatternsTab.classList.add("active");
         myPatternsTab.classList.remove("active");
-        sectionTitle.textContent = "Community Patterns";
-        sectionSubtitle.textContent = "Explore weave designs from the community.";
+        const lang = sessionStorage.getItem("preferredLanguage") || "en";
+        sectionTitle.textContent = (translations[lang] && translations[lang]["section-title-all"]) || "Community Patterns";
+        sectionSubtitle.textContent = (translations[lang] && translations[lang]["section-subtitle-all"]) || "Explore weave designs from the community.";
         document.getElementById("collection-search-input").value = "";
         renderPatternGrid(allPatterns);
       });

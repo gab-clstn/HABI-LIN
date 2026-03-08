@@ -477,109 +477,231 @@
    ========================================= */
 var translations = {
     en: {
-        "home-link": "Home",
-        "collection-link": "Collection",
-        "about-link": "About",
-        "settings-link": "Settings",
-        "logout-link": "Logout",
-        "greeting-text": "Hello,",
-        "brand-logo": "HABI-LIN",
-        "col-title": "Digital Patterns",
-        "col-sub": "Your saved weave drafts from the loom studio.",
-        "col-my-tab": "My Patterns",
-        "col-all-tab": "All Patterns",
-        "col-new": "New Design",
-        "about-mission": "Our Mission",
-        "about-title": "Digitalizing the Dying Art of Traditional Filipino Weaving",
-        "about-desc": "HABI-LIN is a bridge between ancestral wisdom and modern technology, designed to preserve the intricate patterns of the Philippines for the digital age.",
-        "dash-welcome": "Welcome back,",
-        "dash-banner-sub": "Pick up where you left off or explore new traditional techniques.",
-        "dash-quick": "Quick Actions",
-        "dash-create-h": "Create New Weave",
-        "dash-create-p": "Start a blank pattern draft from scratch using our 3D loom.",
-        "dash-create-btn": "Get Started",
-        "dash-lib-h": "Pattern Library",
-        "dash-lib-p": "Browse through your saved collection and community favorites.",
-        "dash-lib-btn": "Open Library"
+        // ── NAV (all pages) ──
+        "home-link":        "Home",
+        "collection-link":  "Collection",
+        "about-link":       "About",
+        "settings-link":    "Settings",
+        "logout-link":      "Logout",
+        "greeting-text":    "Hello,",
+
+        // ── ABOUT PAGE ──
+        "about-mission":    "Our Mission",
+        "about-title":      "Digitalizing the Dying Art of Traditional Filipino Weaving",
+        "about-desc":       "HABI-LIN is a bridge between ancestral wisdom and modern technology, designed to preserve the intricate patterns of the Philippines for the digital age.",
+        "about-problem-h":  "The Problem",
+        "about-problem-p":  "Traditional handloom weaving is a labor-intensive art form that is slowly disappearing as younger generations move toward digital careers. The complex patterns often exist only in the memory of master weavers.",
+        "about-solution-h": "The Solution",
+        "about-solution-p": "By using 3D modeling and data signal processing, HABI-LIN captures the movement of the loom, allowing weavers to create, store, and share digital pattern drafts globally.",
+
+        // ── COLLECTION PAGE ──
+        "section-title":        "Digital Patterns",
+        "section-subtitle":     "Your saved weave drafts from the loom studio.",
+        "section-title-all":    "Community Patterns",
+        "section-subtitle-all": "Explore weave designs from the community.",
+        "my-patterns-tab":  "My Patterns",
+        "all-patterns-tab": "All Patterns",
+        "col-new":          "New Design",
+
+        // ── SETTINGS PAGE ──
+        "stab-general":       "General",
+        "stab-account":       "Account",
+        "stab-security":      "Security",
+        "s-general-title":    "General Settings",
+        "s-general-desc":     "Manage your workspace preferences and localized experience.",
+        "s-lang-label":       "Interface Language",
+        "s-dark-title":       "Dark Appearance",
+        "s-dark-desc":        "Switch between light and dark visual themes for the dashboard.",
+        "s-hifi-title":       "High Fidelity Rendering",
+        "s-hifi-desc":        "Enable high-precision 3D textures in the Weaving Studio.",
+        "s-save-btn":         "Save Preferences",
+        "s-account-title":    "Account Details",
+        "s-account-desc":     "Update your personal information and contact details.",
+        "s-change-avatar":    "Change Avatar",
+        "s-fullname-label":   "Full Legal Name",
+        "s-email-label":      "Email Address",
+        "s-update-account":   "Update Account",
+        "s-delete-account":   "Permanently delete my account",
+        "s-security-title":   "Security & Access",
+        "s-security-desc":    "Protect your designs and patterns with robust security protocols.",
+        "s-curr-pass-label":  "Current Password",
+        "s-new-pass-label":   "New Secure Password",
+        "s-update-security":  "Update Security",
+         "dash-welcome":     "Welcome,",
+        "dash-banner-sub":  "Pick up where you left off or explore new traditional techniques.",
+        "dash-quick":       "Quick Actions",
+        "dash-create-h":    "Create New Weave",
+        "dash-create-p":    "Start a blank pattern draft from scratch using our 3D loom.",
+        "dash-create-btn":  "Get Started",
+        "dash-lib-h":       "Pattern Library",
+        "dash-lib-p":       "Browse through your saved collection and community favorites.",
+        "dash-lib-btn":     "Open Library",
     },
     fil: {
-        "home-link": "Home",
-        "collection-link": "Koleksyon",
-        "about-link": "Tungkol sa Amin",
-        "settings-link": "Settings",
-        "logout-link": "Mag-logout",
-        "greeting-text": "Kamusta,",
-        "brand-logo": "HABI-LIN",
-        "col-title": "Mga Digital na Pattern",
-        "col-sub": "Ang iyong mga naka-save na draft ng habi mula sa loom studio.",
-        "col-my-tab": "Aking mga Pattern",
-        "col-all-tab": "Lahat ng Pattern",
-        "col-new": "Bagong Disenyo",
-        "about-mission": "Ang Aming Misyon",
-        "about-title": "Pag-digitize sa Sining ng Tradisyunal na Paghahabi ng Pilipino",
-        "about-desc": "Ang HABI-LIN ay tulay sa pagitan ng karunungan ng ninuno at makabagong teknolohiya para mapanatili ang mga pattern ng Pilipinas.",
-        "dash-welcome": "Maligayang pagbabalik,",
-        "dash-banner-sub": "Ituloy ang iyong nasimulan o galugarin ang mga bagong tradisyunal na teknik.",
-        "dash-quick": "Mabilisang Aksyon",
-        "dash-create-h": "Gumawa ng Bagong Habi",
-        "dash-create-p": "Magsimula ng isang blangkong draft ng pattern gamit ang aming 3D loom.",
-        "dash-create-btn": "Magsimula Na",
-        "dash-lib-h": "Library ng Pattern",
-        "dash-lib-p": "Tingnan ang iyong koleksyon at mga paborito ng komunidad.",
-        "dash-lib-btn": "Buksan ang Library"
+        "home-link":        "Home",
+        "collection-link":  "Koleksyon",
+        "about-link":       "Tungkol sa Amin",
+        "settings-link":    "Settings",
+        "logout-link":      "Mag-logout",
+        "greeting-text":    "Kamusta,",
+
+        "about-mission":    "Ang Aming Misyon",
+        "about-title":      "Pag-digitize sa Sining ng Tradisyunal na Paghahabi ng Pilipino",
+        "about-desc":       "Ang HABI-LIN ay tulay sa pagitan ng karunungan ng ninuno at makabagong teknolohiya para mapanatili ang mga pattern ng Pilipinas.",
+        "about-problem-h":  "Ang Problema",
+        "about-problem-p":  "Ang tradisyunal na paghahabi sa handloom ay isang sining na unti-unting nawawala habang ang mga kabataan ay lumilipat sa digital na karera. Ang mga kumplikadong pattern ay kadalasang nasa isip lamang ng mga dalubhasang mananahi.",
+        "about-solution-h": "Ang Solusyon",
+        "about-solution-p": "Sa pamamagitan ng 3D modeling at data signal processing, kinukuha ng HABI-LIN ang galaw ng handloom, na nagbibigay-daan sa mga mananahi na lumikha, mag-imbak, at magbahagi ng mga digital na pattern draft sa buong mundo.",
+
+        "section-title":        "Mga Digital na Pattern",
+        "section-subtitle":     "Ang iyong mga naka-save na draft ng habi mula sa loom studio.",
+        "section-title-all":    "Mga Pattern ng Komunidad",
+        "section-subtitle-all": "Tuklasin ang mga disenyo ng habi mula sa komunidad.",
+        "my-patterns-tab":  "Aking mga Pattern",
+        "all-patterns-tab": "Lahat ng Pattern",
+        "col-new":          "Bagong Disenyo",
+
+        // ── SETTINGS PAGE ──
+        "stab-general":       "General",
+        "stab-account":       "Account",
+        "stab-security":      "Seguridad",
+        "s-general-title":    "Mga Setting ng General",
+        "s-general-desc":     "Pamahalaan ang iyong mga kagustuhan at lokal na karanasan.",
+        "s-lang-label":       "Wika ng Interface",
+        "s-dark-title":       "Madilim na Hitsura",
+        "s-dark-desc":        "Lumipat sa pagitan ng maliwanag at madilim na tema sa dashboard.",
+        "s-hifi-title":       "High Fidelity Rendering",
+        "s-hifi-desc":        "I-enable ang high-precision na 3D textures sa Weaving Studio.",
+        "s-save-btn":         "I-save ang Mga Kagustuhan",
+        "s-account-title":    "Mga Detalye ng Account",
+        "s-account-desc":     "I-update ang iyong personal na impormasyon at mga detalye ng kontak.",
+        "s-change-avatar":    "Palitan ang Avatar",
+        "s-fullname-label":   "Buong Legal na Pangalan",
+        "s-email-label":      "Email Address",
+        "s-update-account":   "I-update ang Account",
+        "s-delete-account":   "Permanenteng burahin ang aking account",
+        "s-security-title":   "Seguridad at Access",
+        "s-security-desc":    "Protektahan ang iyong mga disenyo at pattern sa matibay na seguridad.",
+        "s-curr-pass-label":  "Kasalukuyang Password",
+        "s-new-pass-label":   "Bagong Secure na Password",
+        "s-update-security":  "I-update ang Seguridad",
+        "dash-welcome":     "Maligayang pagbabalik,",
+        "dash-banner-sub":  "Ituloy ang iyong nasimulan o galugarin ang mga bagong tradisyunal na teknik.",
+        "dash-quick":       "Mabilisang Aksyon",
+        "dash-create-h":    "Gumawa ng Bagong Habi",
+        "dash-create-p":    "Magsimula ng isang blangkong draft ng pattern gamit ang aming 3D loom.",
+        "dash-create-btn":  "Magsimula Na",
+        "dash-lib-h":       "Library ng Pattern",
+        "dash-lib-p":       "Tingnan ang iyong koleksyon at mga paborito ng komunidad.",
+        "dash-lib-btn":     "Buksan ang Library",
     },
     ilo: {
-        "home-link": "Home",
-        "collection-link": "Koleksion",
-        "about-link": "Maipapan",
-        "settings-link": "Settings",
-        "logout-link": "Rummuar",
-        "greeting-text": "Kumusta,",
-        "brand-logo": "HABI-LIN",
-        "col-title": "Dagiti Digital a Pattern",
-        "col-sub": "Dagiti naisave-mo a draft ti abel manipud iti loom studio.",
-        "col-my-tab": "Dagiti Pattern-ko",
-        "col-all-tab": "Amin a Pattern",
-        "col-new": "Baro a Disenyo",
-        "about-mission": "Ti Misionmi",
-        "about-title": "Panang-digitize ti Sining ti Tradisyunal a Panagabel ti Filipino",
-        "about-desc": "Ti HABI-LIN ket rangtay iti nagbaetan ti sirib dagiti kaputotan ken baro a teknolohiya.",
-        "dash-welcome": "Naragsak a panagsubli,",
-        "dash-banner-sub": "Ituloy ti inrugiam wenno ammuen dagiti baro a tradisyunal a teknik.",
-        "dash-quick": "Napaspas nga Aksyon",
-        "dash-create-h": "Agabel ti Baro",
-        "dash-create-p": "Mangrugi ti baro a draft ti pattern babaen ti panagusar ti 3D loom-mi.",
-        "dash-create-btn": "Rugian Mon",
-        "dash-lib-h": "Library ti Pattern",
-        "dash-lib-p": "Kitaem dagiti naisave-mo a koleksion ken dagiti paborito ti komunidad.",
-        "dash-lib-btn": "Lukatan ti Library"
+        "home-link":        "Home",
+        "collection-link":  "Koleksion",
+        "about-link":       "Maipapan",
+        "settings-link":    "Settings",
+        "logout-link":      "Rummuar",
+        "greeting-text":    "Kumusta,",
+
+        "about-mission":    "Ti Misionmi",
+        "about-title":      "Panang-digitize ti Sining ti Tradisyunal a Panagabel ti Filipino",
+        "about-desc":       "Ti HABI-LIN ket rangtay iti nagbaetan ti sirib dagiti kaputotan ken baro a teknolohiya tapno mapangtalinaed dagiti pattern ti Pilipinas.",
+        "about-problem-h":  "Ti Problema",
+        "about-problem-p":  "Ti tradisyunal a panagabel iti handloom ket maysa a sining a nalainglaing a mapukaw ta dagiti agtubo ket lumipat iti digital a trabaho. Dagiti komplikado a pattern ket adda laeng iti isip dagiti mannaabel.",
+        "about-solution-h": "Ti Solusion",
+        "about-solution-p": "Babaen ti 3D modeling ken data signal processing, ti HABI-LIN ket mangikapet ti pannakigtot ti handloom, tapno dagiti mannaabel ket makaaramid, makaipan, ken makaibagi dagiti digital a pattern draft iti lubong.",
+
+        "section-title":        "Dagiti Digital a Pattern",
+        "section-subtitle":     "Dagiti naisave-mo a draft ti abel manipud iti loom studio.",
+        "section-title-all":    "Dagiti Pattern ti Komunidad",
+        "section-subtitle-all": "Suruten dagiti disenyo ti abel manipud iti komunidad.",
+        "my-patterns-tab":  "Dagiti Pattern-ko",
+        "all-patterns-tab": "Amin a Pattern",
+        "col-new":          "Baro a Disenyo",
+
+        // ── SETTINGS PAGE ──
+        "stab-general":       "General",
+        "stab-account":       "Account",
+        "stab-security":      "Seguridad",
+        "s-general-title":    "Dagiti Setting ti General",
+        "s-general-desc":     "Payadayoen dagiti kagustuan ken lokal a kapadasan.",
+        "s-lang-label":       "Lengguahe ti Interface",
+        "s-dark-title":       "Nangisit a Pannakita",
+        "s-dark-desc":        "Agpalit iti nagbaetan ti nalawag ken nangisit a tema iti dashboard.",
+        "s-hifi-title":       "High Fidelity Rendering",
+        "s-hifi-desc":        "I-enable dagiti high-precision a 3D textures iti Weaving Studio.",
+        "s-save-btn":         "Isalakan dagiti Kagustuan",
+        "s-account-title":    "Dagiti Detalye ti Account",
+        "s-account-desc":     "I-update dagiti personal a impormasyon ken detalye ti kontak.",
+        "s-change-avatar":    "Baliwan ti Avatar",
+        "s-fullname-label":   "Kompleto a Legal a Nagan",
+        "s-email-label":      "Email Address",
+        "s-update-account":   "I-update ti Account",
+        "s-delete-account":   "Permanente a buraen ti account-ko",
+        "s-security-title":   "Seguridad ken Access",
+        "s-security-desc":    "Protektaran dagiti disenyo ken pattern babaen ti natibtibker a seguridad.",
+        "s-curr-pass-label":  "Agdama a Password",
+        "s-new-pass-label":   "Baro a Secure a Password",
+        "s-update-security":  "I-update ti Seguridad",
+        "dash-welcome":     "Naragsak a panagsubli,",
+        "dash-banner-sub":  "Ituloy ti inrugiam wenno ammuen dagiti baro a tradisyunal a teknik.",
+        "dash-quick":       "Napaspas nga Aksyon",
+        "dash-create-h":    "Agabel ti Baro",
+        "dash-create-p":    "Mangrugi ti baro a draft ti pattern babaen ti panagusar ti 3D loom-mi.",
+        "dash-create-btn":  "Rugian Mon",
+        "dash-lib-h":       "Library ti Pattern",
+        "dash-lib-p":       "Kitaem dagiti naisave-mo a koleksion ken dagiti paborito ti komunidad.",
+        "dash-lib-btn":     "Lukatan ti Library",
     }
 };
 
 
 /* =========================================
    4. LANGUAGE APPLICATION FUNCTION
-   Preserves SVG icons while swapping text nodes.
+   - Plain text elements: sets textContent directly
+   - Elements with SVG icons (like col-new): only replaces text nodes, preserves icon
+   - greeting-text: text only, no icon
    ========================================= */
 function applyGlobalLanguage() {
-    const lang = localStorage.getItem("preferredLanguage") || "en";
+    // sessionStorage resets when the browser/tab is closed — so the site
+    // always opens in English. Language only persists within the same session
+    // unless the user saves it in Settings (which writes to sessionStorage).
+    const lang = sessionStorage.getItem("preferredLanguage") || "en";
     const texts = translations[lang];
+    if (!texts) return;
+
+    // Elements with SVG icons — only swap text nodes, preserve icon
+    const iconElements = new Set(["home-link", "collection-link", "about-link", "settings-link", "logout-link", "col-new"]);
+
+    // Elements with child spans/elements to preserve — only swap first text node
+    const mixedElements = new Set(["dash-welcome"]);
 
     Object.keys(texts).forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            const hasIcon = el.querySelector("svg");
-            if (hasIcon) {
-                el.childNodes.forEach(node => {
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        node.textContent = " " + texts[id];
-                    }
-                });
-            } else {
-                el.textContent = texts[id];
+        if (!el) return;
+
+        if (iconElements.has(id)) {
+            el.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "") {
+                    node.textContent = " " + texts[id];
+                }
+            });
+            const hasTextNode = Array.from(el.childNodes).some(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+            if (!hasTextNode) {
+                el.appendChild(document.createTextNode(" " + texts[id]));
             }
+        } else if (mixedElements.has(id)) {
+            // Prepend translated text before the first child element (e.g. username span)
+            // Remove any existing leading text nodes first to avoid duplicates
+            Array.from(el.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) el.removeChild(node);
+            });
+            el.insertBefore(document.createTextNode(texts[id] + " "), el.firstChild);
+        } else {
+            el.textContent = texts[id];
         }
     });
+
     document.documentElement.lang = lang;
 }
 

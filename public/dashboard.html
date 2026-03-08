@@ -821,12 +821,12 @@
         <a href="about.html" class="nav-item" id="about-link">About</a>
         <div class="nav-spacer"></div>
         <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
-        <a href="/auth/logout" class="nav-item logout">Logout</a>
+        <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
       </nav>
 
       <div class="user-info" style="margin-left:auto;">
         <div class="user-text">
-          <span class="greeting">Hello,</span>
+          <span class="greeting" id="greeting-text">Hello,</span>
           <strong id="user-firstname">Weaver</strong>
         </div>
         <a href="user-settings.html" class="profile-circle" id="profile-btn">
@@ -946,19 +946,19 @@
         <!-- OVERVIEW (homepage content) -->
         <div id="overview-section">
           <div class="welcome-banner">
-            <h1>Welcome back, <span id="user-firstname-display">Weaver</span>!</h1>
-            <p>Pick up where you left off or explore new traditional techniques.</p>
+            <h1 id="dash-welcome"><span id="user-firstname-display">Weaver</span>!</h1>
+            <p id="dash-banner-sub">Pick up where you left off or explore new traditional techniques.</p>
           </div>
-          <h3 class="section-title">Quick Actions</h3>
+          <h3 class="section-title" id="dash-quick">Quick Actions</h3>
           <div class="card-grid">
             <div class="action-card">
               <div class="card-visual"><svg class="icon icon-lg" aria-hidden="true">
                   <use href="#icon-plus" />
                 </svg></div>
               <div class="card-info">
-                <h4>Create New Weave</h4>
-                <p>Start a blank pattern draft from scratch using our 3D loom.</p>
-                <button class="card-btn" onclick="showLoom()">Get Started</button>
+                <h4 id="dash-create-h">Create New Weave</h4>
+                <p id="dash-create-p">Start a blank pattern draft from scratch using our 3D loom.</p>
+                <button class="card-btn" onclick="showLoom()" id="dash-create-btn">Get Started</button>
               </div>
             </div>
             <div class="action-card" onclick="window.location.href='collection.html'" style="cursor:pointer;">
@@ -966,9 +966,9 @@
                   <use href="#icon-book-open" />
                 </svg></div>
               <div class="card-info">
-                <h4>Pattern Library</h4>
-                <p>Browse through your saved collection and community favorites.</p>
-                <button class="card-btn-outline">Open Library</button>
+                <h4 id="dash-lib-h">Pattern Library</h4>
+                <p id="dash-lib-p">Browse through your saved collection and community favorites.</p>
+                <button class="card-btn-outline" id="dash-lib-btn">Open Library</button>
               </div>
             </div>
           </div>
