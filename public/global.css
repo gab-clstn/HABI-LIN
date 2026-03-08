@@ -1,0 +1,157 @@
+ /* === DARK MODE === */
+    /* Updated to include html element for immediate application */
+    html.dark-mode, body.dark-mode {
+      background-color: #121214;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .sidebar {
+      background: #1a1a1d;
+      border-color: #333;
+    }
+
+    body.dark-mode .sidebar-header h2 {
+      color: #fdf2f2;
+    }
+
+    body.dark-mode .nav-item {
+      color: #bbb;
+    }
+
+    body.dark-mode .nav-item.active {
+      color: #fdf2f2;
+    }
+
+    body.dark-mode .top-header {
+      border-color: #333;
+    }
+
+    body.dark-mode .settings-container {
+      background: #1a1a1d;
+    }
+
+    body.dark-mode .settings-sidebar {
+      background: #121214;
+      border-color: #333;
+    }
+
+    body.dark-mode .settings-menu-btn {
+      color: #bbb;
+    }
+
+    body.dark-mode .settings-menu-btn:hover {
+      background: #2a2a2d;
+      color: #fdf2f2;
+    }
+
+    body.dark-mode .settings-input {
+      background: #2a2a2d;
+      border-color: #444;
+      color: white;
+    }
+
+    body.dark-mode .settings-input:focus {
+      border-color: #fdf2f2;
+      box-shadow: 0 0 0 4px rgba(253, 242, 242, .1);
+    }
+
+    body.dark-mode .pane-header h2 {
+      color: #fff;
+    }
+
+    body.dark-mode .avatar-container {
+      background: #2a2a2d;
+      border-color: #333;
+    }
+
+    body.dark-mode .toggle-row {
+      border-color: #333;
+    }
+
+    body.dark-mode .toggle-text h4 {
+      color: #fff;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+      .sidebar-nav {
+        margin-left: 12px;
+        gap: 0;
+      }
+
+      .nav-item {
+        padding: 8px 8px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar-nav {
+        display: none;
+      }
+
+      .sidebar {
+        padding: 0 16px;
+        gap: 8px;
+      }
+
+      .top-header {
+        padding: 16px 16px 8px;
+      }
+
+      .user-text {
+        display: none;
+      }
+
+      .settings-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .settings-sidebar {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding: 20px;
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+      }
+
+      .settings-menu-btn {
+        margin-bottom: 0;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .settings-body {
+        padding: 30px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --nav-height: 56px;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1rem;
+      }
+
+      .profile-circle {
+        width: 34px;
+        height: 34px;
+      }
+
+      .settings-body {
+        padding: 20px 15px;
+      }
+
+      .pane-header h2 {
+        font-size: 1.3rem;
+      }
+    }

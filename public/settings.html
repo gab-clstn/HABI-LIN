@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
 
+  <script src="global.js"></script>
+
   <style>
     .icon {
       display: inline-block;
@@ -37,7 +39,7 @@
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="icon-sliders" viewBox="0 0 512 512">
       <path
-        d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128-80c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zM0 256c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 256c-17.7 0-32 14.3-32 32zM416 96c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96z" />
+        d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128-80c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zM0 256c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 256c-17.7 0-32-14.3-32 32zM416 96c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96z" />
     </symbol>
     <symbol id="icon-user" viewBox="0 0 448 512">
       <path
@@ -674,173 +676,17 @@
       }
     }
 
-    /* === DARK MODE === */
-    body.dark-mode {
-      background-color: #121214;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .sidebar {
-      background: #1a1a1d;
-      border-color: #333;
-    }
-
-    body.dark-mode .sidebar-header h2 {
-      color: #fdf2f2;
-    }
-
-    body.dark-mode .nav-item {
-      color: #bbb;
-    }
-
-    body.dark-mode .nav-item.active {
-      color: #fdf2f2;
-    }
-
-    body.dark-mode .top-header {
-      border-color: #333;
-    }
-
-    body.dark-mode .settings-container {
-      background: #1a1a1d;
-    }
-
-    body.dark-mode .settings-sidebar {
-      background: #121214;
-      border-color: #333;
-    }
-
-    body.dark-mode .settings-menu-btn {
-      color: #bbb;
-    }
-
-    body.dark-mode .settings-menu-btn:hover {
-      background: #2a2a2d;
-      color: #fdf2f2;
-    }
-
-    body.dark-mode .settings-input {
-      background: #2a2a2d;
-      border-color: #444;
-      color: white;
-    }
-
-    body.dark-mode .settings-input:focus {
-      border-color: #fdf2f2;
-      box-shadow: 0 0 0 4px rgba(253, 242, 242, .1);
-    }
-
-    body.dark-mode .pane-header h2 {
-      color: #fff;
-    }
-
-    body.dark-mode .avatar-container {
-      background: #2a2a2d;
-      border-color: #333;
-    }
-
-    body.dark-mode .toggle-row {
-      border-color: #333;
-    }
-
-    body.dark-mode .toggle-text h4 {
-      color: #fff;
-    }
-
-    /* === RESPONSIVE === */
-    @media (max-width: 1024px) {
-      .sidebar-nav {
-        margin-left: 12px;
-        gap: 0;
-      }
-
-      .nav-item {
-        padding: 8px 8px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .hamburger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .sidebar-nav {
-        display: none;
-      }
-
-      .sidebar {
-        padding: 0 16px;
-        gap: 8px;
-      }
-
-      .top-header {
-        padding: 16px 16px 8px;
-      }
-
-      .user-text {
-        display: none;
-      }
-
-      .settings-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-      }
-
-      .settings-sidebar {
-        border-right: none;
-        border-bottom: 1px solid #eee;
-        padding: 20px;
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-      }
-
-      .settings-menu-btn {
-        margin-bottom: 0;
-        flex-shrink: 0;
-        white-space: nowrap;
-      }
-
-      .settings-body {
-        padding: 30px 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      :root {
-        --nav-height: 56px;
-      }
-
-      .sidebar-header h2 {
-        font-size: 1rem;
-      }
-
-      .profile-circle {
-        width: 34px;
-        height: 34px;
-      }
-
-      .settings-body {
-        padding: 20px 15px;
-      }
-
-      .pane-header h2 {
-        font-size: 1.3rem;
-      }
-    }
+   
   </style>
 </head>
 
 <body>
   <div class="page-wrapper">
 
-    <!-- TOP NAV -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <a href="dashboard.html" class="logo-link">
-          <h2>HABI-LIN</h2>
+          <h2 id="brand-logo">HABI-LIN</h2>
         </a>
       </div>
 
@@ -849,14 +695,14 @@
         <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
         <a href="about.html" class="nav-item" id="about-link">About</a>
         <div class="nav-spacer"></div>
-        <a href="settings.html" class="nav-item active">Settings</a>
-        <a href="/auth/logout" class="nav-item logout">Logout</a>
+        <a href="settings.html" class="nav-item active" id="settings-link">Settings</a>
+        <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
       </nav>
 
       <div class="user-info" style="margin-left:auto;">
         <div class="user-text">
-          <span class="greeting">Hello,</span>
-          <strong id="user-firstname">Weaver</strong>
+          <span class="greeting" id="greeting-text">Hello,</span>
+          <strong id="user-firstname-sidebar">Weaver</strong>
         </div>
         <a href="user-settings.html" class="profile-circle" id="profile-btn">
           <svg class="icon" id="default-avatar-icon" aria-hidden="true">
@@ -874,7 +720,6 @@
       </button>
     </aside>
 
-    <!-- MOBILE DRAWER -->
     <div class="mobile-drawer" id="mobile-drawer" role="navigation">
       <a href="dashboard.html" class="nav-item">Home</a>
       <a href="collection.html" class="nav-item">Collection</a>
@@ -883,9 +728,7 @@
       <a href="/auth/logout" class="nav-item logout">Logout</a>
     </div>
 
-    <!-- MAIN CONTAINER -->
     <main class="main-container">
-      <!-- TOP HEADER -->
       <header class="top-header">
         <div class="header-breadcrumb">
           <span>Dashboard</span> /
@@ -893,9 +736,7 @@
         </div>
       </header>
 
-      <!-- SETTINGS CONTENT -->
       <section class="settings-container">
-        <!-- LEFT SIDEBAR MENU -->
         <aside class="settings-sidebar">
           <button class="settings-menu-btn active" onclick="tab(event, 'general')">
             <svg class="icon" aria-hidden="true">
@@ -917,10 +758,8 @@
           </button>
         </aside>
 
-        <!-- RIGHT CONTENT AREA -->
         <div class="settings-body">
           <div class="form-section">
-            <!-- GENERAL PANE -->
             <div id="general" class="pane active">
               <div class="pane-header">
                 <h2>General Settings</h2>
@@ -929,10 +768,10 @@
 
               <div class="form-group">
                 <label>Interface Language</label>
-                <select class="settings-input">
-                  <option>English (International)</option>
-                  <option>Filipino (National)</option>
-                  <option>Ilocano</option>
+                <select class="settings-input" id="languageSelect">
+                  <option value="en">English (International)</option>
+                  <option value="fil">Filipino (National)</option>
+                  <option value="ilo">Ilocano</option>
                 </select>
               </div>
 
@@ -958,7 +797,7 @@
                 </label>
               </div>
 
-              <button class="save-btn" onclick="showGeneralFeedback(this)">
+              <button class="save-btn" onclick="saveLanguageSettings(this)">
                 <svg class="icon" aria-hidden="true">
                   <use href="#icon-floppy-disk" />
                 </svg>
@@ -966,7 +805,6 @@
               </button>
             </div>
 
-            <!-- ACCOUNT PANE -->
             <div id="account" class="pane">
               <div class="pane-header">
                 <h2>Account Details</h2>
@@ -1012,7 +850,6 @@
               </a>
             </div>
 
-            <!-- SECURITY PANE -->
             <div id="security" class="pane">
               <div class="pane-header">
                 <h2>Security & Access</h2>
@@ -1043,6 +880,41 @@
   </div>
 
   <script>
+    // === LANGUAGE SAVE FUNCTION ===
+    // NOTE: translations dict and applyGlobalLanguage() come from global.js (loaded in <head>).
+    // We must NOT re-declare 'translations' here — a duplicate const declaration
+    // throws a SyntaxError that silently breaks every button and toggle on this page.
+    async function saveLanguageSettings(btn) {
+      // 1. Save and apply language
+      const selectedLang = document.getElementById("languageSelect").value;
+      localStorage.setItem("preferredLanguage", selectedLang);
+      applyGlobalLanguage();
+
+      // 2. Save and apply theme — only happens HERE on Save click, not on toggle
+      const isDark = document.getElementById("darkModeToggle").checked;
+      const theme = isDark ? "dark" : "light";
+      applyGlobalTheme(isDark);
+
+      // 3. Persist theme to the server
+      try {
+        await fetch("/auth/update-theme", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ theme }),
+        });
+      } catch (err) {
+        console.error("Theme sync failed", err);
+      }
+
+      // 4. Show saved feedback
+      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Saved';
+      btn.style.background = "#28a745";
+      setTimeout(() => {
+        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Save Preferences';
+        btn.style.background = "";
+      }, 2000);
+    }
+
     // === HAMBURGER ===
     const hamburgerBtn = document.getElementById("hamburger-btn");
     const mobileDrawer = document.getElementById("mobile-drawer");
@@ -1086,25 +958,15 @@
           body: JSON.stringify({ name: fullName, email: email }),
         });
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new TypeError("Server didn't return JSON!");
-        }
-
-        const data = await response.json();
-
         if (response.ok) {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Changes Saved';
           btn.style.background = "#28a745";
           document.getElementById("user-firstname-sidebar").textContent = fullName.split(" ")[0];
         } else {
-          throw new Error(data.error || "Update failed");
+          throw new Error("Update failed");
         }
       } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Error: " + error.message);
-        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-exclamation-circle" /></svg> Error Saving';
-        btn.style.background = "#d93025";
+        btn.innerHTML = 'Error';
       } finally {
         setTimeout(() => {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Update Account';
@@ -1132,18 +994,16 @@
           body: JSON.stringify({ currentPassword, newPassword }),
         });
 
-        const data = await response.json();
         if (response.ok) {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Password Updated';
           btn.style.background = "#28a745";
           document.getElementById("current-password").value = "";
           document.getElementById("new-password").value = "";
         } else {
-          alert(data.error || "Check current password.");
-          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-exclamation-circle" /></svg> Update Failed';
+          alert("Check current password.");
         }
       } catch (error) {
-        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-exclamation-circle" /></svg> Error';
+        btn.innerHTML = 'Error';
       } finally {
         setTimeout(() => {
           btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
@@ -1154,46 +1014,47 @@
     }
 
     // === THEME TOGGLE ===
-    async function toggleTheme() {
-      const isDark = document.getElementById("darkModeToggle").checked;
-      const theme = isDark ? "dark" : "light";
-
-      document.body.classList.toggle("dark-mode", isDark);
-
-      try {
-        await fetch("/auth/update-theme", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ theme }),
-        });
-      } catch (err) {
-        console.error("Theme sync failed", err);
-      }
-    }
-
-    // === GENERAL FEEDBACK ===
-    function showGeneralFeedback(btn) {
-      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Saved';
-      btn.style.background = "#28a745";
-      setTimeout(() => {
-        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Save Preferences';
-        btn.style.background = "#2b0303";
-      }, 2000);
+    // The checkbox itself does NOT apply the theme immediately.
+    // Theme is only applied + saved when the user clicks "Save Preferences".
+    // This is a no-op kept so the onchange attribute in HTML doesn't error.
+    function toggleTheme() {
+      // intentionally empty — actual apply + save happens in saveLanguageSettings()
     }
 
     // === INITIALIZATION ===
     document.addEventListener("DOMContentLoaded", async () => {
+      // 1. Check for saved language and inject it
+      const savedLang = localStorage.getItem("preferredLanguage") || "en";
+      document.getElementById("languageSelect").value = savedLang;
+      applyGlobalLanguage();
+
+      // 2. Sync toggle UI with what global.js already applied to <html>
+      // global.js runs before DOMContentLoaded and has already applied the
+      // correct class to <html>, so we just read localStorage here.
+      if (localStorage.getItem("theme") === "dark") {
+        document.getElementById("darkModeToggle").checked = true;
+      } else {
+        document.getElementById("darkModeToggle").checked = false;
+      }
+
+      // 3. Fetch User Session Data (Kept for populating user info)
       try {
         const response = await fetch("/auth/user");
         const user = await response.json();
+        
         if (user) {
           document.getElementById("user-firstname-sidebar").textContent = user.name.split(" ")[0];
           document.getElementById("full-name-input").value = user.name || "";
           document.getElementById("email-input").value = user.email || "";
 
-          if (user.theme === "dark") {
-            document.body.classList.add("dark-mode");
+          // If the database says dark but localStorage doesn't yet reflect it,
+          // align both and apply globally via applyGlobalTheme().
+          if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
+            applyGlobalTheme(true);
             document.getElementById("darkModeToggle").checked = true;
+          } else if (user.theme === "light" && localStorage.getItem("theme") !== "light") {
+            applyGlobalTheme(false);
+            document.getElementById("darkModeToggle").checked = false;
           }
         }
       } catch (error) {
