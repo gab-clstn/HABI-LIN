@@ -20,6 +20,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ------------------ PROFILE PHOTO STORAGE ------------------ */
+// Note: Keeping multer config here so your code doesn't break, 
+// but we'll use the Base64 route for Atlas/Railway compatibility.
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, "public/uploads"));
@@ -31,7 +33,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ── Middleware ────────────────────────────────────────────────
-// Raised to 10mb: patternRows is a large nested bool[][] array
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -42,13 +43,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 /* ──────────────────────────────────────────────────────────────
    PATTERN SCHEMA
-
-   KEY FIXES:
-   1. steps & patternRows use Schema.Types.Mixed so Mongoose
-      does NOT flatten nested arrays (patternRows is bool[][]).
-   2. strict:false lets any extra fields survive safely.
-   3. "created" is a Number/timestamp — matches what loom.js
-      sends (Date.now()) and what index.html reads.
 ────────────────────────────────────────────────────────────── */
 const patternSchema = new mongoose.Schema(
     {
@@ -177,7 +171,7 @@ app.post("/auth/update-account", async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ error: "Please log in again." });
     try {
         const updated = await User.findByIdAndUpdate(
-            req.user._id, { name: req.body.name, email: req.body.email }, { new: true }
+            req.user._id, { name: req.body.name, email: req.body.email }, { returnDocument: 'after' }
         );
         if (!updated) return res.status(404).json({ error: "User not found" });
         req.user.name  = updated.name;
@@ -207,14 +201,13 @@ app.post("/auth/update-theme", async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to save theme" }); }
 });
 
+// FIXED: Atlas-compatible photo upload using Base64
 app.post("/auth/upload-photo", async (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     try {
         const { photo } = req.body;
-        
-        if (!photo) {
-            return res.status(400).json({ error: "No photo data provided" });
-        }
+        if (!photo) return res.status(400).json({ error: "No photo data provided" });
+
         await User.findByIdAndUpdate(
             req.user._id, 
             { photo: photo }, 
@@ -245,26 +238,16 @@ app.get("/loom", (req, res) => {
 
 /* ══════════════════════════════════════════════════════════════
    PATTERN ROUTES
-
-   ⚠ ORDER IS CRITICAL in Express:
-      /api/patterns/save      — must come before /api/patterns
-      /api/patterns/my-weaves — must come before /api/patterns/:id
-      /api/patterns           — general fetch, comes after specifics
-      /api/patterns/:id       — wildcard, always last
 ══════════════════════════════════════════════════════════════ */
 
-// 1. POST  /api/patterns/save  — save a new woven pattern
 app.post("/api/patterns/save", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
-        // Use the spread operator to grab everything (warpColors, rowColors, etc.)
         const newPattern = await Pattern.create({
             ...req.body,
             userId: req.user._id,
             created: req.body.created || Date.now()
         });
-
-        console.log(`[PATTERN SAVE] user=${req.user._id} | name="${newPattern.name}" | Colors Saved: ${!!req.body.warpColors}`);
         res.status(200).json({ message: "Pattern saved successfully!", pattern: newPattern });
     } catch (err) {
         console.error("Pattern Save Error:", err);
@@ -272,7 +255,6 @@ app.post("/api/patterns/save", async (req, res) => {
     }
 });
 
-// 2. GET   /api/patterns/my-weaves  — backwards-compatible alias
 app.get("/api/patterns/my-weaves", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
@@ -281,12 +263,11 @@ app.get("/api/patterns/my-weaves", async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to fetch patterns" }); }
 });
 
-// 3. GET   /api/patterns  — fetch all patterns for collection page
+// FIXED: Filtered to specifically count only the current user's patterns for Profile stats
 app.get("/api/patterns", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
         const patterns = await Pattern.find({ userId: req.user._id }).sort({ created: -1 });
-        console.log(`[PATTERN FETCH] user=${req.user._id} | found ${patterns.length} pattern(s)`);
         res.json(patterns);
     } catch (err) {
         console.error("Pattern Fetch Error:", err);
@@ -294,7 +275,6 @@ app.get("/api/patterns", async (req, res) => {
     }
 });
 
-// 4. DELETE /api/patterns/:id  — delete one pattern (owner-only)
 app.delete("/api/patterns/:id", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
@@ -308,19 +288,16 @@ app.delete("/api/patterns/:id", async (req, res) => {
     }
 });
 
-// 5. PUT /api/patterns/:id — update an existing pattern
 app.put("/api/patterns/:id", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
         const updatedPattern = await Pattern.findOneAndUpdate(
             { _id: req.params.id, userId: req.user._id },
-            { ...req.body }, // Updates everything sent from the loom
-            { new: true }
+            { ...req.body }, 
+            { returnDocument: 'after' }
         );
 
         if (!updatedPattern) return res.status(404).json({ error: "Pattern not found" });
-        
-        console.log(`[PATTERN UPDATE] user=${req.user._id} | id=${req.params.id}`);
         res.status(200).json({ message: "Pattern updated successfully!", pattern: updatedPattern });
     } catch (err) {
         console.error("Pattern Update Error:", err);
@@ -328,8 +305,5 @@ app.put("/api/patterns/:id", async (req, res) => {
     }
 });
 
-/* ══════════════════════════════════════════════════════════════
-   START SERVER
-══════════════════════════════════════════════════════════════ */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
