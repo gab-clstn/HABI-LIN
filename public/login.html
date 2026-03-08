@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HABI-LIN | Auth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <style>
         /* ── RESET ── */
@@ -19,7 +21,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        /* ── VARIABLES (matches dashboard/collection/about) ── */
+        /* ── VARIABLES ── */
         :root {
             --brand: #2b0303;
             --brand-mid: #4a0606;
@@ -35,14 +37,13 @@
             --transition: all 0.6s ease-in-out;
         }
 
-        html,
-        body {
+        html, body {
             height: 100%;
             background: var(--bg);
             color: var(--text);
         }
 
-        body {
+        .login-body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -288,7 +289,7 @@
             font-size: clamp(0.78rem, 1.1vw, 0.9rem);
             line-height: 1.65;
             margin-bottom: clamp(16px, 2.5vh, 28px);
-            max-width: 220px;
+            max-width: 250px;
         }
 
         .btn-ghost {
@@ -311,7 +312,6 @@
             transform: translateY(-2px);
         }
 
-        /* HABI-LIN watermark on overlay */
         .overlay-brand {
             position: absolute;
             bottom: clamp(14px, 2.5vh, 24px);
@@ -325,58 +325,25 @@
             white-space: nowrap;
         }
 
-        /* ── OVERLAY POSITIONS ── */
-        .overlay-left {
-            transform: translateX(-20%);
-        }
-
-        .overlay-right {
-            right: 0;
-            transform: translateX(0);
-        }
-
         /* ── SLIDE ANIMATION ── */
-        .auth-container.right-panel-active .sign-in-container {
-            transform: translateX(100%);
-        }
-
-        .auth-container.right-panel-active .sign-up-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-        }
-
-        .auth-container.right-panel-active .overlay-container {
-            transform: translateX(-100%);
-        }
-
-        .auth-container.right-panel-active .overlay {
-            transform: translateX(50%);
-        }
-
-        .auth-container.right-panel-active .overlay-left {
-            transform: translateX(0);
-        }
-
-        .auth-container.right-panel-active .overlay-right {
-            transform: translateX(20%);
-        }
+        .auth-container.right-panel-active .sign-in-container { transform: translateX(100%); }
+        .auth-container.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; }
+        .auth-container.right-panel-active .overlay-container { transform: translateX(-100%); }
+        .auth-container.right-panel-active .overlay { transform: translateX(50%); }
+        .auth-container.right-panel-active .overlay-left { transform: translateX(0); }
+        .auth-container.right-panel-active .overlay-right { transform: translateX(20%); }
 
         /* ── MOBILE TOGGLE (shown only on mobile) ── */
-        .mobile-toggle {
-            display: none;
-        }
+        .mobile-toggle { display: none; }
 
         /* ── TABLET (601–900px) ── */
         @media (min-width: 601px) and (max-width: 900px) {
-            .auth-container {
-                min-height: clamp(460px, 58vh, 540px);
-            }
+            .auth-container { min-height: clamp(460px, 58vh, 540px); }
         }
 
         /* ── MOBILE (≤600px): stack forms, hide overlay ── */
         @media (max-width: 600px) {
-            body {
+            .login-body {
                 align-items: flex-start;
                 padding: 24px 16px 40px;
                 overflow-y: auto;
@@ -389,9 +356,7 @@
                 box-shadow: 0 10px 32px rgba(0, 0, 0, .1);
             }
 
-            .overlay-container {
-                display: none;
-            }
+            .overlay-container { display: none; }
 
             .form-container {
                 position: static;
@@ -402,25 +367,11 @@
                 display: none;
             }
 
-            .sign-in-container {
-                display: block;
-            }
+            .sign-in-container { display: block; }
+            .auth-container.right-panel-active .sign-in-container { display: none; }
+            .auth-container.right-panel-active .sign-up-container { display: block; z-index: 5; }
 
-            .auth-container.right-panel-active .sign-in-container {
-                display: none;
-                transform: none;
-            }
-
-            .auth-container.right-panel-active .sign-up-container {
-                display: block;
-                opacity: 1;
-                transform: none;
-                z-index: 5;
-            }
-
-            form {
-                padding: 36px 24px 40px;
-            }
+            form { padding: 36px 24px 40px; }
 
             .mobile-toggle {
                 display: flex;
@@ -438,25 +389,16 @@
                 text-decoration: none;
             }
 
-            .mobile-toggle a:hover {
-                text-decoration: underline;
-            }
+            .mobile-toggle a:hover { text-decoration: underline; }
         }
 
         /* ── VERY SMALL (≤380px) ── */
         @media (max-width: 380px) {
-            .auth-container h1 {
-                font-size: 1.4rem;
-            }
-
-            form {
-                padding: 28px 18px 36px;
-            }
+            .auth-container h1 { font-size: 1.4rem; }
+            form { padding: 28px 18px 36px; }
         }
-    </style>
 
-    <!-- ── SVG ICON SPRITE ── -->
-    <style>
+        /* SVG ICONS IN CSS */
         .icon {
             display: inline-block;
             width: 1em;
@@ -468,51 +410,38 @@
     </style>
 
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-
-        <!-- Facebook -->
         <symbol id="icon-facebook" viewBox="0 0 320 512">
-            <path
-                d="M279.14 288l14.22-92.66h-88.91V133.41c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+            <path d="M279.14 288l14.22-92.66h-88.91V133.41c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
         </symbol>
-
-        <!-- Google -->
         <symbol id="icon-google" viewBox="0 0 488 512">
-            <path
-                d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
+            <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
         </symbol>
-
     </svg>
 </head>
-
-<body>
+<body class="login-body">
     <div class="auth-container" id="auth-container">
-
-        <!-- ── SIGN UP PANEL ── -->
+        
         <div class="form-container sign-up-container">
             <form id="signupForm" novalidate>
                 <h1>Create Account</h1>
-
+                
                 <div id="signupMsg" class="form-message"></div>
 
                 <div class="social-icons">
-                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook"><svg class="icon"
-                            aria-hidden="true">
-                            <use href="#icon-facebook" />
-                        </svg></a>
-                    <a href="/auth/google" class="social-btn" title="Continue with Google"><svg class="icon"
-                            aria-hidden="true">
-                            <use href="#icon-google" />
-                        </svg></a>
+                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-facebook" /></svg>
+                    </a>
+                    <a href="/auth/google" class="social-btn" title="Continue with Google">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-google" /></svg>
+                    </a>
                 </div>
-
-                <span class="divider">or register with your email</span>
-
-                <input class="auth-input" type="text" name="name" placeholder="Full Name" autocomplete="name"
-                    required />
+                
+                <span class="divider">or use your email for registration</span>
+                
+                <input class="auth-input" type="text" name="name" placeholder="Name" autocomplete="name" required />
                 <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" required />
-                <input class="auth-input" type="password" name="password" placeholder="Password"
-                    autocomplete="new-password" required />
-
+                <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="new-password" required />
+                
                 <button type="submit" class="btn-primary">Sign Up</button>
 
                 <div class="mobile-toggle">
@@ -521,7 +450,6 @@
             </form>
         </div>
 
-        <!-- ── SIGN IN PANEL ── -->
         <div class="form-container sign-in-container">
             <form id="loginForm" novalidate>
                 <h1>Sign In</h1>
@@ -529,24 +457,21 @@
                 <div id="loginMsg" class="form-message"></div>
 
                 <div class="social-icons">
-                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook"><svg class="icon"
-                            aria-hidden="true">
-                            <use href="#icon-facebook" />
-                        </svg></a>
-                    <a href="/auth/google" class="social-btn" title="Continue with Google"><svg class="icon"
-                            aria-hidden="true">
-                            <use href="#icon-google" />
-                        </svg></a>
+                    <a href="/auth/facebook" class="social-btn" title="Continue with Facebook">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-facebook" /></svg>
+                    </a>
+                    <a href="/auth/google" class="social-btn" title="Continue with Google">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-google" /></svg>
+                    </a>
                 </div>
-
+                
                 <span class="divider">or use your account</span>
-
+                
                 <input class="auth-input" type="email" name="email" placeholder="Email" autocomplete="email" required />
-                <input class="auth-input" type="password" name="password" placeholder="Password"
-                    autocomplete="current-password" required />
-
+                <input class="auth-input" type="password" name="password" placeholder="Password" autocomplete="current-password" required />
+                
                 <a href="#" class="forgot">Forgot your password?</a>
-
+                
                 <button type="submit" class="btn-primary">Sign In</button>
 
                 <div class="mobile-toggle">
@@ -555,28 +480,23 @@
             </form>
         </div>
 
-        <!-- ── OVERLAY (desktop slide panel) ── -->
         <div class="overlay-container">
             <div class="overlay">
-
                 <div class="overlay-panel overlay-left">
                     <h1>Welcome Back!</h1>
-                    <p>Good to see you again. Sign in to continue your weaving journey.</p>
+                    <p>To keep connected with us please login with your personal info</p>
                     <button class="btn-ghost" id="signIn">Sign In</button>
                     <span class="overlay-brand">HABI-LIN</span>
                 </div>
-
                 <div class="overlay-panel overlay-right">
                     <h1>Hello, Weaver!</h1>
-                    <p>Join us and start preserving the art of traditional Filipino weaving.</p>
+                    <p>Enter your personal details and start your journey with us</p>
                     <button class="btn-ghost" id="signUp">Sign Up</button>
                     <span class="overlay-brand">HABI-LIN</span>
                 </div>
-
             </div>
         </div>
-
-    </div><!-- /.auth-container -->
+    </div>
 
     <script>
         const container = document.getElementById('auth-container');
@@ -585,9 +505,12 @@
         const mobileSignIn = document.getElementById('mobileSignIn');
         const mobileSignUp = document.getElementById('mobileSignUp');
 
-        const showSignIn = () => container.classList.remove('right-panel-active');
-        const showSignUp = () => container.classList.add('right-panel-active');
+        // Function to switch to Sign In
+        const showSignIn = () => container.classList.remove("right-panel-active");
+        // Function to switch to Sign Up
+        const showSignUp = () => container.classList.add("right-panel-active");
 
+        // Clear messages when manually clicking buttons
         const clearMsgs = () => {
             document.querySelectorAll('.form-message').forEach(m => {
                 m.textContent = '';
@@ -600,60 +523,69 @@
         mobileSignIn?.addEventListener('click', (e) => { e.preventDefault(); clearMsgs(); showSignIn(); });
         mobileSignUp?.addEventListener('click', (e) => { e.preventDefault(); clearMsgs(); showSignUp(); });
 
-        /* ── MESSAGE HELPER ── */
-        const displayMsg = (id, message, type) => {
-            const el = document.getElementById(id);
+        const displayMsg = (elementId, message, type) => {
+            const el = document.getElementById(elementId);
             el.textContent = message;
             el.className = `form-message ${type}`;
         };
 
-        /* ── LOGIN ── */
+        // Handle Local Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
             try {
                 const res = await fetch('/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+
                 if (res.ok) {
-                    displayMsg('loginMsg', 'Login successful! Redirecting…', 'success');
+                    displayMsg('loginMsg', 'Login successful! Redirecting...', 'success');
                     setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
                 } else {
                     displayMsg('loginMsg', 'Invalid email or password.', 'error');
                 }
-            } catch {
-                displayMsg('loginMsg', 'Connection error. Please try again.', 'error');
+            } catch (err) {
+                displayMsg('loginMsg', 'System error. Try again.', 'error');
             }
         });
 
-        /* ── SIGNUP ── */
+        // Handle Local Signup
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(e.target));
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
             try {
                 const res = await fetch('/auth/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+
                 if (res.ok) {
-                    displayMsg('signupMsg', 'Account created! Redirecting to Sign In…', 'success');
+                    // 1. Show message on the Sign Up side
+                    displayMsg('signupMsg', 'Account created! Redirecting to Sign In...', 'success');
                     e.target.reset();
+
+                    // 2. Wait 2 seconds, then slide back to Sign In automatically
                     setTimeout(() => {
                         showSignIn();
-                        displayMsg('loginMsg', 'Account ready — please sign in.', 'success');
+                        // Optional: show a message on the login side too
+                        displayMsg('loginMsg', 'Success! You can now sign in.', 'success');
                     }, 2000);
+
                 } else {
                     const errData = await res.json().catch(() => ({}));
-                    displayMsg('signupMsg', errData.message || 'Signup failed. Please try again.', 'error');
+                    displayMsg('signupMsg', errData.message || 'Signup failed.', 'error');
                 }
-            } catch {
-                displayMsg('signupMsg', 'Connection error. Please try again.', 'error');
+            } catch (err) {
+                displayMsg('signupMsg', 'Connection error.', 'error');
             }
         });
     </script>
 </body>
-
 </html>
