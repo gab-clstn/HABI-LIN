@@ -1,1067 +1,1197 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HABI-LIN | Settings</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
-
-  <script src="global.js"></script>
-
-  <style>
-    .icon {
-      display: inline-block;
-      width: 1em;
-      height: 1em;
-      vertical-align: -0.125em;
-      fill: currentColor;
-      flex-shrink: 0;
-    }
-
-    .icon-sm {
-      width: 0.85em;
-      height: 0.85em;
-    }
-
-    .icon-lg {
-      width: 1.25em;
-      height: 1.25em;
-    }
-
-    .icon-2xl {
-      width: 2em;
-      height: 2em;
-    }
-  </style>
-
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-    <symbol id="icon-sliders" viewBox="0 0 512 512">
-      <path
-        d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128-80c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zM0 256c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 256c-17.7 0-32-14.3-32 32zM416 96c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96z" />
-    </symbol>
-    <symbol id="icon-user" viewBox="0 0 448 512">
-      <path
-        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
-    </symbol>
-    <symbol id="icon-shield" viewBox="0 0 512 512">
-      <path
-        d="M369.9 97.9L186.1 14.2c-3.3-2-6.9-3.4-10.9-3.6c-10.1-1-19.8 4.3-23.9 13.2L10.9 242.4c-10 21.8-10.8 45.4-2.1 67.9l82 197.3c5.4 13 15.8 23.8 28.9 28.5c13.9 5.3 29.6 5.3 43.5 0l192.6-80.6c10.6-4.5 19.5-12.8 25.2-23.2l92.7-223.6c7.3-17.6 9.7-37.2 6.5-56.9L447 159.3c2.2-13.6-4.7-26.9-17.1-31.4zM224 384c-44.1 0-80-35.9-80-80s35.9-80 80-80s80 35.9 80 80s-35.9 80-80 80z" />
-    </symbol>
-    <symbol id="icon-circle-user" viewBox="0 0 512 512">
-      <path
-        d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0-192 96 96 0 1 1 0 192z" />
-    </symbol>
-    <symbol id="icon-shield-halved" viewBox="0 0 512 512">
-      <path
-        d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 12.3 36.8 37.7 36.3 64.5c-8.3 135.3-74 232.6-175.5 284.4c-32.2 17-68.7 27.6-108.5 27.6c-39.8 0-76.3-10.6-108.5-27.6C74.3 379.7 8.6 282.4 .3 147.3C-.2 120.5 14.6 95.1 36.6 82.8L242.7 2.9C246.8 1 251.4 0 256 0z" />
-    </symbol>
-    <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
-      <path
-        d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
-    </symbol>
-    <symbol id="icon-bars" viewBox="0 0 448 512">
-      <path
-        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
-    </symbol>
-    <symbol id="icon-xmark" viewBox="0 0 384 512">
-      <path
-        d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-    </symbol>
-    <symbol id="icon-floppy-disk" viewBox="0 0 448 512">
-      <path
-        d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm96 96V64h64v64h-64zm0 192H64V160H224v160zm64 0V160h96v160h-96zm0-64H64v-32h160v32z" />
-    </symbol>
-    <symbol id="icon-lock" viewBox="0 0 448 512">
-      <path
-        d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 0C35.8 0 0 35.8 0 80V432c0 44.2 35.8 80 80 80H368c44.2 0 80-35.8 80-80V80c0-44.2-35.8-80-80-80H80zm0 224V80H368V224H80zm176 96c17.7 0 32 14.3 32 32s-14.3 32-32 32-32-14.3-32-32 14.3-32 32-32z" />
-    </symbol>
-    <symbol id="icon-trash" viewBox="0 0 448 512">
-      <path
-        d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64L32 128zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
-    </symbol>
-    <symbol id="icon-check" viewBox="0 0 512 512">
-      <path
-        d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
-    </symbol>
-    <symbol id="icon-exclamation-circle" viewBox="0 0 512 512">
-      <path
-        d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216v64zm24-120H224c-13.3 0-24-10.7-24-24V168c0-13.3 10.7-24 24-24h16c13.3 0 24 10.7 24 24v24c0 13.3-10.7 24-24 24z" />
-    </symbol>
-    <symbol id="icon-spinner" viewBox="0 0 512 512">
-      <path
-        d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zm0-294.2a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zM369.1 437a48 48 0 1 0 -76.2-57.8 48 48 0 1 0 76.2 57.8z" />
-    </symbol>
-  </svg>
-
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    :root {
-      --nav-height: 70px;
-      --brand: #2b0303;
-      --brand-mid: #4a0606;
-      --brand-light: #fdf2f2;
-      --bg: #fcfcfb;
-      --surface: #ffffff;
-      --border: #f0f0f0;
-      --border-color: #eee;
-      --text: #1a1a1a;
-      --danger: #d93025;
-      --success: #28a745;
-      --content-px: clamp(20px, 5vw, 80px);
-    }
-
-    html,
-    body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    .page-wrapper {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    /* === TOP NAVBAR === */
-    .sidebar {
-      width: 100%;
-      height: var(--nav-height);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      padding: 0 var(--content-px);
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      gap: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .sidebar-header h2 {
-      font-weight: 800;
-      letter-spacing: -1px;
-      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-      color: var(--brand);
-      white-space: nowrap;
-    }
-
-    .logo-link,
-    .logo-link h2 {
-      text-decoration: none;
-      color: var(--brand);
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex: 1;
-      gap: 4px;
-      margin-left: 32px;
-    }
-
-    .nav-item {
-      color: #666;
-      text-decoration: none;
-      padding: 8px 12px;
-      font-size: clamp(0.82rem, 1.3vw, 0.9rem);
-      font-weight: 500;
-      position: relative;
-      white-space: nowrap;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    .nav-item::after {
-      content: '';
-      position: absolute;
-      left: 12px;
-      bottom: 4px;
-      width: 0;
-      height: 2px;
-      background: var(--brand);
-      transition: width 0.3s ease;
-    }
-
-    .nav-item:hover {
-      color: var(--brand);
-      background: var(--brand-light);
-    }
-
-    .nav-item:hover::after,
-    .nav-item.active::after {
-      width: calc(100% - 24px);
-    }
-
-    .nav-item.active {
-      color: var(--brand);
-      font-weight: 700;
-    }
-
-    .nav-spacer {
-      margin-left: auto;
-    }
-
-    .logout {
-      color: var(--danger) !important;
-      font-weight: 600;
-    }
-
-    .logout:hover {
-      color: #a01f20 !important;
-    }
-
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      color: var(--brand);
-      font-size: 1.2rem;
-      margin-left: auto;
-      transition: background 0.2s;
-    }
-
-    .hamburger:hover {
-      background: var(--brand-light);
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-left: auto;
-    }
-
-    .user-text {
-      text-align: right;
-    }
-
-    .greeting {
-      display: block;
-      font-size: 0.72rem;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .user-info strong {
-      color: var(--text);
-      font-weight: 600;
-      font-size: 0.92rem;
-    }
-
-    .profile-circle {
-      width: 40px;
-      height: 40px;
-      background: #f0f0f0;
-      color: var(--brand);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid white;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, .06);
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      flex-shrink: 0;
-    }
-
-    .profile-circle:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
-    }
-
-    .mobile-drawer {
-      display: none;
-      position: fixed;
-      top: var(--nav-height);
-      left: 0;
-      width: 100%;
-      background: var(--surface);
-      border-bottom: 1px solid #eee;
-      z-index: 999;
-      padding: 12px 20px 20px;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
-      transform: translateY(-10px);
-      opacity: 0;
-      transition: transform 0.25s ease, opacity 0.25s ease;
-    }
-
-    .mobile-drawer.open {
-      display: flex;
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .mobile-drawer .nav-item {
-      display: block;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-    }
-
-    /* === MAIN CONTAINER === */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      margin-top: var(--nav-height);
-      overflow-x: hidden;
-    }
-
-    .top-header {
-      padding: clamp(16px, 3vw, 25px) var(--content-px);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-breadcrumb {
-      font-size: 0.83rem;
-      color: #888;
-      font-weight: 500;
-    }
-
-    .active-crumb {
-      color: var(--brand);
-    }
-
-    /* === SETTINGS LAYOUT === */
-    .settings-container {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 0;
-      overflow: hidden;
-      background: var(--surface);
-    }
-
-    /* === SETTINGS SIDEBAR === */
-    .settings-sidebar {
-      background: #fcfcfc;
-      border-right: 1px solid var(--border-color);
-      padding: 40px 20px;
-      overflow-y: auto;
-    }
-
-    .settings-menu-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      border: none;
-      background: transparent;
-      color: #666;
-      font-weight: 600;
-      font-size: 0.95rem;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-
-    .settings-menu-btn .icon {
-      width: 20px;
-      color: #888;
-    }
-
-    .settings-menu-btn:hover {
-      background: #f0f0f0;
-      color: var(--brand);
-    }
-
-    .settings-menu-btn.active {
-      background: var(--brand);
-      color: white;
-    }
-
-    .settings-menu-btn.active .icon {
-      color: white;
-    }
-
-    /* === SETTINGS BODY === */
-    .settings-body {
-      padding: 60px 80px;
-      overflow-y: auto;
-    }
-
-    .settings-body::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .settings-body::-webkit-scrollbar-track {
-      background: #f0f0f0;
-    }
-
-    .settings-body::-webkit-scrollbar-thumb {
-      background: #ddd;
-      border-radius: 4px;
-    }
-
-    .settings-body::-webkit-scrollbar-thumb:hover {
-      background: #bbb;
-    }
-
-    /* === PANES === */
-    .pane {
-      display: none;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    .pane.active {
-      display: block;
-    }
-
-    .pane-header {
-      margin-bottom: 40px;
-    }
-
-    .pane-header h2 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .pane-header p {
-      color: #888;
-      font-size: 1rem;
-      line-height: 1.5;
-    }
-
-    /* === FORM ELEMENTS === */
-    .form-section {
-      max-width: 600px;
-    }
-
-    .form-group {
-      margin-bottom: 25px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #444;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 10px;
-    }
-
-    .settings-input {
-      width: 100%;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #fcfcfb;
-      font-size: 0.95rem;
-      transition: all 0.2s ease;
-      outline: none;
-      font-family: inherit;
-    }
-
-    .settings-input:focus {
-      border-color: var(--brand);
-      background: var(--surface);
-      box-shadow: 0 0 0 4px rgba(43, 3, 3, 0.05);
-    }
-
-    /* === TOGGLE ROW === */
-    .toggle-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .toggle-text h4 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .toggle-text p {
-      font-size: 0.85rem;
-      color: #888;
-      margin-top: 4px;
-    }
-
-    /* === SWITCH TOGGLE === */
-    .switch {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #e0e0e0;
-      transition: 0.3s ease;
-      border-radius: 30px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background: white;
-      transition: 0.3s ease;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background: var(--brand);
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(20px);
-    }
-
-    /* === BUTTONS === */
-    .save-btn {
-      background: var(--brand);
-      color: white;
-      border: none;
-      padding: 14px 35px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 30px;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .save-btn:hover {
-      background: var(--brand-mid);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(43, 3, 3, .15);
-    }
-
-    .save-btn:active {
-      transform: translateY(0);
-    }
-
-    .save-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .save-btn .icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* === AVATAR SECTION === */
-    .avatar-container {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      padding: 20px;
-      background: #fcfcfb;
-      border-radius: 15px;
-      border: 1px solid #eee;
-    }
-
-    .avatar-preview {
-      width: 60px;
-      height: 60px;
-      background: #eee;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: var(--brand);
-      flex-shrink: 0;
-    }
-
-    .avatar-preview .icon {
-      width: 30px;
-      height: 30px;
-    }
-
-    .avatar-btn {
-      margin-top: 0 !important;
-      padding: 8px 16px !important;
-      font-size: 0.8rem !important;
-      background: var(--surface) !important;
-      color: var(--brand) !important;
-      border: 1px solid #ddd !important;
-    }
-
-    .avatar-btn:hover {
-      background: #f5f5f5 !important;
-      border-color: var(--brand) !important;
-    }
-
-    /* === DANGER LINK === */
-    .danger-link {
-      color: var(--danger);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 40px;
-      transition: all 0.2s ease;
-    }
-
-    .danger-link:hover {
-      color: #a01f20;
-      text-decoration: underline;
-    }
-
-    .danger-link .icon {
-      width: 14px;
-      height: 14px;
-    }
-
-    /* === ANIMATIONS === */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HABI-LIN | Settings</title>
+    
+    <script src="global.js"></script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <style>
+      .icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.125em;
+        fill: currentColor;
+        flex-shrink: 0;
+      }
+      .icon-sm { width: 0.85em; height: 0.85em; }
+      .icon-lg { width: 1.25em; height: 1.25em; }
+      .icon-2xl { width: 2em; height: 2em; }
+    </style>
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+      <symbol id="icon-sliders" viewBox="0 0 512 512">
+        <path d="M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128-80c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zM0 256c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 256c-17.7 0-32-14.3-32 32zM416 96c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96z" />
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 448 512">
+        <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 512 512">
+        <path d="M369.9 97.9L186.1 14.2c-3.3-2-6.9-3.4-10.9-3.6c-10.1-1-19.8 4.3-23.9 13.2L10.9 242.4c-10 21.8-10.8 45.4-2.1 67.9l82 197.3c5.4 13 15.8 23.8 28.9 28.5c13.9 5.3 29.6 5.3 43.5 0l192.6-80.6c10.6-4.5 19.5-12.8 25.2-23.2l92.7-223.6c7.3-17.6 9.7-37.2 6.5-56.9L447 159.3c2.2-13.6-4.7-26.9-17.1-31.4zM224 384c-44.1 0-80-35.9-80-80s35.9-80 80-80s80 35.9 80 80s-35.9 80-80 80z" />
+      </symbol>
+      <symbol id="icon-circle-user" viewBox="0 0 512 512">
+        <path d="M399 384.2C376.9 345.8 335.4 320 288 320H224c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0-192 96 96 0 1 1 0 192z" />
+      </symbol>
+      <symbol id="icon-shield-halved" viewBox="0 0 512 512">
+        <path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 12.3 36.8 37.7 36.3 64.5c-8.3 135.3-74 232.6-175.5 284.4c-32.2 17-68.7 27.6-108.5 27.6c-39.8 0-76.3-10.6-108.5-27.6C74.3 379.7 8.6 282.4 .3 147.3C-.2 120.5 14.6 95.1 36.6 82.8L242.7 2.9C246.8 1 251.4 0 256 0z" />
+      </symbol>
+      <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
+        <path d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
+      </symbol>
+      <symbol id="icon-bars" viewBox="0 0 448 512">
+        <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
+      </symbol>
+      <symbol id="icon-xmark" viewBox="0 0 384 512">
+        <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+      </symbol>
+      <symbol id="icon-floppy-disk" viewBox="0 0 448 512">
+        <path d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm96 96V64h64v64h-64zm0 192H64V160H224v160zm64 0V160h96v160h-96zm0-64H64v-32h160v32z" />
+      </symbol>
+      <symbol id="icon-lock" viewBox="0 0 448 512">
+        <path d="M144 144v48H304V144c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 0C35.8 0 0 35.8 0 80V432c0 44.2 35.8 80 80 80H368c44.2 0 80-35.8 80-80V80c0-44.2-35.8-80-80-80H80zm0 224V80H368V224H80zm176 96c17.7 0 32 14.3 32 32s-14.3 32-32 32-32-14.3-32-32 14.3-32 32-32z" />
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 448 512">
+        <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64L32 128zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 512 512">
+        <path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
+      </symbol>
+      <symbol id="icon-exclamation-circle" viewBox="0 0 512 512">
+        <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216v64zm24-120H224c-13.3 0-24-10.7-24-24V168c0-13.3 10.7-24 24-24h16c13.3 0 24 10.7 24 24v24c0 13.3-10.7 24-24 24z" />
+      </symbol>
+      <symbol id="icon-spinner" viewBox="0 0 512 512">
+        <path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zm0-294.2a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zM369.1 437a48 48 0 1 0 -76.2-57.8 48 48 0 1 0 76.2 57.8z" />
+      </symbol>
+    </svg>
+
+    <style>
+      /* --- PRESERVED ORIGINAL CSS FROM DASHBOARD + RESPONSIVE VARIABLES --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
       }
 
-      to {
+      :root {
+        --nav-height: 70px;
+        --brand: #2b0303;
+        --brand-mid: #4a0606;
+        --brand-light: #fdf2f2;
+        --bg: #fcfcfb;
+        --surface: #ffffff;
+        --border: #f0f0f0;
+        --border-color: #eee;
+        --text: #1a1a1a;
+        --danger: #d93025;
+        --success: #28a745;
+        --content-px: clamp(20px, 5vw, 80px);
+      }
+
+      html,
+      body {
+        height: 100%;
+        background-color: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+      }
+
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .dashboard-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      /* === TOP NAVBAR === */
+      .sidebar {
+        width: 100%;
+        height: var(--nav-height);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 var(--content-px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      }
+
+      .sidebar-header h2 {
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-right: clamp(20px, 5vw, 120px);
+        white-space: nowrap;
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+        color: var(--brand);
+      }
+
+      .logo-link,
+      .logo-link h2 {
+        text-decoration: none;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex: 1;
+        gap: 15px;
+      }
+
+      .nav-item {
+        color: #666;
+        text-decoration: none;
+        padding: 8px 12px;
+        margin: 0;
+        font-size: clamp(0.82rem, 1.3vw, 0.95rem);
+        font-weight: 500;
+        position: relative;
+        white-space: nowrap;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: color 0.2s, background 0.2s;
+      }
+
+      .nav-item::after {
+        content: "";
+        position: absolute;
+        left: 12px;
+        bottom: 4px;
+        width: 0;
+        height: 2px;
+        background-color: var(--brand);
+        transition: width 0.3s ease;
+      }
+
+      .nav-item:hover {
+        color: var(--brand);
+        background: var(--brand-light);
+      }
+
+      .nav-item:hover::after,
+      .nav-item.active::after {
+        width: calc(100% - 24px);
+      }
+
+      .nav-item.active {
+        color: var(--brand);
+        font-weight: 700;
+      }
+
+      .nav-spacer {
+        margin-left: auto;
+      }
+
+      .logout {
+        color: var(--danger) !important;
+        font-weight: 600;
+      }
+
+      .logout:hover {
+        color: #a01f20 !important;
+      }
+
+      .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 8px;
+        color: var(--brand);
+        font-size: 1.2rem;
+        margin-left: auto;
+        transition: background 0.2s;
+      }
+
+      .hamburger:hover {
+        background: var(--brand-light);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+
+      .user-text {
+        text-align: right;
+      }
+
+      .greeting {
+        display: block;
+        font-size: 0.72rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .user-info strong {
+        color: var(--text);
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+
+      .profile-circle {
+        width: 40px;
+        height: 40px;
+        background: #f0f0f0;
+        color: var(--brand);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        flex-shrink: 0;
+      }
+
+      .profile-circle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      }
+
+      .mobile-drawer {
+        display: none;
+        position: fixed;
+        top: var(--nav-height);
+        left: 0;
+        width: 100%;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border-color);
+        z-index: 999;
+        padding: 12px 20px 20px;
+        flex-direction: column;
+        gap: 4px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-10px);
+        opacity: 0;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+      }
+
+      .mobile-drawer.open {
+        display: flex;
+        transform: translateY(0);
         opacity: 1;
+      }
+
+      .mobile-drawer .nav-item {
+        display: block;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+      }
+
+      /* === MAIN CONTAINER === */
+      .main-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-top: var(--nav-height);
+        overflow-x: hidden;
+      }
+
+      .top-header {
+        background: transparent;
+        padding: clamp(16px, 3vw, 25px) var(--content-px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header-breadcrumb {
+        font-size: 0.83rem;
+        color: #888;
+        font-weight: 500;
+      }
+
+      .active-crumb {
+        color: var(--brand);
+      }
+
+      /* --- PROFESSIONAL SETTINGS CONTENT --- */
+      .settings-container {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 0;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .settings-sidebar {
+        background: #fcfcfc;
+        border-right: 1px solid var(--border-color);
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+
+      .settings-menu-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 8px;
+        text-align: left;
+      }
+
+      .settings-menu-btn .icon {
+        width: 20px;
+        color: #888;
+      }
+
+      .settings-menu-btn:hover {
+        background: #f0f0f0;
+        color: var(--brand);
+      }
+
+      .settings-menu-btn.active {
+        background: var(--brand);
+        color: white;
+      }
+
+      .settings-menu-btn.active .icon {
+        color: white;
+      }
+
+      .settings-body {
+        padding: 60px 80px;
+        overflow-y: auto;
+      }
+
+      .settings-body::-webkit-scrollbar {
+        width: 8px;
+      }
+      .settings-body::-webkit-scrollbar-track {
+        background: #f0f0f0;
+      }
+      .settings-body::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 4px;
+      }
+      .settings-body::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+      }
+
+      .pane {
+        display: none;
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      .pane.active {
+        display: block;
+      }
+
+      .pane-header {
+        margin-bottom: 40px;
+      }
+
+      .pane-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .pane-header p {
+        color: #888;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      /* Form Elements Refresh */
+      .form-section {
+        max-width: 600px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 10px;
+      }
+
+      .settings-input {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        background: #fcfcfb;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        outline: none;
+        font-family: inherit;
+      }
+
+      .settings-input:focus {
+        border-color: var(--brand);
+        background: var(--surface);
+        box-shadow: 0 0 0 4px rgba(43, 3, 3, 0.05);
+      }
+
+      /* Professional Toggle Row */
+      .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .toggle-text h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .toggle-text p {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 4px;
+      }
+
+      .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #e0e0e0;
+        transition: 0.3s ease;
+        border-radius: 30px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        transition: 0.3s ease;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background: var(--brand);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+
+      .save-btn {
+        background: var(--brand);
+        color: white;
+        border: none;
+        padding: 14px 35px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .save-btn:hover {
+        background: var(--brand-mid);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(43, 3, 3, 0.15);
+      }
+
+      .save-btn:active {
         transform: translateY(0);
       }
-    }
 
-   
-  </style>
-</head>
+      .save-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
 
-<body>
-  <div class="page-wrapper">
+      .save-btn .icon {
+        width: 16px;
+        height: 16px;
+      }
 
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <a href="dashboard.html" class="logo-link">
-          <h2 id="brand-logo">HABI-LIN</h2>
-        </a>
-      </div>
+      /* === AVATAR SECTION === */
+      .avatar-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #fcfcfb;
+        border-radius: 15px;
+        border: 1px solid #eee;
+      }
 
-      <nav class="sidebar-nav">
-        <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
-        <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
-        <a href="about.html" class="nav-item" id="about-link">About</a>
-        <div class="nav-spacer"></div>
-        <a href="settings.html" class="nav-item active" id="settings-link">Settings</a>
-        <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
-      </nav>
+      .avatar-preview {
+        width: 60px;
+        height: 60px;
+        background: #eee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--brand);
+        flex-shrink: 0;
+      }
 
-      <div class="user-info" style="margin-left:auto;">
-        <div class="user-text">
-          <span class="greeting" id="greeting-text">Hello,</span>
-          <strong id="user-firstname-sidebar">Weaver</strong>
+      .avatar-preview .icon {
+        width: 30px;
+        height: 30px;
+      }
+
+      .avatar-btn {
+        margin-top: 0 !important;
+        padding: 8px 16px !important;
+        font-size: 0.8rem !important;
+        background: var(--surface) !important;
+        color: var(--brand) !important;
+        border: 1px solid #ddd !important;
+      }
+
+      .avatar-btn:hover {
+        background: #f5f5f5 !important;
+        border-color: var(--brand) !important;
+      }
+
+      .danger-link {
+        color: var(--danger);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 40px;
+        transition: all 0.2s ease;
+      }
+
+      .danger-link:hover {
+        color: #a01f20;
+        text-decoration: underline;
+      }
+
+      .danger-link .icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- GLOBAL DARK MODE CLASSES --- */
+      body.dark-mode { background-color: #121214; color: #e0e0e0; }
+      body.dark-mode .sidebar { background: #1a1a1d; border-color: #333; }
+      body.dark-mode .sidebar-header h2 { color: #fdf2f2; }
+      body.dark-mode .settings-container { background: #1a1a1d; border-color: #333; }
+      body.dark-mode .settings-sidebar { background: #121214; border-color: #333; }
+      body.dark-mode .settings-input { background: #2a2a2d; border-color: #444; color: white; }
+      body.dark-mode .settings-menu-btn:hover { background: #2a2a2d; color: #fdf2f2; }
+      body.dark-mode .pane-header h2 { color: #fff; }
+      body.dark-mode .user-info strong { color: #fff; }
+      body.dark-mode .form-group label { color: #aaa; }
+      body.dark-mode .toggle-text h4 { color: #eee; }
+      body.dark-mode .avatar-container { background: #2a2a2d; border-color: #444; }
+      body.dark-mode .top-header { border-bottom-color: #333; }
+      body.dark-mode .toggle-row { border-bottom-color: #333; }
+
+      /* ── RESPONSIVE MEDIA QUERIES ── */
+      @media (max-width: 1024px) {
+        .sidebar-nav { margin-left: 12px; gap: 0; }
+        .nav-item { padding: 8px 8px; font-size: clamp(0.8rem, 1.4vw, 0.88rem); }
+        .settings-container { grid-template-columns: 220px 1fr; }
+        .settings-body { padding: 40px; }
+      }
+
+      @media (max-width: 768px) {
+        .hamburger { display: flex; align-items: center; justify-content: center; }
+        .sidebar-nav { display: none; }
+        .sidebar { padding: 0 16px; gap: 8px; }
+        .top-header { padding: 16px 16px 8px; }
+        .user-text { display: none; }
+        
+        .settings-container { 
+          display: flex; 
+          flex-direction: column; 
+          overflow-y: auto; 
+        }
+        
+        .settings-sidebar {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          padding: 16px;
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+          background: var(--surface);
+          scrollbar-width: none; /* Hide scrollbar for cleaner look */
+        }
+        .settings-sidebar::-webkit-scrollbar { display: none; }
+
+        .settings-menu-btn {
+          width: auto;
+          margin-bottom: 0;
+          margin-right: 8px;
+          white-space: nowrap;
+          padding: 10px 16px;
+        }
+
+        .settings-body { padding: 24px 16px 60px; overflow-y: visible; }
+        .pane-header { margin-bottom: 24px; }
+        .pane-header h2 { font-size: 1.5rem; }
+      }
+
+      @media (max-width: 420px) {
+        :root { --nav-height: 56px; }
+        .sidebar-header h2 { font-size: 1rem; }
+        .profile-circle { width: 34px; height: 34px; }
+        .toggle-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .switch { align-self: flex-end; }
+        .save-btn { width: 100%; justify-content: center; }
+        .avatar-container { flex-direction: column; text-align: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <a href="dashboard.html" class="logo-link">
+            <h2 id="brand-logo">HABI-LIN</h2>
+          </a>
         </div>
-        <a href="user-settings.html" class="profile-circle" id="profile-btn">
-          <svg class="icon" id="default-avatar-icon" aria-hidden="true">
-            <use href="#icon-user" />
+
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item" id="home-link">Home</a>
+          <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
+          <a href="about.html" class="nav-item" id="about-link">About</a>
+          <div class="nav-spacer"></div>
+          <a href="settings.html" class="nav-item active" id="settings-link">Settings</a>
+          <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
+        </nav>
+
+        <div class="user-info" style="margin-left:auto;">
+          <div class="user-text">
+            <span class="greeting" id="greeting-text">Hello,</span>
+            <strong id="user-firstname-sidebar">Weaver</strong>
+          </div>
+          <a href="user-settings.html" class="profile-circle" id="profile-btn">
+            <svg class="icon" id="default-avatar-icon" aria-hidden="true">
+              <use href="#icon-user" />
+            </svg>
+            <img id="user-photo" src="" alt="" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+          </a>
+        </div>
+
+        <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+          <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
+            <use href="#icon-bars" />
           </svg>
-          <img id="user-photo" src="" alt=""
-            style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
-        </a>
+        </button>
+      </aside>
+
+      <div class="mobile-drawer" id="mobile-drawer" role="navigation">
+        <a href="dashboard.html" class="nav-item">Home</a>
+        <a href="collection.html" class="nav-item">Collection</a>
+        <a href="about.html" class="nav-item">About</a>
+        <a href="settings.html" class="nav-item active">Settings</a>
+        <a href="/auth/logout" class="nav-item logout">Logout</a>
       </div>
 
-      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
-        <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
-          <use href="#icon-bars" />
-        </svg>
-      </button>
-    </aside>
+      <main class="main-container">
+        <header class="top-header">
+          <div class="header-breadcrumb">
+            <span>Dashboard</span> /
+            <span class="active-crumb">System Settings</span>
+          </div>
+        </header>
 
-    <div class="mobile-drawer" id="mobile-drawer" role="navigation">
-      <a href="dashboard.html" class="nav-item">Home</a>
-      <a href="collection.html" class="nav-item">Collection</a>
-      <a href="about.html" class="nav-item">About</a>
-      <a href="settings.html" class="nav-item active">Settings</a>
-      <a href="/auth/logout" class="nav-item logout">Logout</a>
-    </div>
+        <section class="settings-container">
+          <aside class="settings-sidebar">
+            <button class="settings-menu-btn active" onclick="tab(event, 'general')">
+              <svg class="icon" aria-hidden="true"><use href="#icon-sliders" /></svg>
+              <span id="stab-general">General</span>
+            </button>
+            <button class="settings-menu-btn" onclick="tab(event, 'account')">
+              <svg class="icon" aria-hidden="true"><use href="#icon-circle-user" /></svg>
+              <span id="stab-account">Account</span>
+            </button>
+            <button class="settings-menu-btn" onclick="tab(event, 'security')">
+              <svg class="icon" aria-hidden="true"><use href="#icon-shield-halved" /></svg>
+              <span id="stab-security">Security</span>
+            </button>
+          </aside>
 
-    <main class="main-container">
-      <header class="top-header">
-        <div class="header-breadcrumb">
-          <span>Dashboard</span> /
-          <span class="active-crumb">System Settings</span>
-        </div>
-      </header>
-
-      <section class="settings-container">
-        <aside class="settings-sidebar">
-          <button class="settings-menu-btn active" onclick="tab(event, 'general')">
-            <svg class="icon" aria-hidden="true">
-              <use href="#icon-sliders" />
-            </svg>
-            <span id="stab-general">General</span>
-          </button>
-          <button class="settings-menu-btn" onclick="tab(event, 'account')">
-            <svg class="icon" aria-hidden="true">
-              <use href="#icon-circle-user" />
-            </svg>
-            <span id="stab-account">Account</span>
-          </button>
-          <button class="settings-menu-btn" onclick="tab(event, 'security')">
-            <svg class="icon" aria-hidden="true">
-              <use href="#icon-shield-halved" />
-            </svg>
-            <span id="stab-security">Security</span>
-          </button>
-        </aside>
-
-        <div class="settings-body">
-          <div class="form-section">
-            <div id="general" class="pane active">
-              <div class="pane-header">
-                <h2 id="s-general-title">General Settings</h2>
-                <p id="s-general-desc">Manage your workspace preferences and localized experience.</p>
-              </div>
-
-              <div class="form-group">
-                <label id="s-lang-label">Interface Language</label>
-                <select class="settings-input" id="languageSelect">
-                  <option value="en">English (International)</option>
-                  <option value="fil">Filipino (National)</option>
-                  <option value="ilo">Ilocano</option>
-                </select>
-              </div>
-
-              <div class="toggle-row">
-                <div class="toggle-text">
-                  <h4 id="s-dark-title">Dark Appearance</h4>
-                  <p id="s-dark-desc">Switch between light and dark visual themes for the dashboard.</p>
+          <div class="settings-body">
+            <div class="form-section">
+              <div id="general" class="pane active">
+                <div class="pane-header">
+                  <h2 id="s-general-title">General Settings</h2>
+                  <p id="s-general-desc">Manage your workspace preferences and localized experience.</p>
                 </div>
-                <label class="switch">
-                  <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()" />
-                  <span class="slider"></span>
-                </label>
-              </div>
 
-              <div class="toggle-row">
-                <div class="toggle-text">
-                  <h4 id="s-hifi-title">High Fidelity Rendering</h4>
-                  <p id="s-hifi-desc">Enable high-precision 3D textures in the Weaving Studio.</p>
+                <div class="form-group">
+                  <label id="s-lang-label">Interface Language</label>
+                  <select class="settings-input" id="languageSelect">
+                    <option value="en">English (International)</option>
+                    <option value="fil">Filipino (National)</option>
+                    <option value="ilo">Ilocano</option>
+                  </select>
                 </div>
-                <label class="switch">
-                  <input type="checkbox" checked />
-                  <span class="slider"></span>
-                </label>
-              </div>
 
-              <button class="save-btn" onclick="saveLanguageSettings(this)">
-                <svg class="icon" aria-hidden="true">
-                  <use href="#icon-floppy-disk" />
-                </svg>
-                <span id="s-save-btn">Save Preferences</span>
-              </button>
-            </div>
-
-            <div id="account" class="pane">
-              <div class="pane-header">
-                <h2 id="s-account-title">Account Details</h2>
-                <p id="s-account-desc">Update your personal information and contact details.</p>
-              </div>
-
-              <div class="avatar-container">
-                <div class="avatar-preview">
-                  <svg class="icon" aria-hidden="true">
-                    <use href="#icon-user" />
-                  </svg>
+                <div class="toggle-row">
+                  <div class="toggle-text">
+                    <h4 id="s-dark-title">Dark Appearance</h4>
+                    <p id="s-dark-desc">Switch between light and dark visual themes for the dashboard.</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()" />
+                    <span class="slider"></span>
+                  </label>
                 </div>
-                <div>
-                  <button class="save-btn avatar-btn"
-                    onclick="alert('Please use the profile upload feature on the dashboard for now.')">
-                    <span id="s-change-avatar">Change Avatar</span>
-                  </button>
+
+                <div class="toggle-row">
+                  <div class="toggle-text">
+                    <h4 id="s-hifi-title">High Fidelity Rendering</h4>
+                    <p id="s-hifi-desc">Enable high-precision 3D textures in the Weaving Studio.</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" checked />
+                    <span class="slider"></span>
+                  </label>
                 </div>
+
+                <button class="save-btn" onclick="saveLanguageSettings(this)">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg>
+                  <span id="s-save-btn">Save Preferences</span>
+                </button>
               </div>
 
-              <div class="form-group">
-                <label id="s-fullname-label">Full Legal Name</label>
-                <input type="text" class="settings-input" id="full-name-input" placeholder="Full Name" />
+              <div id="account" class="pane">
+                <div class="pane-header">
+                  <h2 id="s-account-title">Account Details</h2>
+                  <p id="s-account-desc">Update your personal information and contact details.</p>
+                </div>
+
+                <div class="avatar-container">
+                  <div class="avatar-preview">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-user" /></svg>
+                  </div>
+                  <div>
+                    <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="uploadAvatar(event)" />
+                    
+                    <button class="save-btn avatar-btn" onclick="document.getElementById('avatar-upload-input').click()">
+                      <span id="s-change-avatar">Upload New Avatar</span>
+                    </button>
+                    
+                    <p id="avatar-upload-status" style="font-size: 0.75rem; font-weight: 600; margin-top: 8px; display: none;"></p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label id="s-fullname-label">Full Legal Name</label>
+                  <input type="text" class="settings-input" id="full-name-input" placeholder="Full Name" />
+                </div>
+
+                <div class="form-group">
+                  <label id="s-email-label">Email Address</label>
+                  <input type="email" class="settings-input" id="email-input" placeholder="email@example.com" />
+                </div>
+
+                <button class="save-btn" onclick="updateAccountSettings()">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg>
+                  <span id="s-update-account">Update Account</span>
+                </button>
+                <br />
+                <a href="#" class="danger-link">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-trash" /></svg>
+                  <span id="s-delete-account">Permanently delete my account</span>
+                </a>
               </div>
 
-              <div class="form-group">
-                <label id="s-email-label">Email Address</label>
-                <input type="email" class="settings-input" id="email-input" placeholder="email@example.com" />
+              <div id="security" class="pane">
+                <div class="pane-header">
+                  <h2 id="s-security-title">Security & Access</h2>
+                  <p id="s-security-desc">Protect your designs and patterns with robust security protocols.</p>
+                </div>
+
+                <div class="form-group">
+                  <label id="s-curr-pass-label">Current Password</label>
+                  <input type="password" id="current-password" class="settings-input" placeholder="••••••••" />
+                </div>
+
+                <div class="form-group">
+                  <label id="s-new-pass-label">New Secure Password</label>
+                  <input type="password" id="new-password" class="settings-input" placeholder="Enter new password" />
+                </div>
+
+                <button class="save-btn" onclick="updatePassword()">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg>
+                  <span id="s-update-security">Update Security</span>
+                </button>
               </div>
-
-              <button class="save-btn" onclick="updateAccountSettings()">
-                <svg class="icon" aria-hidden="true">
-                  <use href="#icon-floppy-disk" />
-                </svg>
-                <span id="s-update-account">Update Account</span>
-              </button>
-
-              <a href="#" class="danger-link">
-                <svg class="icon" aria-hidden="true">
-                  <use href="#icon-trash" />
-                </svg>
-                <span id="s-delete-account">Permanently delete my account</span>
-              </a>
-            </div>
-
-            <div id="security" class="pane">
-              <div class="pane-header">
-                <h2 id="s-security-title">Security & Access</h2>
-                <p id="s-security-desc">Protect your designs and patterns with robust security protocols.</p>
-              </div>
-
-              <div class="form-group">
-                <label id="s-curr-pass-label">Current Password</label>
-                <input type="password" id="current-password" class="settings-input" placeholder="••••••••" />
-              </div>
-
-              <div class="form-group">
-                <label id="s-new-pass-label">New Secure Password</label>
-                <input type="password" id="new-password" class="settings-input" placeholder="Enter new password" />
-              </div>
-
-              <button class="save-btn" onclick="updatePassword()">
-                <svg class="icon" aria-hidden="true">
-                  <use href="#icon-lock" />
-                </svg>
-                <span id="s-update-security">Update Security</span>
-              </button>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
-  </div>
+        </section>
+      </main>
+    </div>
 
-  <script>
-    // === LANGUAGE SAVE FUNCTION ===
-    // NOTE: translations dict and applyGlobalLanguage() come from global.js (loaded in <head>).
-    // We must NOT re-declare 'translations' here — a duplicate const declaration
-    // throws a SyntaxError that silently breaks every button and toggle on this page.
-    async function saveLanguageSettings(btn) {
-      // 1. Save and apply language
-      const selectedLang = document.getElementById("languageSelect").value;
-      sessionStorage.setItem("preferredLanguage", selectedLang);
-      applyGlobalLanguage();
+    <script>
+      // === LANGUAGE SAVE FUNCTION ===
+      async function saveLanguageSettings(btn) {
+        // 1. Save and apply language
+        const selectedLang = document.getElementById("languageSelect").value;
+        sessionStorage.setItem("preferredLanguage", selectedLang);
+        if(typeof applyGlobalLanguage === 'function') applyGlobalLanguage();
 
-      // 2. Save and apply theme — only happens HERE on Save click, not on toggle
-      const isDark = document.getElementById("darkModeToggle").checked;
-      const theme = isDark ? "dark" : "light";
-      applyGlobalTheme(isDark);
+        // 2. Save and apply theme
+        const isDark = document.getElementById("darkModeToggle").checked;
+        const theme = isDark ? "dark" : "light";
+        if(typeof applyGlobalTheme === 'function') applyGlobalTheme(isDark);
 
-      // 3. Persist theme to the server
-      try {
-        await fetch("/auth/update-theme", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ theme }),
-        });
-      } catch (err) {
-        console.error("Theme sync failed", err);
-      }
-
-      // 4. Show saved feedback
-      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Saved';
-      btn.style.background = "#28a745";
-      setTimeout(() => {
-        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Save Preferences';
-        btn.style.background = "";
-      }, 2000);
-    }
-
-    // === HAMBURGER ===
-    const hamburgerBtn = document.getElementById("hamburger-btn");
-    const mobileDrawer = document.getElementById("mobile-drawer");
-    hamburgerBtn.addEventListener("click", () => {
-      const isOpen = mobileDrawer.classList.toggle("open");
-      hamburgerBtn.setAttribute("aria-expanded", isOpen);
-      document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
-    });
-    function closeDrawer() {
-      mobileDrawer.classList.remove("open");
-      hamburgerBtn.setAttribute("aria-expanded", "false");
-      document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
-    }
-    document.addEventListener("click", (e) => {
-      if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
-    });
-
-    // === TAB SWITCHING ===
-    function tab(evt, paneId) {
-      document.querySelectorAll(".pane").forEach((p) => p.classList.remove("active"));
-      document.querySelectorAll(".settings-menu-btn").forEach((b) => b.classList.remove("active"));
-      document.getElementById(paneId).classList.add("active");
-      evt.currentTarget.classList.add("active");
-    }
-
-    // === ACCOUNT UPDATE ===
-    async function updateAccountSettings() {
-      const fullName = document.getElementById("full-name-input").value;
-      const email = document.getElementById("email-input").value;
-      const btn = document.querySelector("#account .save-btn");
-
-      if (!fullName || !email) return alert("Please fill in all fields.");
-
-      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-spinner" /></svg> Saving...';
-      btn.disabled = true;
-
-      try {
-        const response = await fetch("/auth/update-account", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: fullName, email: email }),
-        });
-
-        if (response.ok) {
-          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Changes Saved';
-          btn.style.background = "#28a745";
-          document.getElementById("user-firstname-sidebar").textContent = fullName.split(" ")[0];
-        } else {
-          throw new Error("Update failed");
+        // 3. Persist theme to the server
+        try {
+          await fetch("/auth/update-theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ theme }),
+          });
+        } catch (err) {
+          console.error("Theme sync failed", err);
         }
-      } catch (error) {
-        btn.innerHTML = 'Error';
-      } finally {
+
+        // 4. Show saved feedback
+        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Saved';
+        btn.style.background = "#28a745";
         setTimeout(() => {
-          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Update Account';
+          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Save Preferences';
           btn.style.background = "";
-          btn.disabled = false;
         }, 2000);
       }
-    }
 
-    // === UPDATE PASSWORD ===
-    async function updatePassword() {
-      const currentPassword = document.getElementById("current-password").value;
-      const newPassword = document.getElementById("new-password").value;
-      const btn = document.querySelector("#security .save-btn");
-
-      if (!currentPassword || !newPassword) return alert("Please fill both fields");
-
-      btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-spinner" /></svg> Updating...';
-      btn.disabled = true;
-
-      try {
-        const response = await fetch("/auth/update-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ currentPassword, newPassword }),
-        });
-
-        if (response.ok) {
-          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Password Updated';
-          btn.style.background = "#28a745";
-          document.getElementById("current-password").value = "";
-          document.getElementById("new-password").value = "";
-        } else {
-          alert("Check current password.");
-        }
-      } catch (error) {
-        btn.innerHTML = 'Error';
-      } finally {
-        setTimeout(() => {
-          btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
-          btn.style.background = "";
-          btn.disabled = false;
-        }, 2000);
+      // === HAMBURGER ===
+      const hamburgerBtn = document.getElementById("hamburger-btn");
+      const mobileDrawer = document.getElementById("mobile-drawer");
+      hamburgerBtn.addEventListener("click", () => {
+        const isOpen = mobileDrawer.classList.toggle("open");
+        hamburgerBtn.setAttribute("aria-expanded", isOpen);
+        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
+      });
+      function closeDrawer() {
+        mobileDrawer.classList.remove("open");
+        hamburgerBtn.setAttribute("aria-expanded", "false");
+        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
       }
-    }
+      document.addEventListener("click", (e) => {
+        if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
+      });
 
-    // === THEME TOGGLE ===
-    // The checkbox itself does NOT apply the theme immediately.
-    // Theme is only applied + saved when the user clicks "Save Preferences".
-    // This is a no-op kept so the onchange attribute in HTML doesn't error.
-    function toggleTheme() {
-      // intentionally empty — actual apply + save happens in saveLanguageSettings()
-    }
-
-    // === INITIALIZATION ===
-    document.addEventListener("DOMContentLoaded", async () => {
-      // 1. Check for saved language and inject it
-      const savedLang = sessionStorage.getItem("preferredLanguage") || "en";
-      document.getElementById("languageSelect").value = savedLang;
-      applyGlobalLanguage();
-
-      // 2. Sync toggle UI with what global.js already applied to <html>
-      // global.js runs before DOMContentLoaded and has already applied the
-      // correct class to <html>, so we just read localStorage here.
-      if (localStorage.getItem("theme") === "dark") {
-        document.getElementById("darkModeToggle").checked = true;
-      } else {
-        document.getElementById("darkModeToggle").checked = false;
+      // === TAB SWITCHING ===
+      function tab(evt, paneId) {
+        document.querySelectorAll(".pane").forEach((p) => p.classList.remove("active"));
+        document.querySelectorAll(".settings-menu-btn").forEach((b) => b.classList.remove("active"));
+        document.getElementById(paneId).classList.add("active");
+        evt.currentTarget.classList.add("active");
       }
 
-      // 3. Fetch User Session Data (Kept for populating user info)
-      try {
-        const response = await fetch("/auth/user");
-        const user = await response.json();
-        
-        if (user) {
-          document.getElementById("user-firstname-sidebar").textContent = user.name.split(" ")[0];
-          document.getElementById("full-name-input").value = user.name || "";
-          document.getElementById("email-input").value = user.email || "";
+      // === ACCOUNT UPDATE ===
+      async function updateAccountSettings() {
+        const fullName = document.getElementById("full-name-input").value;
+        const email = document.getElementById("email-input").value;
+        const btn = document.querySelector("#account .save-btn");
 
-          // If the database says dark but localStorage doesn't yet reflect it,
-          // align both and apply globally via applyGlobalTheme().
-          if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
-            applyGlobalTheme(true);
-            document.getElementById("darkModeToggle").checked = true;
-          } else if (user.theme === "light" && localStorage.getItem("theme") !== "light") {
-            applyGlobalTheme(false);
-            document.getElementById("darkModeToggle").checked = false;
+        if (!fullName || !email) return alert("Please fill in all fields.");
+
+        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-spinner" /></svg> Saving...';
+        btn.disabled = true;
+
+        try {
+          const response = await fetch("/auth/update-account", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: fullName, email: email }),
+          });
+
+          // Check if the server actually sent JSON
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+             throw new TypeError("Oops, we haven't got JSON from the server!");
           }
-        }
-      } catch (error) {
-        console.log("Session sync failed.");
-      }
-    });
-  </script>
-</body>
 
+          const data = await response.json();
+
+          if (response.ok) {
+            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Changes Saved';
+            btn.style.background = "#28a745";
+            document.getElementById("user-firstname-sidebar").textContent = fullName.split(" ")[0];
+          } else {
+            throw new Error(data.error || "Update failed");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          alert("Error: " + error.message);
+          btn.innerHTML = 'Error';
+          btn.style.background = "#d93025";
+        } finally {
+          setTimeout(() => {
+            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-floppy-disk" /></svg> Update Account';
+            btn.style.background = "";
+            btn.disabled = false;
+          }, 2000);
+        }
+      }
+
+      // === UPDATE PASSWORD ===
+      async function updatePassword() {
+        const currentPassword = document.getElementById("current-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const btn = document.querySelector("#security .save-btn");
+
+        if (!currentPassword || !newPassword) return alert("Please fill both fields");
+
+        btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-spinner" /></svg> Updating...';
+        btn.disabled = true;
+
+        try {
+          const response = await fetch("/auth/update-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword, newPassword }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-check" /></svg> Password Updated';
+            btn.style.background = "#28a745";
+            document.getElementById("current-password").value = "";
+            document.getElementById("new-password").value = "";
+          } else {
+            alert(data.error || "Check current password.");
+            btn.innerHTML = 'Update Failed';
+          }
+        } catch (error) {
+          btn.innerHTML = 'Error';
+        } finally {
+          setTimeout(() => {
+            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
+            btn.style.background = "";
+            btn.disabled = false;
+          }, 2000);
+        }
+      }
+
+      // === THEME TOGGLE ===
+      // The checkbox itself does NOT apply the theme immediately.
+      // Theme is only applied + saved when the user clicks "Save Preferences".
+      function toggleTheme() {
+        // intentionally empty — actual apply + save happens in saveLanguageSettings()
+      }
+
+      // === INITIALIZATION ===
+      document.addEventListener("DOMContentLoaded", async () => {
+        // 1. Check for saved language and inject it
+        const savedLang = sessionStorage.getItem("preferredLanguage") || "en";
+        document.getElementById("languageSelect").value = savedLang;
+        if(typeof applyGlobalLanguage === 'function') applyGlobalLanguage();
+
+        // 2. Sync toggle UI with what global.js already applied to <html>
+        if (localStorage.getItem("theme") === "dark") {
+          document.getElementById("darkModeToggle").checked = true;
+        } else {
+          document.getElementById("darkModeToggle").checked = false;
+        }
+
+        // 3. Fetch User Session Data
+        try {
+          const response = await fetch("/auth/user");
+          const user = await response.json();
+          
+          if (user) {
+            document.getElementById("user-firstname-sidebar").textContent = user.name.split(" ")[0];
+            document.getElementById("full-name-input").value = user.name || "";
+            document.getElementById("email-input").value = user.email || "";
+            
+            if (user.photo) {
+                const avatarPreview = document.querySelector(".avatar-preview");
+                if(avatarPreview) {
+                    avatarPreview.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+                    avatarPreview.style.border = "none";
+                }
+            }
+      
+      // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
+      async function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Keep it under 2MB so your MongoDB Atlas free tier doesn't fill up
+        if (file.size > 2 * 1024 * 1024) {
+          alert("File is too large! Please choose an image under 2MB.");
+          event.target.value = ""; 
+          return;
+        }
+
+        const statusText = document.getElementById("avatar-upload-status");
+        if(statusText) {
+            statusText.style.display = "block";
+            statusText.textContent = "Processing image...";
+            statusText.style.color = "#888";
+        }
+
+        // Convert the image file into a Base64 string
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Image = e.target.result;
+
+          try {
+            if(statusText) statusText.textContent = "Saving to database...";
+            
+            // Send as standard JSON
+            const res = await fetch("/auth/upload-photo", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ photo: base64Image })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.photo) {
+              const newPhotoUrl = data.photo; 
+
+              // 1. Update the large preview circle
+              const largePreview = document.querySelector(".avatar-preview");
+              if (largePreview) {
+                largePreview.innerHTML = `<img src="${newPhotoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:none;" />`;
+                largePreview.style.background = "transparent";
+              }
+              
+              // 2. Update the tiny sidebar circle
+              const sidebarImg = document.getElementById("user-photo");
+              const sidebarIcon = document.getElementById("default-avatar-icon");
+              
+              if (sidebarImg) {
+                sidebarImg.src = newPhotoUrl;
+                sidebarImg.style.display = "block"; 
+              }
+              if (sidebarIcon) {
+                sidebarIcon.style.display = "none"; 
+              }
+
+              if (window.windowCurrentUserObj) {
+                  window.windowCurrentUserObj.photo = newPhotoUrl;
+              }
+
+              if(statusText) {
+                  statusText.textContent = "Avatar updated successfully!";
+                  statusText.style.color = "#28a745";
+              }
+            } else {
+              throw new Error(data.error || "Failed to save avatar");
+            }
+          } catch (err) {
+            console.error("Upload error details:", err);
+            if(statusText) {
+                statusText.textContent = "Upload failed. Check terminal for errors.";
+                statusText.style.color = "#d93025";
+            }
+          }
+          
+          if(statusText) {
+              setTimeout(() => { statusText.style.display = "none"; }, 3000);
+          }
+        };
+        
+        // This triggers the conversion
+        reader.readAsDataURL(file);
+      }
+      
+            // Sync user DB theme preference with local storage if they mismatch
+            if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
+              if(typeof applyGlobalTheme === 'function') applyGlobalTheme(true);
+              document.getElementById("darkModeToggle").checked = true;
+            } else if (user.theme === "light" && localStorage.getItem("theme") !== "light") {
+              if(typeof applyGlobalTheme === 'function') applyGlobalTheme(false);
+              document.getElementById("darkModeToggle").checked = false;
+            }
+          }
+        } catch (error) {
+          console.log("Session sync failed.");
+        }
+      });
+    </script>
+  </body>
 </html>
