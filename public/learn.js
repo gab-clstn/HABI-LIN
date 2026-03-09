@@ -101,7 +101,7 @@ function initLearnLoom(pattern) {
     const ROW_SPACING     = 0.02;
     const BEATER_HIT_Z    = BASE_FRONT - 0.2;
     const MAX_ROWS_BEFORE_TAKEUP = 100;
-    const BEAT_DURATION   = 10; // Sped up for faster input handling
+    const BEAT_DURATION   = 10; 
 
     const zPositions = SHAFT_COUNT === 2
         ? [TOWER_Z - 0.25, TOWER_Z + 0.25]
@@ -118,6 +118,8 @@ function initLearnLoom(pattern) {
     let activeWeft   = null;
     let rowCounter   = 0;
     let fellZ        = BASE_FRONT - 0.12;
+    
+    let beaterHeld   = false;
     let beatTimer    = 0;
 
     let shuttleCurrentSide = -1;
@@ -171,8 +173,6 @@ function initLearnLoom(pattern) {
     resizeRenderer();
     window.addEventListener("resize", resizeRenderer);
 
-    // Use ResizeObserver so the renderer reacts to any container size change,
-    // not just window resize (e.g. sidebar collapsing, orientation change)
     const resizeObs = new ResizeObserver(resizeRenderer);
     resizeObs.observe(container);
 
@@ -443,7 +443,6 @@ function initLearnLoom(pattern) {
     createClothBase();
 
     function createLearnHUD() {
-        // Enable container queries on the studio div for responsive layout
         container.style.containerType = "inline-size";
         container.style.containerName = "learnStudio";
 
@@ -483,6 +482,18 @@ function initLearnLoom(pattern) {
                 font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;
                 border: 1px solid #333;
             }
+            
+            /* Pattern Panel Collapsed State */
+            #learnPatternPanel {
+                transition: height 0.3s ease, width 0.3s ease;
+            }
+            #learnPatternPanel.collapsed {
+                height: 38px !important;
+                min-height: 38px !important;
+            }
+            #learnPatternPanel.collapsed #learnPatternBody {
+                display: none !important;
+            }
 
             /* ── Responsive layout ── */
             @container learnStudio (max-width: 639px) {
@@ -498,8 +509,18 @@ function initLearnLoom(pattern) {
                     max-height: 55vh;
                     overflow-y: hidden;
                 }
-                #learnPatternPanel { display: none !important; }
                 #learnHUD .lhud-toggle { display: inline-block; }
+                
+                #learnPatternPanel { 
+                    display: flex !important;
+                    top: 12px !important;
+                    bottom: auto !important;
+                    right: 12px !important;
+                    left: auto !important;
+                    width: 180px !important;
+                    height: 140px !important;
+                    padding: 8px !important;
+                }
             }
 
             @container learnStudio (min-width: 640px) and (max-width: 899px) {
@@ -518,8 +539,8 @@ function initLearnLoom(pattern) {
                     bottom: 12px !important;
                     right: 12px !important;
                     left: auto !important;
-                    width: 260px !important;
-                    height: 150px !important;
+                    width: 280px !important;
+                    height: 200px !important;
                 }
             }
 
@@ -539,8 +560,8 @@ function initLearnLoom(pattern) {
                     bottom: 16px !important;
                     right: 16px !important;
                     left: auto !important;
-                    width: clamp(260px, 28%, 320px) !important;
-                    height: 190px !important;
+                    width: clamp(300px, 35%, 450px) !important;
+                    height: 260px !important;
                 }
             }
         `;
@@ -628,20 +649,38 @@ function initLearnLoom(pattern) {
             right:         "16px",
             left:          "auto",
             top:           "auto",
-            width:         "clamp(260px, 28%, 320px)",
-            height:        "160px",
+            width:         "clamp(300px, 35%, 450px)",
+            height:        "260px",
         });
         patPanel.innerHTML = `
-            <div style="font-size:0.72rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:1px; display:flex; justify-content:space-between; flex-shrink:0;">
+            <div id="learnPatternHeader" style="font-size:0.72rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; cursor:pointer; user-select:none;">
                 <span>Pattern Progress</span>
-                <span id="learnRowBadge" style="color:#00ff88;"></span>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <span id="learnRowBadge" style="color:#00ff88;"></span>
+                    <button id="learnPatternCollapseBtn" style="background:none; border:none; color:#888; cursor:pointer; font-size:0.75rem; padding:0;">▼</button>
+                </div>
             </div>
-            <div style="flex:1; overflow:hidden; background:#111; border-radius:6px; min-height:0;">
-                <canvas id="learnPatternCanvas" width="290" height="150"
+            <div id="learnPatternBody" style="flex:1; overflow:hidden; background:#111; border-radius:6px; min-height:0; transition: opacity 0.3s ease;">
+                <canvas id="learnPatternCanvas" width="380" height="200"
                     style="width:100%; height:100%; image-rendering:pixelated; display:block;"></canvas>
             </div>
         `;
+        
         container.appendChild(patPanel);
+
+        // Enable toggling the pattern panel
+        document.getElementById("learnPatternHeader").addEventListener("click", () => {
+            const isCollapsed = patPanel.classList.toggle("collapsed");
+            document.getElementById("learnPatternCollapseBtn").textContent = isCollapsed ? "▲" : "▼";
+            
+            // Re-render the canvas briefly after expanding so it fills the space correctly
+            if (!isCollapsed) {
+                setTimeout(() => {
+                    const rowNum = Math.min(lessonIndex, lessonPlan.length - 1);
+                    renderLearnPattern(rowNum);
+                }, 50);
+            }
+        });
 
         document.getElementById("autoPlayToggle").addEventListener("change", (e) => {
             autoPlay = e.target.checked;
@@ -680,7 +719,11 @@ function initLearnLoom(pattern) {
                 transform: "none", width: "100%", maxWidth: "100%",
                 borderRadius: "14px 14px 0 0", maxHeight: "55vh", overflowY: "auto",
             });
-            panel.style.display = "none";
+            Object.assign(panel.style, {
+                display: "flex", top: "12px", bottom: "auto",
+                left: "auto", right: "12px",
+                width: "180px", height: "140px", padding: "8px"
+            });
         } else if (width < 900) {
             const hudW = "260px";
             Object.assign(hud.style, {
@@ -691,7 +734,7 @@ function initLearnLoom(pattern) {
             Object.assign(panel.style, {
                 display: "flex", top: "auto", bottom: "12px",
                 left: "auto", right: "12px",
-                width: "260px", height: "150px",
+                width: "280px", height: "200px",
             });
         } else {
             const hudW = Math.min(320, Math.max(260, Math.floor(width * 0.28))) + "px";
@@ -700,11 +743,18 @@ function initLearnLoom(pattern) {
                 transform: "none", width: hudW, maxWidth: "",
                 borderRadius: "16px", maxHeight: "calc(100% - 220px)", overflowY: "auto",
             });
+            const panelW = Math.min(450, Math.max(300, Math.floor(width * 0.35))) + "px";
             Object.assign(panel.style, {
                 display: "flex", top: "auto", bottom: "16px",
                 left: "auto", right: "16px",
-                width: hudW, height: "190px",
+                width: panelW, height: "260px",
             });
+        }
+        
+        // Re-render canvas on resize so it adapts to new dimensions if not collapsed
+        if (!panel.classList.contains("collapsed")) {
+            const rowNum = Math.min(lessonIndex, lessonPlan.length - 1);
+            renderLearnPattern(rowNum);
         }
     }
 
@@ -766,7 +816,13 @@ function initLearnLoom(pattern) {
 
         ["SHED", "SHUTTLE", "BEAT"].forEach(p => {
             const el = document.getElementById("phaseTab_" + p);
-            if (el) el.classList.toggle("active", p === currentPhase || (currentPhase.includes("ERROR") && p === "SHED"));
+            if (el) {
+                // Keep SHUTTLE tab lit up if we're in the RELEASE_PEDAL intermediate phase
+                const matchPhase = (currentPhase === "RELEASE_PEDAL" && p === "SHUTTLE") || 
+                                   (currentPhase === p) || 
+                                   (currentPhase.includes("ERROR") && p === "SHED");
+                el.classList.toggle("active", matchPhase);
+            }
         });
 
         const instr   = document.getElementById("learnInstruction");
@@ -784,15 +840,17 @@ function initLearnLoom(pattern) {
             if (nextBtn) { nextBtn.textContent = "Skip →"; nextBtn.style.background = "#00e5ff"; nextBtn.style.color = "#000"; }
         }
 
-        const pedalNames = step.pedals.map(p => `<kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">${p + 1}</kbd>`).join(" + ");
-        const dirArrow   = step.shuttleDir === "right" ? "→ right" : "← left";
+        const dirArrow = step.shuttleDir === "right" ? "→ right" : "← left";
+        
+        // This takes the pedal array (e.g. [0, 1]) and turns it into "1 + 2"
+        const pedalNamesText = step.pedals.map(p => p + 1).join(" + ");
 
         if (currentPhase === "ERROR_UNDO_SHED") {
             instr.style.borderLeftColor = "#d93025";
             const targetPedals = mistakeStack[mistakeStack.length - 1];
             let stackWarning = `<span style="color:#ffdd00; font-size:0.85em;">(${mistakeStack.length} mistakes stacked!)</span>`;
             
-            const wrongNames = Array.from(targetPedals).map(p => `<kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">${p + 1}</kbd>`).join(" + ");
+            const wrongNames = Array.from(targetPedals).map(p => `<kbd class="lhud-kbd">${p + 1}</kbd>`).join(" + ");
             
             instr.innerHTML = `<strong style="color:#d93025;">⚠️ Oops! Mistake Detected.</strong> ${stackWarning}<br>To clear the tangle, you must reopen the <b>exact</b> shed used for this mistake: <strong>${wrongNames}</strong>.`;
             keyHint.innerHTML = `Hold key(s) ${wrongNames} then press Space to pull back`;
@@ -816,37 +874,53 @@ function initLearnLoom(pattern) {
             } else {
                 instr.innerHTML = `<strong style="color:#ffdd00;">Physical Undo</strong><br>You threw the shuttle through a closed shed. Pull it back <strong>${undoArrow}</strong> to clear it.`;
             }
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to throw shuttle back`;
+            keyHint.innerHTML = `Press <kbd class="lhud-kbd">Space</kbd> to throw shuttle back`;
         }
         else if (currentPhase === "UNDO_READY") {
             instr.style.borderLeftColor = "#ff00ff";
-            const prevNames = lessonPlan[lessonIndex - 1].pedals.map(p => `<kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">${p + 1}</kbd>`).join(" + ");
+            const prevNames = lessonPlan[lessonIndex - 1].pedals.map(p => `<kbd class="lhud-kbd">${p + 1}</kbd>`).join(" + ");
             const undoArrow = shuttleCurrentSide === 1 ? "← left" : "→ right"; 
             instr.innerHTML = `<strong style="color:#ff00ff;">[UNDO MODE]</strong><br>Holding previous row pedals (<strong>${prevNames}</strong>). Throw shuttle <strong>${undoArrow}</strong> to rewind.`;
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to undo`;
-        }
-        else if (currentPhase === "SHUTTLE") {
-            instr.style.borderLeftColor = "#ffdd00";
-            instr.innerHTML = `${colorChangeText}Keep pedals held! Throw shuttle <strong style="color:#ffdd00;">${dirArrow}</strong> through shed.`;
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to throw the shuttle`;
+            keyHint.innerHTML = `Press <kbd class="lhud-kbd">Space</kbd> to undo`;
         }
         else if (currentPhase === "SHED") {
             instr.style.borderLeftColor = "#00e5ff";
             instr.innerHTML = step.pedals.length === 0
-                ? `No pedal needed — all shafts stay up for this row.`
-                : `Press pedal${step.pedals.length > 1 ? "s" : ""} <strong>${pedalNames}</strong> to lower shaft${step.pedals.length > 1 ? "s" : ""} <strong>${step.pedals.map(p => p + 1).join(" & ")}</strong> and open the shed.`;
+                ? `<strong>1. Open Shed</strong><br>No pedals needed for this row.`
+                : `<strong>1. Press Pedal(s) <strong>${pedalNamesText}</strong></strong><br>Press and hold pedal(s) <strong>${pedalNamesText}</strong> to open the shed.`;
+            
             keyHint.innerHTML = step.pedals.length === 0
-                ? `<span style="color:#555;">No key needed — press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">Space</kbd> to continue</span>`
-                : `Press key${step.pedals.length > 1 ? "s" : ""} ${pedalNames} on your keyboard`;
+                ? `<span style="color:#555;">Press <kbd class="lhud-kbd">Space</kbd> to continue</span>`
+                : `PC: Hold <kbd class="lhud-kbd">${step.pedals.map(p => p + 1).join("</kbd> + <kbd class='lhud-kbd'>")}</kbd> | ESP32: 1-4`;
+        }
+        else if (currentPhase === "SHUTTLE") {
+            instr.style.borderLeftColor = "#ffdd00";
+            instr.innerHTML = `${colorChangeText}<strong>2. Send Shuttle</strong><br>Keep pedals held! Throw shuttle <strong style="color:#ffdd00;">${dirArrow}</strong> through the shed.`;
+            keyHint.innerHTML = `PC: Press <kbd class="lhud-kbd">Space</kbd> | ESP32: S1S2 / S2S1`;
+        }
+        else if (currentPhase === "RELEASE_PEDAL") {
+            instr.style.borderLeftColor = "#ffaa00";
+            instr.innerHTML = `<strong>2B. Release Pedal(s)</strong><br>Let go of pedal(s) <strong>${pedalNamesText}</strong> before beating.`;
+            keyHint.innerHTML = `PC: Release keys | ESP32: 7-0 (auto-triggered on physical release)`;
         }
         else if (currentPhase === "BEAT") {
             instr.style.borderLeftColor = "#00ff88";
-            instr.innerHTML = `Beat the weft thread into place by swinging the beater forward.`;
-            keyHint.innerHTML = `Press <kbd style="background:#222;border:1px solid #555;border-radius:4px;padding:2px 6px;font-family:monospace;">0</kbd> to beat`;
+            if (!beaterHeld) {
+                instr.innerHTML = `<strong>3. Send the Beater Down</strong><br>Pull the beater forward to lock the thread in place.`;
+                keyHint.innerHTML = `PC: Press <kbd class="lhud-kbd">B</kbd> | ESP32: B`;
+            } else {
+                instr.innerHTML = `<strong>3. Put the Beater Back</strong><br>Return the beater to its resting position to complete the row.`;
+                keyHint.innerHTML = `PC: Press <kbd class="lhud-kbd">V</kbd> | ESP32: B_1`;
+            }
         }
 
         updateHighlights();
-        renderLearnPattern(rowNum);
+        
+        // Don't render if it's collapsed, it throws off the canvas calculations
+        const patPanel = document.getElementById("learnPatternPanel");
+        if (patPanel && !patPanel.classList.contains("collapsed")) {
+            renderLearnPattern(rowNum);
+        }
     }
 
     function updateHighlights() {
@@ -865,7 +939,8 @@ function initLearnLoom(pattern) {
             } else {
                 hl.material.color.setHex(0x00e5ff); 
                 hl.material.emissive.setHex(0x00e5ff);
-                hl.visible = (currentPhase === "SHED") && step.pedals.includes(i);
+                // Keep highlights visible during SHED, SHUTTLE, and RELEASE_PEDAL
+                hl.visible = (currentPhase === "SHED" || currentPhase === "SHUTTLE" || currentPhase === "RELEASE_PEDAL") && step.pedals.includes(i);
             }
         });
 
@@ -883,7 +958,7 @@ function initLearnLoom(pattern) {
                 shuttleHighlight.material.emissive.setHex(0xffdd00);
             }
         }
-        if (beaterHighlight) beaterHighlight.visible = (currentPhase === "BEAT");
+        if (beaterHighlight) beaterHighlight.visible = (currentPhase === "BEAT" && !beaterHeld);
     }
 
     function clearAllHighlights() {
@@ -903,7 +978,7 @@ function initLearnLoom(pattern) {
         const cs = Math.min(
             Math.max(1, Math.floor(c.clientWidth  / warpCount)),
             Math.max(1, Math.floor(c.clientHeight / rows.length)),
-            6
+            8 // Increased max cell size
         );
 
         c.width  = warpCount * cs;
@@ -990,6 +1065,15 @@ function initLearnLoom(pattern) {
             return;
         }
 
+        // Gate logic for forcing release before going to BEAT
+        if (currentPhase === "RELEASE_PEDAL") {
+            if (currentPressedPedals.size === 0) {
+                currentPhase = "BEAT";
+            }
+            refreshHUD();
+            return; 
+        }
+
         if (currentPhase === "SHED" || currentPhase === "SHUTTLE" || currentPhase === "UNDO_READY") {
             if (checkShedCorrect()) {
                 currentPhase = "SHUTTLE";  
@@ -1000,39 +1084,6 @@ function initLearnLoom(pattern) {
             }
             refreshHUD();
         }
-    }
-
-    function advancePhase() {
-        if (isTransitioning) return;
-
-        if (currentPhase === "SHED") {
-            currentPhase = "SHUTTLE";
-        }
-        else if (currentPhase === "SHUTTLE") {
-            currentPhase = "BEAT";
-            shuttleStartSide   = shuttleCurrentSide;
-            shuttleCurrentSide = -shuttleCurrentSide;
-            shuttleArmed    = true;
-            shuttleInserted = false;
-            lastShuttleX    = shuttleGroup.position.x;
-        }
-        else if (currentPhase === "BEAT") {
-            isTransitioning = true; 
-            beatTimer = BEAT_DURATION;
-            
-            setTimeout(() => {
-                lessonIndex++;
-                if (lessonIndex >= lessonPlan.length) {
-                    currentPhase = "DONE";
-                } else {
-                    currentPhase = "SHED";
-                    currentPressedPedals.clear(); 
-                }
-                isTransitioning = false; 
-                refreshHUD();
-            }, (BEAT_DURATION / 60) * 1000 + 100);
-        }
-        refreshHUD();
     }
 
     function skipCurrentPhase() {
@@ -1056,13 +1107,23 @@ function initLearnLoom(pattern) {
         }
         else if (currentPhase === "SHUTTLE") {
             triggerShuttleThrow(); 
+            if (currentPressedPedals.size > 0) {
+                currentPhase = "RELEASE_PEDAL";
+            } else {
+                currentPhase = "BEAT";
+            }
+            refreshHUD();
+        }
+        else if (currentPhase === "RELEASE_PEDAL") {
+            currentPressedPedals.clear();
             currentPhase = "BEAT";
             refreshHUD();
         }
         else if (currentPhase === "BEAT") {
             isTransitioning = true;
-            beatTimer = BEAT_DURATION;
+            beaterHeld = true; 
             setTimeout(() => {
+                beaterHeld = false;
                 lessonIndex++;
                 if (lessonIndex >= lessonPlan.length) currentPhase = "DONE";
                 else { 
@@ -1099,27 +1160,64 @@ function initLearnLoom(pattern) {
     function goToPrevStep() {
         if (lessonIndex === 0 && currentPhase === "SHED") return;
 
-        if (currentPhase !== "SHED") {
-            if (currentPhase === "BEAT" || currentPhase === "SHUTTLE") {
+        if (currentPhase === "BEAT") {
+            if (lessonPlan[lessonIndex].pedals.length > 0) {
+                currentPhase = "RELEASE_PEDAL";
+                lessonPlan[lessonIndex].pedals.forEach(p => currentPressedPedals.add(p));
+            } else {
+                currentPhase = "SHUTTLE";
+                const step = lessonPlan[lessonIndex];
+                shuttleCurrentSide = (step.shuttleDir === "right") ? -1 : 1;
+                shuttleGroup.position.x = shuttleCurrentSide * SHUTTLE_LIMIT;
+                shuttleInserted = false;
                 removeLastMistakeWeft();
             }
-            currentPhase = "SHED";
-            currentPressedPedals.clear();
-        } 
-        else {
-            if (lessonIndex > 0) {
-                lessonIndex--;
-                removeLastMistakeWeft();
-                currentPhase = "SHED";
-                currentPressedPedals.clear();
-            }
+            refreshHUD();
+            return;
         }
 
-        const step = lessonPlan[lessonIndex];
-        shuttleCurrentSide = (step.shuttleDir === "right") ? -1 : 1;
-        shuttleGroup.position.x = shuttleCurrentSide * SHUTTLE_LIMIT;
+        if (currentPhase === "RELEASE_PEDAL") {
+            currentPhase = "SHUTTLE";
+            const step = lessonPlan[lessonIndex];
+            shuttleCurrentSide = (step.shuttleDir === "right") ? -1 : 1;
+            shuttleGroup.position.x = shuttleCurrentSide * SHUTTLE_LIMIT;
+            shuttleInserted = false;
+            removeLastMistakeWeft();
+            refreshHUD();
+            return;
+        }
 
-        refreshHUD();
+        if (currentPhase === "SHUTTLE") {
+            currentPhase = "SHED";
+            currentPressedPedals.clear();
+            refreshHUD();
+            return;
+        }
+
+        if (currentPhase === "SHED") {
+            if (lessonIndex > 0) {
+                lessonIndex--;
+                removeLastWeftFull(); 
+                currentPhase = "BEAT"; 
+                currentPressedPedals.clear();
+                
+                const prevStep = lessonPlan[lessonIndex];
+                shuttleCurrentSide = (prevStep.shuttleDir === "right") ? 1 : -1;
+                shuttleGroup.position.x = shuttleCurrentSide * SHUTTLE_LIMIT;
+            }
+            refreshHUD();
+            return;
+        }
+        
+        if (currentPhase.includes("ERROR")) {
+            currentPhase = "SHED";
+            currentPressedPedals.clear();
+            removeLastMistakeWeft();
+            const step = lessonPlan[lessonIndex];
+            shuttleCurrentSide = (step.shuttleDir === "right") ? -1 : 1;
+            shuttleGroup.position.x = shuttleCurrentSide * SHUTTLE_LIMIT;
+            refreshHUD();
+        }
     }
 
     function removeActiveWeft() {
@@ -1203,6 +1301,7 @@ function initLearnLoom(pattern) {
     }
 
     function handleLearnKey(e) {
+        // Digits 1-4 HOLD pedals
         if (["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) {
             const idx = parseInt(e.code.replace("Digit","")) - 1;
             if (idx < SHAFT_COUNT) {
@@ -1210,13 +1309,25 @@ function initLearnLoom(pattern) {
                 evaluatePedalPhases();
             }
         }
+        
+        // ESP32 mapping: 7-0 RELEASES pedals (7 releases 1, 8 releases 2, etc.)
+        if (["Digit7","Digit8","Digit9","Digit0"].includes(e.code)) {
+            const releaseMap = { "Digit7": 0, "Digit8": 1, "Digit9": 2, "Digit0": 3 };
+            currentPressedPedals.delete(releaseMap[e.code]);
+            evaluatePedalPhases();
+        }
 
         if (e.code === "Space") {
             e.preventDefault();
             
             if (currentPhase === "SHUTTLE") {
-                currentPhase = "BEAT";
                 triggerShuttleThrow();
+                // Instead of jumping straight to BEAT, we check if pedals need releasing
+                if (currentPressedPedals.size > 0) {
+                    currentPhase = "RELEASE_PEDAL";
+                } else {
+                    currentPhase = "BEAT";
+                }
                 refreshHUD();
             }
             else if (currentPhase === "UNDO_READY") {
@@ -1230,15 +1341,11 @@ function initLearnLoom(pattern) {
                     currentPhase = "BEAT";
                     triggerShuttleThrow();
                 } else {
-                    // MISTAKE LOGIC: Stack the mistake.
                     mistakeStack.push(new Set(currentPressedPedals));
                     triggerShuttleThrow(); 
                     if (mistakeStack.length >= MAX_MISTAKES) {
                         showFloatingWarning("LOOM TANGLED: Undo the highlighted sheds.");
                     }
-                    // SMART GATE: Since the user is currently holding the exact pedals they just used to make the mistake, 
-                    // the shed is already perfectly primed to pull the shuttle back. 
-                    // This jumps straight to ERROR_UNDO_SHUTTLE without stacking a second mistake.
                     currentPhase = checkUndoShedCorrect() ? "ERROR_UNDO_SHUTTLE" : "ERROR_UNDO_SHED";
                 }
                 refreshHUD();
@@ -1258,7 +1365,6 @@ function initLearnLoom(pattern) {
                 refreshHUD();
             }
             else if (currentPhase === "ERROR_UNDO_SHED") {
-                // If they let go and threw the shuttle again through ANOTHER wrong shed, we stack the mistake as normal.
                 mistakeStack.push(new Set(currentPressedPedals));
                 triggerShuttleThrow();
                 showFloatingWarning("Mistake stacked! Tangle is getting worse.");
@@ -1267,32 +1373,34 @@ function initLearnLoom(pattern) {
             }
         }
 
-        if (e.code === "Digit0" || e.code === "Numpad0") {
-            if (currentPhase === "BEAT") {
-                isTransitioning = true;
-                beatTimer = BEAT_DURATION;
-                
-                setTimeout(() => {
-                    lessonIndex++;
-                    if (lessonIndex >= lessonPlan.length) {
-                        currentPhase = "DONE";
-                    } else {
-                        currentPhase = "SHED";
-                        currentPressedPedals.clear(); 
-                        evaluatePedalPhases(); 
-                    }
-                    isTransitioning = false;
-                    refreshHUD();
-                }, (BEAT_DURATION / 60) * 1000 + 100);
+        // Key B: Sends Beater Down (Hold)
+        if (e.code === "KeyB" || e.key === "b" || e.key === "B") {
+            if (currentPhase === "BEAT" && !beaterHeld) {
+                beaterHeld = true; 
+            }
+        }
+        
+        // Key V: Puts Beater Back (Release)
+        if (e.code === "KeyV" || e.key === "v" || e.key === "V") {
+            if (currentPhase === "BEAT" && beaterHeld) {
+                beaterHeld = false;
+                lessonIndex++;
+                if (lessonIndex >= lessonPlan.length) {
+                    currentPhase = "DONE";
+                } else {
+                    currentPhase = "SHED";
+                    currentPressedPedals.clear(); 
+                }
+                refreshHUD();
             }
         }
     }
 
     function handleLearnKeyUp(e) {
+        // PC keyboard naturally releasing pedals
         if (["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) {
             const idx = parseInt(e.code.replace("Digit","")) - 1;
             currentPressedPedals.delete(idx);
-            
             evaluatePedalPhases();
         }
     }
@@ -1305,7 +1413,7 @@ function initLearnLoom(pattern) {
             const isPressed   = currentPressedPedals.has(i);
             const targetY     = isPressed ? SHED_CLOSED_Y : SHED_OPEN_Y;
             const targetAngle = isPressed ? 3 * (Math.PI / 180) : 13 * (Math.PI / 180);
-            // Sped up from 0.15 to 0.4
+            
             if (pedalPivotGroups[i]) pedalPivotGroups[i].rotation.x += (targetAngle - pedalPivotGroups[i].rotation.x) * 0.4;
             if (heddleFrames[i])     heddleFrames[i].position.y     += (targetY - heddleFrames[i].position.y) * 0.4;
             if (warpGroups[i]) {
@@ -1386,7 +1494,7 @@ function initLearnLoom(pattern) {
         const fromRight = shuttleStartSide ===  1 && shuttleGroup.position.x < 0;
         
         if (fromLeft || fromRight) { 
-            if (currentPhase === "BEAT") {
+            if (currentPhase === "BEAT" || currentPhase === "RELEASE_PEDAL") {
                 addWeftThread(); 
             }
             shuttleInserted = true; 
@@ -1404,8 +1512,7 @@ function initLearnLoom(pattern) {
         }
     }
 
-    function processBeat(beaterPressed, currentHitZ) {
-        if (!beaterPressed || beatTimer !== BEAT_DURATION - 1) return;
+    function processBeat(currentHitZ) {
         if (!activeWeft) return;
         const pos = activeWeft.line.geometry.attributes.position;
         for (let j = 0; j < pos.count; j++) {
@@ -1471,23 +1578,28 @@ function initLearnLoom(pattern) {
         tickAutoPlay();
         updateActiveWeftShape();
 
-        // Shuttle sped up to 0.35
         const targetX = shuttleCurrentSide * SHUTTLE_LIMIT;
         shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.35;
 
-        const beaterPressed = beatTimer > 0;
+        // Determine if beater is down (held or animating via skip/autoplay)
+        const beaterPressed = beaterHeld || beatTimer > 0;
         if (beatTimer > 0) beatTimer--;
 
         updateClothTakeup();
 
         const hitZ        = BEATER_HIT_Z - rowCounter * ROW_SPACING;
         const targetBeatZ = beaterPressed ? hitZ : BEATER_REST_Z;
-        // Beater sped up to 0.6 / 0.35
+        
         beaterGroup.position.z += (targetBeatZ - beaterGroup.position.z) * (beaterPressed ? 0.6 : 0.35);
 
         checkWeftInsertion();
         checkWeftReady();
-        processBeat(beaterPressed, hitZ);
+
+        // If in BEAT phase, the beater is being pressed down, and thread is loose, lock it in!
+        if (beaterPressed && currentPhase === "BEAT" && activeWeft && !activeWeft.isBeaten) {
+            processBeat(hitZ);
+            refreshHUD(); // Update instructions to tell user to put the beater back
+        }
 
         shuttleGroup.position.y = beaterGroup.position.y - 0.35;
         shuttleGroup.position.z = beaterGroup.position.z + 0.18;

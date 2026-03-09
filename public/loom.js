@@ -179,7 +179,7 @@ function injectLoomStyles() {
             top: clamp(10px, 2%, 20px);
             left: clamp(10px, 2%, 20px);
             width: clamp(160px, 18vw, 220px);
-            max-height: 80vh; /* Increased so the Save button isn't cut off */
+            max-height: 80vh; 
             background: rgba(13, 13, 18, 0.96);
             color: #e0e0e0;
             border: 1px solid #2a2a35;
@@ -199,7 +199,7 @@ function injectLoomStyles() {
 
         /* THE COLLAPSED STATE */
         .loom-panel.collapsed {
-            max-height: 48px !important; /* Just tall enough for the header & back button */
+            max-height: 48px !important; 
             min-height: 48px !important;
             padding-bottom: 0 !important;
             overflow: hidden !important;
@@ -217,7 +217,7 @@ function injectLoomStyles() {
             padding-bottom: 8px;
             border-bottom: 1px solid #2a2a35;
             gap: 6px;
-            cursor: pointer; /* Makes the whole header area clickable */
+            cursor: pointer; 
             user-select: none;
             margin-bottom: 0;
         }
@@ -350,57 +350,34 @@ function injectLoomStyles() {
             display: block;
         }
 
+        /* HARDWARE SIMULATOR CONTAINER (Hidden on phones) */
+        .hardware-sim-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .hardware-sim-container { display: none !important; }
+        }
+
         /* ── DESKTOP (>900px): Side-by-side layout ── */
         @media (min-width: 901px) {
-            .loom-panel {
-                width: clamp(200px, 18vw, 250px);
-                max-height: 50vh;
-            }
-            .loom-pattern-panel {
-                width: clamp(220px, 30vw, 450px);
-                height: clamp(150px, 25vh, 300px);
-            }
+            .loom-panel { width: clamp(200px, 18vw, 250px); max-height: 50vh; }
+            .loom-pattern-panel { width: clamp(220px, 30vw, 450px); height: clamp(150px, 25vh, 300px); }
         }
 
         /* ── TABLET (601–900px) ── */
         @media (min-width: 601px) and (max-width: 900px) {
-            .loom-panel {
-                width: clamp(150px, 20vw, 200px);
-                max-height: 45vh;
-            }
-            .loom-pattern-panel {
-                width: clamp(180px, 32vw, 300px);
-                height: clamp(120px, 20vh, 200px);
-            }
+            .loom-panel { width: clamp(150px, 20vw, 200px); max-height: 45vh; }
+            .loom-pattern-panel { width: clamp(180px, 32vw, 300px); height: clamp(120px, 20vh, 200px); }
         }
 
         /* ── MOBILE (≤600px): Re-arranged for better visibility ── */
         @media (max-width: 600px) {
-            .loom-panel {
-                top: 10px !important;
-                left: 10px !important;
-                bottom: auto !important;
-                width: auto !important;
-                min-width: 180px;
-                max-height: 60vh !important; /* Give plenty of room for Save button */
-                padding: 10px !important;
-            }
-
-            .loom-pattern-panel {
-                bottom: 0 !important;
-                right: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 28vh !important; /* Made this a teeny bit shorter! */
-                max-width: none !important;
-                border-radius: 16px 16px 0 0 !important;
-                border-bottom: none;
-            }
-
-            #patternCanvas {
-                width: 100% !important;
-                height: auto !important;
-            }
+            .loom-panel { top: 10px !important; left: 10px !important; width: auto !important; min-width: 180px; max-height: 60vh !important; padding: 10px !important; }
+            .loom-pattern-panel { bottom: 0 !important; right: 0 !important; left: 0 !important; width: 100% !important; height: 28vh !important; max-width: none !important; border-radius: 16px 16px 0 0 !important; border-bottom: none; }
+            #patternCanvas { width: 100% !important; height: auto !important; }
         }
     `;
     
@@ -455,7 +432,7 @@ function initLoom() {
     }
 
     //----------------------------------------------
-    // RUNTIME STATE
+    // RUNTIME STATE (HARDWARE / HOLD UPDATES)
     //----------------------------------------------
     const activeKeys = new Set();
     const pedalPivotGroups = [];
@@ -463,8 +440,10 @@ function initLoom() {
     const warpGroups = [];
     for (let i = 0; i < SHAFT_COUNT; i++) warpGroups.push([]);
 
-    // Multi-pedal support
+    // Hardware State Tracking
     let currentPressedPedals = new Set();
+    let isBeaterPulled = false;
+    let hasProcessedCurrentBeat = false;
 
     let beaterGroup, shuttleGroup, clothRoller;
     let weftThreads = [];
@@ -473,9 +452,6 @@ function initLoom() {
     let rowCounter = 0;
     let weftColorHistory = (loomConfig.rowColors && Array.isArray(loomConfig.rowColors)) ? Array.from(loomConfig.rowColors) : [];
     let fellZ = BASE_FRONT - 0.12;
-    
-    // ACTION QUEUE - Prevents skipped beats during hardware latency
-    let queuedBeat = false;
 
     // Shuttle pass state
     let shuttleSideToggle = false;
@@ -495,11 +471,6 @@ function initLoom() {
     let weftReadyToBeat = false;
     let shuttleCurrentSide = -1; // -1 = left, 1 = right
 
-    // Auto-shuttle for traditional loom
-    let pedalHoldTimer = 0;
-    let pedalHoldActive = false;
-    const PEDAL_AUTO_SHUTTLE_DELAY = 30; // ~0.5 sec at 60fps
-    let lastPedalState = false;
 
     //----------------------------------------------
     // THREE.JS SCENE SETUP
@@ -855,34 +826,140 @@ function initLoom() {
     createClothBase();
 
     //----------------------------------------------
-    // AUTO-SHUTTLE (traditional loom)
+    // HARDWARE COMMAND API (Bluetooth / Strict Protocol)
     //----------------------------------------------
-    function handleAutoShuttle() {
-        if (loomConfig.loomType !== "traditional") return;
-
-        const pedalPressed = currentPressedPedals.size > 0;
-
-        if (pedalPressed && !lastPedalState) {
-            pedalHoldActive = true;
-            pedalHoldTimer = PEDAL_AUTO_SHUTTLE_DELAY;
-        }
-
-        if (pedalHoldActive && pedalPressed) {
-            pedalHoldTimer--;
-            if (pedalHoldTimer <= 0) {
-                if (isShedOpenEnough()) {
-                    handleHardwareInput("S");
-                }
-                pedalHoldActive = false;
-            }
-        }
-
-        if (!pedalPressed) {
-            pedalHoldActive = false;
-        }
-
-        lastPedalState = pedalPressed;
+    function triggerShuttleThrow(targetSide) {
+        shuttleStartSide = -targetSide; // if moving to right (1), started at left (-1)
+        shuttleCurrentSide = targetSide;
+        shuttleArmed = true;
+        shuttleInserted = false;
+        lastShuttleX = shuttleGroup.position.x;
+        recordedSteps.push({ action: "shuttle" });
     }
+
+    function handleHardwareInput(data) {
+        data = data.trim();
+        console.log("Hardware Data Received:", data);
+
+        // 1. Pedal Downs (Press & Hold)
+        const pedalMapDown = { "1": 0, "2": 1, "3": 2, "4": 3 };
+        if (pedalMapDown[data] !== undefined) {
+            currentPressedPedals.add(pedalMapDown[data]);
+            recordedSteps.push({ action: "pedal", value: pedalMapDown[data] });
+            return;
+        }
+
+        // 2. Pedal Ups (Release 7, 8, 9, 0)
+        const pedalMapUp = { "7": 0, "8": 1, "9": 2, "0": 3 };
+        if (pedalMapUp[data] !== undefined) {
+            currentPressedPedals.delete(pedalMapUp[data]);
+            return;
+        }
+
+        // Multiple concurrent pedals sent via comma (legacy safe fallback)
+        if (data.includes(",")) {
+            currentPressedPedals.clear();
+            data.split(",").forEach(p => {
+                const pedalIdx = parseInt(p) - 1;
+                if (!isNaN(pedalIdx)) currentPressedPedals.add(pedalIdx);
+            });
+            recordedSteps.push({ action: "pedals", value: Array.from(currentPressedPedals) });
+            return;
+        }
+
+        if (data === "R") {
+            currentPressedPedals.clear();
+            return;
+        }
+
+        // 3. Beater PULL (Hold)
+        if (data === "B" || data === "RFID_3" || data === "RFID_4") {
+            isBeaterPulled = true;
+            return;
+        }
+
+        // 4. Beater RELEASE 
+        if (data === "B_1" || data === "V") { 
+            isBeaterPulled = false;
+            hasProcessedCurrentBeat = false; // Resets for the next beat
+            return;
+        }
+
+        // 5. Shuttle (S1S2 = left to right, S2S1 = right to left)
+        if (data === "S1S2") { // Left to Right
+            triggerShuttleThrow(1);
+            return;
+        }
+
+        if (data === "S2S1") { // Right to Left
+            triggerShuttleThrow(-1);
+            return;
+        }
+    }
+
+    async function connectBLE() {
+        const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+        const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+        const btn = document.getElementById('bleConnect');
+
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'ESP32' }],
+                optionalServices: [SERVICE_UUID]
+            });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService(SERVICE_UUID);
+            const characteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
+
+            await characteristic.startNotifications();
+            characteristic.addEventListener('characteristicvaluechanged', (e) => {
+                const val = new TextDecoder().decode(e.target.value).trim();
+                handleHardwareInput(val);
+            });
+
+            btn.style.background = "#28a745";
+            btn.innerHTML = "Loom Connected";
+        } catch (err) {
+            console.error("BLE Error:", err);
+        }
+    }
+
+    //----------------------------------------------
+    // INPUT — KEYBOARD (LAPTOP CONTROLS ONLY)
+    //----------------------------------------------
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return; // Prevent hold spamming
+        
+        // Laptop keys 1-4 perfectly mimic the hardware push & hold behavior 
+        // by sending the exact string the hardware sends when pushed.
+        if (e.code === 'Digit1') handleHardwareInput("1");
+        if (e.code === 'Digit2') handleHardwareInput("2");
+        if (e.code === 'Digit3') handleHardwareInput("3");
+        if (e.code === 'Digit4') handleHardwareInput("4");
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (shuttleCurrentSide === -1) handleHardwareInput("S1S2"); // Throw right
+            else handleHardwareInput("S2S1"); // Throw left
+        }
+
+        if (e.code === 'KeyB') {
+            handleHardwareInput("B");
+        }
+        
+        if (e.code === 'KeyV') {
+            handleHardwareInput("B_1");
+        }
+    }, true);
+
+    // Laptop key release perfectly mimics the hardware letting go
+    // by sending the exact string the hardware sends when released.
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Digit1') handleHardwareInput("7");
+        if (e.code === 'Digit2') handleHardwareInput("8");
+        if (e.code === 'Digit3') handleHardwareInput("9");
+        if (e.code === 'Digit4') handleHardwareInput("0");
+    });
 
     //----------------------------------------------
     // WEFT / WEAVING LOGIC
@@ -932,17 +1009,6 @@ function initLoom() {
         shuttleDirectionChanges = 0;
     }
 
-    function undoLastWeft() {
-        if (weftThreads.length === 0) return;
-        const lastThread = weftThreads[weftThreads.length - 1];
-        if (lastThread.isBeaten) return;
-
-        scene.remove(lastThread.line);
-        weftThreads.pop();
-        patternHistory.pop();
-        activeWeft = null;
-    }
-
     function voidActiveWeft() {
         shuttleSideToggle = (shuttleCurrentSide === 1);
         weftReadyToBeat = false;
@@ -958,7 +1024,6 @@ function initLoom() {
         patternHistory.pop();
 
         activeWeft = null;
-        beatTimer = 0;
 
         shuttleDirectionChanges = 0;
         shuttleMovingPositive = null;
@@ -1012,136 +1077,6 @@ function initLoom() {
     }
 
     //----------------------------------------------
-    // HARDWARE (BLE / ESP32)
-    //----------------------------------------------
-    async function connectBLE() {
-        const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
-        const btn = document.getElementById('bleConnect');
-
-        try {
-            const device = await navigator.bluetooth.requestDevice({
-                filters: [{ name: 'ESP32' }],
-                optionalServices: [SERVICE_UUID]
-            });
-            const server = await device.gatt.connect();
-            const service = await server.getPrimaryService(SERVICE_UUID);
-            const characteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
-
-            await characteristic.startNotifications();
-            characteristic.addEventListener('characteristicvaluechanged', (e) => {
-                const val = new TextDecoder().decode(e.target.value).trim();
-                handleHardwareInput(val);
-            });
-
-            btn.style.background = "#28a745";
-            btn.innerHTML = "Loom Connected";
-        } catch (err) {
-            console.error("BLE Error:", err);
-        }
-    }
-
-    function handleHardwareInput(data) {
-        data = data.trim();
-        console.log("Hardware Data Received:", data);
-
-        if (data.includes(",")) {
-            currentPressedPedals.clear();
-            data.split(",").forEach(p => {
-                const pedalIdx = parseInt(p) - 1;
-                if (!isNaN(pedalIdx)) currentPressedPedals.add(pedalIdx);
-            });
-            recordedSteps.push({ action: "pedals", value: Array.from(currentPressedPedals) });
-            return;
-        }
-
-        if (["1", "2", "3", "4", "5"].includes(data)) {
-            const pedalIdx = parseInt(data) - 1;
-            currentPressedPedals.add(pedalIdx);
-            recordedSteps.push({ action: "pedal", value: pedalIdx });
-            return;
-        }
-
-        if (data === "0" || data === "R") {
-            currentPressedPedals.clear();
-            return;
-        }
-
-        if (data === "B") {
-            // STACKING LOGIC: If shuttle hasn't landed yet, queue the beat
-            if (activeWeft && !weftReadyToBeat) {
-                queuedBeat = true;
-                console.log("Input Stacked: Beat queued for shuttle arrival.");
-            } else {
-                beatTimer = BEAT_DURATION;
-            }
-            recordedSteps.push({ action: "beat" });
-            return;
-        }
-
-        if (data === "S") {
-            if (activeWeft && !activeWeft.isBeaten) {
-                console.log("Second press — pulling weft back.");
-                scene.remove(activeWeft.line);
-                activeWeft.line.geometry.dispose();
-                activeWeft.line.material.dispose();
-
-                weftThreads.pop();
-                patternHistory.pop();
-
-                activeWeft = null;
-                weftReadyToBeat = false;
-
-                shuttleCurrentSide = shuttleStartSide;
-                shuttleGroup.position.x = shuttleStartSide * SHUTTLE_LIMIT;
-
-                shuttleInserted = false;
-                shuttleArmed = false;
-                return;
-            }
-
-            shuttleStartSide = shuttleCurrentSide;
-            shuttleCurrentSide = -shuttleCurrentSide;
-
-            shuttleInserted = false;
-            shuttleArmed = true;
-
-            lastShuttleX = shuttleGroup.position.x;
-            recordedSteps.push({ action: "shuttle" });
-            return;
-        }
-    }
-
-    //----------------------------------------------
-    // INPUT — KEYBOARD
-    //----------------------------------------------
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'Digit1') handleHardwareInput("1");
-        if (e.code === 'Digit2') handleHardwareInput("2");
-        if (e.code === 'Digit3') handleHardwareInput("3");
-        if (e.code === 'Digit4') handleHardwareInput("4");
-
-        if (e.code === 'Space') {
-            e.preventDefault();
-            handleHardwareInput("S");
-        }
-
-        if (e.code === 'Digit0' || e.code === 'Numpad0') {
-            // Point to Hardware logic to use the new queuing system
-            handleHardwareInput("B");
-        }
-
-        if (e.code === 'KeyZ') undoLastWeft();
-    }, true);
-
-    window.addEventListener('keyup', (e) => {
-        if (['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
-            const pedalIdx = parseInt(e.code.replace('Digit', '')) - 1;
-            currentPressedPedals.delete(pedalIdx);
-        }
-    });
-
-    //----------------------------------------------
     // UI PANEL
     //----------------------------------------------
     function createUI() {
@@ -1159,7 +1094,7 @@ function initLoom() {
             <button id="bleConnect" class="loom-btn loom-btn--ble">Connect ESP32</button>
 
             <div class="loom-hint">
-                1-4: Shed &nbsp;|&nbsp; Space: Shuttle<br>0: Beat &nbsp;|&nbsp; Z: Undo
+                Hold 1-4: Shed &nbsp;|&nbsp; Space: Shuttle<br>Hold B: Beat &nbsp;|&nbsp; V: Release Beat
             </div>
 
             <hr class="loom-divider" />
@@ -1468,16 +1403,7 @@ function initLoom() {
         const reachedLeft  = shuttleStartSide ===  1 && shuttleGroup.position.x < -SHUTTLE_LIMIT * 0.9;
 
         if (activeWeft && (reachedRight || reachedLeft)) {
-            if (reachedRight) shuttleCurrentSide =  1;
-            if (reachedLeft)  shuttleCurrentSide = -1;
             weftReadyToBeat = true;
-
-            // --- QUEUE HANDLER: Cash in the beat if it was pressed while crossing ---
-            if (queuedBeat) {
-                beatTimer = BEAT_DURATION;
-                queuedBeat = false;
-                console.log("Input Stacked: Executing queued beat.");
-            }
         }
 
         const currentX = shuttleGroup.position.x;
@@ -1502,11 +1428,8 @@ function initLoom() {
         lastShuttleX = currentX;
     }
 
-    function processBeat(beaterPressed, currentHitZ) {
-        if (!beaterPressed || beatTimer !== BEAT_DURATION - 1) return;
-
+    function processBeat(currentHitZ) {
         if (!activeWeft || !weftReadyToBeat) {
-            beatTimer = 0;
             return;
         }
 
@@ -1530,6 +1453,7 @@ function initLoom() {
         shuttleDirectionChanges = 0;
         shuttleMovingPositive = null;
 
+        recordedSteps.push({ action: "beat" });
         render2DPattern();
     }
 
@@ -1591,27 +1515,27 @@ function initLoom() {
         requestAnimationFrame(animate);
 
         updateShafts();
-        handleAutoShuttle();
         updateActiveWeftShape();
 
         // SPEED BOOST: 0.35 multiplier
         const targetX = shuttleCurrentSide * SHUTTLE_LIMIT;
         shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.35;
 
-        const beaterPressed = beatTimer > 0;
-        if (beatTimer > 0) beatTimer--;
-
         updateClothTakeup();
 
         const currentHitZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
-        const targetBeaterZ = beaterPressed ? currentHitZ : BEATER_REST_Z;
+        const targetBeaterZ = isBeaterPulled ? currentHitZ : BEATER_REST_Z;
         // Beater sped up to 0.6 / 0.35
-        const lerpSpeed = beaterPressed ? 0.6 : 0.35;
+        const lerpSpeed = isBeaterPulled ? 0.6 : 0.35;
         beaterGroup.position.z += (targetBeaterZ - beaterGroup.position.z) * lerpSpeed;
 
         checkWeftInsertion();
         checkDirectionChanges();
-        processBeat(beaterPressed, currentHitZ);
+
+        if (isBeaterPulled && !hasProcessedCurrentBeat && weftReadyToBeat) {
+            processBeat(currentHitZ);
+            hasProcessedCurrentBeat = true;
+        }
 
         shuttleGroup.position.y = beaterGroup.position.y - 0.35;
         shuttleGroup.position.z = beaterGroup.position.z + 0.18;
