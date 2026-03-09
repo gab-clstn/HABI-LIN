@@ -73,9 +73,6 @@
       <symbol id="icon-spinner" viewBox="0 0 512 512">
         <path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zm0-294.2a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zM369.1 437a48 48 0 1 0 -76.2-57.8 48 48 0 1 0 76.2 57.8z" />
       </symbol>
-      <symbol id="icon-google" viewBox="0 0 488 512">
-        <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/>
-      </symbol>
     </svg>
 
     <style>
@@ -400,10 +397,19 @@
         overflow-y: auto;
       }
 
-      .settings-body::-webkit-scrollbar { width: 8px; }
-      .settings-body::-webkit-scrollbar-track { background: #f0f0f0; }
-      .settings-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
-      .settings-body::-webkit-scrollbar-thumb:hover { background: #bbb; }
+      .settings-body::-webkit-scrollbar {
+        width: 8px;
+      }
+      .settings-body::-webkit-scrollbar-track {
+        background: #f0f0f0;
+      }
+      .settings-body::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 4px;
+      }
+      .settings-body::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+      }
 
       .pane {
         display: none;
@@ -431,6 +437,7 @@
         line-height: 1.5;
       }
 
+      /* Form Elements Refresh */
       .form-section {
         max-width: 600px;
       }
@@ -467,6 +474,7 @@
         box-shadow: 0 0 0 4px rgba(43, 3, 3, 0.05);
       }
 
+      /* Professional Toggle Row */
       .toggle-row {
         display: flex;
         justify-content: space-between;
@@ -554,9 +562,19 @@
         box-shadow: 0 10px 20px rgba(43, 3, 3, 0.15);
       }
 
-      .save-btn:active { transform: translateY(0); }
-      .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-      .save-btn .icon { width: 16px; height: 16px; }
+      .save-btn:active {
+        transform: translateY(0);
+      }
+
+      .save-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .save-btn .icon {
+        width: 16px;
+        height: 16px;
+      }
 
       /* === AVATAR SECTION === */
       .avatar-container {
@@ -583,7 +601,10 @@
         flex-shrink: 0;
       }
 
-      .avatar-preview .icon { width: 30px; height: 30px; }
+      .avatar-preview .icon {
+        width: 30px;
+        height: 30px;
+      }
 
       .avatar-btn {
         margin-top: 0 !important;
@@ -611,118 +632,25 @@
         transition: all 0.2s ease;
       }
 
-      .danger-link:hover { color: #a01f20; text-decoration: underline; }
-      .danger-link .icon { width: 14px; height: 14px; }
-
-      /* ── SECURITY PANE: LOGIN METHOD BANNER ── */
-      .login-method-banner {
-        display: flex;
-        align-items: flex-start;
-        gap: 18px;
-        padding: 24px 28px;
-        border-radius: 16px;
-        border: 1.5px solid #e8e8e8;
-        background: #fafafa;
-        margin-bottom: 32px;
-      }
-
-      .login-method-banner.google-banner {
-        border-color: #dbeafe;
-        background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
-      }
-
-      .login-method-banner.facebook-banner {
-        border-color: #b3ceff;
-        background: linear-gradient(135deg, #e7f0ff 0%, #dce8ff 100%);
-      }
-
-      .login-method-banner.password-banner {
-        border-color: #fdf2f2;
-        background: linear-gradient(135deg, #fdf2f2 0%, #fff7f0 100%);
-      }
-
-      .login-method-icon {
-        width: 46px;
-        height: 46px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 1.3rem;
-      }
-
-      .google-banner .login-method-icon {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      }
-
-      .facebook-banner .login-method-icon {
-        background: #1877f2;
-        color: white;
-      }
-
-      .password-banner .login-method-icon {
-        background: var(--brand-light);
-        color: var(--brand);
-      }
-
-      .login-method-info h4 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 5px;
-      }
-
-      .login-method-info p {
-        font-size: 0.875rem;
-        color: #666;
-        line-height: 1.55;
-        margin: 0;
-      }
-
-      .social-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #444;
-        margin-top: 10px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      }
-
-      .social-badge.facebook-badge {
-        background: #e7f0ff;
-        border-color: #b3ceff;
-        color: #1877f2;
-      }
-
-      .social-badge .icon { width: 14px; height: 14px; }
-
-      .forgot-password-link {
-        display: inline-block;
-        font-size: 0.83rem;
-        color: var(--brand);
-        font-weight: 600;
-        text-decoration: none;
-        margin-top: 6px;
-        transition: color 0.2s;
-      }
-
-      .forgot-password-link:hover {
-        color: var(--brand-mid);
+      .danger-link:hover {
+        color: #a01f20;
         text-decoration: underline;
       }
 
+      .danger-link .icon {
+        width: 14px;
+        height: 14px;
+      }
+
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* --- GLOBAL DARK MODE CLASSES --- */
@@ -740,14 +668,6 @@
       body.dark-mode .avatar-container { background: #2a2a2d; border-color: #444; }
       body.dark-mode .top-header { border-bottom-color: #333; }
       body.dark-mode .toggle-row { border-bottom-color: #333; }
-      body.dark-mode .login-method-banner { background: #1e1e22; border-color: #333; }
-      body.dark-mode .login-method-banner.google-banner { background: #1a2535; border-color: #2a3f5f; }
-      body.dark-mode .login-method-banner.facebook-banner { background: #151e30; border-color: #1e3a6e; }
-      body.dark-mode .login-method-banner.password-banner { background: #1e1a1a; border-color: #3a2222; }
-      body.dark-mode .login-method-info h4 { color: #e5e5e7; }
-      body.dark-mode .login-method-info p { color: #98989f; }
-      body.dark-mode .social-badge { background: #2c2c2e; border-color: #444; color: #ccc; }
-      body.dark-mode .social-badge.facebook-badge { background: #1a2740; border-color: #1e3a6e; color: #6ba3f5; }
 
       /* ── RESPONSIVE MEDIA QUERIES ── */
       @media (max-width: 1024px) {
@@ -763,7 +683,13 @@
         .sidebar { padding: 0 16px; gap: 8px; }
         .top-header { padding: 16px 16px 8px; }
         .user-text { display: none; }
-        .settings-container { display: flex; flex-direction: column; overflow-y: auto; }
+        
+        .settings-container { 
+          display: flex; 
+          flex-direction: column; 
+          overflow-y: auto; 
+        }
+        
         .settings-sidebar {
           display: flex;
           flex-direction: row;
@@ -772,9 +698,10 @@
           border-right: none;
           border-bottom: 1px solid var(--border-color);
           background: var(--surface);
-          scrollbar-width: none;
+          scrollbar-width: none; /* Hide scrollbar for cleaner look */
         }
         .settings-sidebar::-webkit-scrollbar { display: none; }
+
         .settings-menu-btn {
           width: auto;
           margin-bottom: 0;
@@ -782,10 +709,10 @@
           white-space: nowrap;
           padding: 10px 16px;
         }
+
         .settings-body { padding: 24px 16px 60px; overflow-y: visible; }
         .pane-header { margin-bottom: 24px; }
         .pane-header h2 { font-size: 1.5rem; }
-        .login-method-banner { flex-direction: column; gap: 12px; }
       }
 
       @media (max-width: 420px) {
@@ -871,8 +798,6 @@
 
           <div class="settings-body">
             <div class="form-section">
-
-              <!-- ── GENERAL PANE ── -->
               <div id="general" class="pane active">
                 <div class="pane-header">
                   <h2 id="s-general-title">General Settings</h2>
@@ -916,7 +841,6 @@
                 </button>
               </div>
 
-              <!-- ── ACCOUNT PANE ── -->
               <div id="account" class="pane">
                 <div class="pane-header">
                   <h2 id="s-account-title">Account Details</h2>
@@ -929,9 +853,11 @@
                   </div>
                   <div>
                     <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg, image/webp" style="display: none;" onchange="uploadAvatar(event)" />
+                    
                     <button class="save-btn avatar-btn" onclick="document.getElementById('avatar-upload-input').click()">
                       <span id="s-change-avatar">Upload New Avatar</span>
                     </button>
+                    
                     <p id="avatar-upload-status" style="font-size: 0.75rem; font-weight: 600; margin-top: 8px; display: none;"></p>
                   </div>
                 </div>
@@ -957,17 +883,27 @@
                 </a>
               </div>
 
-              <!-- ── SECURITY PANE ── -->
               <div id="security" class="pane">
                 <div class="pane-header">
-                  <h2 id="s-security-title">Security &amp; Access</h2>
+                  <h2 id="s-security-title">Security & Access</h2>
                   <p id="s-security-desc">Protect your designs and patterns with robust security protocols.</p>
                 </div>
-                <div id="security-content">
-                  <!-- Populated by initSecurityPane() -->
-                </div>
-              </div>
 
+                <div class="form-group">
+                  <label id="s-curr-pass-label">Current Password</label>
+                  <input type="password" id="current-password" class="settings-input" placeholder="••••••••" />
+                </div>
+
+                <div class="form-group">
+                  <label id="s-new-pass-label">New Secure Password</label>
+                  <input type="password" id="new-password" class="settings-input" placeholder="Enter new password" />
+                </div>
+
+                <button class="save-btn" onclick="updatePassword()">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg>
+                  <span id="s-update-security">Update Security</span>
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -1006,7 +942,7 @@
         if (mobileDrawer && !mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
       });
 
-      // === AVATAR UPLOAD ===
+      // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
       async function uploadAvatar(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -1036,6 +972,7 @@
             const data = await response.json();
 
             if (response.ok && data.photo) {
+              // Update sidebar nav photo
               const navPhoto = document.getElementById("user-photo");
               if (navPhoto) {
                 navPhoto.src = data.photo;
@@ -1043,11 +980,12 @@
                 document.getElementById("default-avatar-icon").style.display = "none";
               }
 
+              // Update the preview circle in the settings page
               const avatarPreview = document.querySelector(".avatar-preview");
               if (avatarPreview) {
                 avatarPreview.innerHTML = `<img src="${data.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
               }
-
+              
               if (statusText) {
                 statusText.textContent = "Profile picture updated!";
                 statusText.style.color = "#28a745";
@@ -1136,7 +1074,7 @@
       async function updatePassword() {
         const currentPassword = document.getElementById("current-password").value;
         const newPassword = document.getElementById("new-password").value;
-        const btn = document.getElementById("update-password-btn");
+        const btn = document.querySelector("#security .save-btn");
 
         if (!currentPassword || !newPassword) return alert("Please fill both fields");
 
@@ -1157,126 +1095,22 @@
             document.getElementById("current-password").value = "";
             document.getElementById("new-password").value = "";
           } else {
-            alert(data.error || "Check your current password and try again.");
-            btn.style.background = "#d93025";
+            alert(data.error || "Check current password.");
           }
         } catch (error) {
           console.error(error);
-          alert("Server error. Please try again.");
         } finally {
           setTimeout(() => {
-            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> <span id="s-update-security">Update Security</span>';
+            btn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg> Update Security';
             btn.style.background = "";
             btn.disabled = false;
-          }, 2500);
+          }, 2000);
         }
       }
 
       // === THEME TOGGLE UI ===
       function toggleTheme() {
         // Handled in saveLanguageSettings
-      }
-
-      // ═══════════════════════════════════════════════════════════════
-      // SECURITY PANE: Detect login method → render correct UI
-      // Handles 3 cases: Google OAuth, Facebook OAuth, Email/Password
-      // ═══════════════════════════════════════════════════════════════
-      function initSecurityPane(user) {
-        const container = document.getElementById("security-content");
-        if (!container) return;
-
-        // Detect provider — uses backend field first, photo URL as fallback
-        const isGoogleUser =
-          user.provider === "google" ||
-          (typeof user.photo === "string" && user.photo.includes("googleusercontent.com"));
-
-        const isFacebookUser =
-          user.provider === "facebook" ||
-          (typeof user.photo === "string" && user.photo.includes("fbsbx.com")) ||
-          (typeof user.photo === "string" && user.photo.includes("fbcdn.net"));
-
-        if (isGoogleUser) {
-          // ── GOOGLE LOGIN ──
-          container.innerHTML = `
-            <div class="login-method-banner google-banner">
-              <div class="login-method-icon">
-                <svg style="width:26px;height:26px;" viewBox="0 0 488 512" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" fill="#4285F4"/>
-                </svg>
-              </div>
-              <div class="login-method-info">
-                <h4>Signed in with Google</h4>
-                <p>Your account is linked to Google. Password management is handled securely by Google — there is no separate password for this HABI-LIN account.</p>
-                <div class="social-badge">
-                  <svg style="width:12px;height:12px;" viewBox="0 0 488 512" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" fill="#4285F4"/>
-                  </svg>
-                  Google Account Connected
-                </div>
-              </div>
-            </div>
-            <p style="font-size:0.88rem;color:#888;line-height:1.6;">
-              To update your password or manage two-factor authentication, visit your
-              <a href="https://myaccount.google.com/security" target="_blank" rel="noopener noreferrer" style="color:var(--brand);font-weight:600;text-decoration:none;">Google Account Security settings</a>.
-            </p>
-          `;
-
-        } else if (isFacebookUser) {
-          // ── FACEBOOK LOGIN ──
-          container.innerHTML = `
-            <div class="login-method-banner facebook-banner">
-              <div class="login-method-icon">
-                <svg style="width:22px;height:22px;" viewBox="0 0 320 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M279.14 288l14.22-92.66h-88.91V133.41c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
-                </svg>
-              </div>
-              <div class="login-method-info">
-                <h4>Signed in with Facebook</h4>
-                <p>Your account is connected to Facebook. Password management is handled securely by Facebook — there is no separate password for this HABI-LIN account.</p>
-                <div class="social-badge facebook-badge">
-                  <svg style="width:12px;height:12px;" viewBox="0 0 320 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M279.14 288l14.22-92.66h-88.91V133.41c0-25.35 12.42-50.06 52.24-50.06H293V6.26S259.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>
-                  </svg>
-                  Facebook Account Connected
-                </div>
-              </div>
-            </div>
-            <p style="font-size:0.88rem;color:#888;line-height:1.6;">
-              To update your password or manage security settings, visit your
-              <a href="https://www.facebook.com/settings?tab=security" target="_blank" rel="noopener noreferrer" style="color:#1877f2;font-weight:600;text-decoration:none;">Facebook Security Settings</a>.
-            </p>
-          `;
-
-        } else {
-          // ── EMAIL / PASSWORD LOGIN ──
-          container.innerHTML = `
-            <div class="login-method-banner password-banner">
-              <div class="login-method-icon">
-                <svg class="icon icon-lg" aria-hidden="true"><use href="#icon-lock" /></svg>
-              </div>
-              <div class="login-method-info">
-                <h4>Signed in with Email &amp; Password</h4>
-                <p>Your account uses a standard email and password combination. You can update your password below at any time.</p>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label id="s-curr-pass-label">Current Password</label>
-              <input type="password" id="current-password" class="settings-input" placeholder="••••••••" autocomplete="current-password" />
-            </div>
-
-            <div class="form-group">
-              <label id="s-new-pass-label">New Secure Password</label>
-              <input type="password" id="new-password" class="settings-input" placeholder="Enter new password" autocomplete="new-password" />
-              <a href="/forgot-password" class="forgot-password-link">Forgot your current password?</a>
-            </div>
-
-            <button class="save-btn" id="update-password-btn" onclick="updatePassword()">
-              <svg class="icon" aria-hidden="true"><use href="#icon-lock" /></svg>
-              <span id="s-update-security">Update Security</span>
-            </button>
-          `;
-        }
       }
 
       // === INITIALIZATION ===
@@ -1289,23 +1123,23 @@
         // 2. Sync Theme Toggle UI
         const themeToggle = document.getElementById("darkModeToggle");
         if (themeToggle) {
-          themeToggle.checked = localStorage.getItem("theme") === "dark";
+            themeToggle.checked = localStorage.getItem("theme") === "dark";
         }
 
         // 3. Fetch User Session Data
         try {
           const response = await fetch("/auth/user");
           const user = await response.json();
-
+          
           if (user) {
             const sidebarName = document.getElementById("user-firstname-sidebar");
             if (sidebarName) sidebarName.textContent = user.name.split(" ")[0];
-
+            
             const nameInput = document.getElementById("full-name-input");
             const emailInput = document.getElementById("email-input");
             if (nameInput) nameInput.value = user.name || "";
             if (emailInput) emailInput.value = user.email || "";
-
+            
             if (user.photo) {
               const avatarPreview = document.querySelector(".avatar-preview");
               if (avatarPreview) {
@@ -1320,10 +1154,7 @@
               }
             }
 
-            // 4. Render Security pane based on login method
-            initSecurityPane(user);
-
-            // 5. Sync theme preference
+            // Sync user DB theme preference with local storage
             if (user.theme === "dark" && localStorage.getItem("theme") !== "dark") {
               if (typeof applyGlobalTheme === 'function') applyGlobalTheme(true);
               if (themeToggle) themeToggle.checked = true;
@@ -1334,7 +1165,6 @@
           }
         } catch (error) {
           console.log("Session sync failed.");
-          initSecurityPane({});
         }
       });
     </script>
