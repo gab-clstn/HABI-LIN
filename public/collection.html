@@ -758,38 +758,36 @@
 
   <script>
     /* ── GLOBAL VARIABLES ── */
-    let windowCurrentUserObj = null; // Save user globally so we can brand exports (from OG)
+    let windowCurrentUserObj = null; 
     let allPatterns = [];
-    let currentTab = "my"; // "my" or "all"
+    let currentTab = "my"; 
     let currentUserId = null;
+
+    /* ── HELPER: Safely get ID for comparison ── */
+    function getOwnerId(pattern) {
+      if (!pattern.userId) return null;
+      // Checks if userId is a populated object or a raw ID string
+      return (pattern.userId._id || pattern.userId).toString();
+    }
 
     /* ── TAB MANAGEMENT ── */
     const myPatternsTab = document.getElementById("my-patterns-tab");
     const allPatternsTab = document.getElementById("all-patterns-tab");
-    const sectionTitle = document.getElementById("section-title");
-    const sectionSubtitle = document.getElementById("section-subtitle");
 
     myPatternsTab.addEventListener("click", () => {
       currentTab = "my";
       myPatternsTab.classList.add("active");
       allPatternsTab.classList.remove("active");
-      
       document.getElementById("import-btn-wrapper").style.display = "none";
-      
-      const myOnly = allPatterns.filter(p => (p.userId === currentUserId || !p.userId) && p.isImported !== true);
-      renderPatternGrid(myOnly);
+      renderFiltered();
     });
 
     allPatternsTab.addEventListener("click", () => {
       currentTab = "all";
       allPatternsTab.classList.add("active");
       myPatternsTab.classList.remove("active");
-      
       document.getElementById("import-btn-wrapper").style.display = "inline-flex";
-      
-      // Filter out imported patterns before rendering
-      const sharedPatterns = allPatterns.filter(p => p.isImported !== true);
-      renderPatternGrid(sharedPatterns);
+      renderFiltered();
     });
 
     /* ── HAMBURGER ── */
@@ -812,9 +810,9 @@
     /* ── SEARCH SYNC ── */
     document.getElementById("mobile-search-input").addEventListener("input", (e) => {
       document.getElementById("collection-search-input").value = e.target.value;
-      filterPatterns(e.target.value);
+      renderFiltered();
     });
-    document.getElementById("collection-search-input").addEventListener("input", (e) => filterPatterns(e.target.value));
+    document.getElementById("collection-search-input").addEventListener("input", () => renderFiltered());
 
     /* ── USER SESSION ── */
     document.addEventListener("DOMContentLoaded", async () => {
@@ -825,9 +823,8 @@
         
         if (user) {
           windowCurrentUserObj = user; 
-          currentUserId = user._id || user.id; 
+          currentUserId = (user._id || user.id).toString(); 
           
-          // --- SIDEBAR PFP FIX ---
           const firstName = user.name.split(" ")[0];
           document.getElementById("user-firstname").textContent = firstName + "!";
           
@@ -844,78 +841,7 @@
       await loadPatterns();
     });
 
-    /* ── PATTERN HELPERS (OG Logic Preserved) ── */
-    function simulatePatternFromSteps(steps, shaftCount) {
-      const history = [];
-      const warpCount = 60;
-      const threading = [];
-      for (let i = 0; i < warpCount + 1; i++) threading.push(i % shaftCount);
-      let pressedPedals = new Set();
-
-      for (const step of steps) {
-        if (step.action === "pedal") pressedPedals.add(step.value);
-        else if (step.action === "pedals") pressedPedals = new Set(step.value);
-        else if (step.action === "beat") {
-          const shed = [];
-          for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
-          const rowStates = [];
-          for (let i = 0; i <= warpCount; i++) {
-            const shaft = threading[i % threading.length];
-            rowStates.push(shed[shaft]);
-          }
-          history.push(rowStates);
-        }
-      }
-      return history;
-    }
-
-    // OG Canvas Drawing Logic
-    function drawPatternOnCanvas(canvas, pattern) {
-      const patternRows = pattern.patternRows || [];
-      const fallbackWeft = pattern.weftColor || "#c0392b";
-      if (!canvas || patternRows.length === 0) return;
-
-      const warpCount = patternRows[0].length;
-      const rowCount  = patternRows.length;
-      const cellSize = Math.min(Math.max(1, Math.floor(canvas.width / warpCount)), Math.max(1, Math.floor(canvas.height / rowCount)), 8);
-
-      canvas.width  = warpCount * cellSize;
-      canvas.height = rowCount  * cellSize;
-      const ctx = canvas.getContext("2d");
-      
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const safeWarpColors = (pattern.warpColors && pattern.warpColors.length > 0) 
-          ? pattern.warpColors 
-          : ["#f0eadf", "#f0eadf", "#f0eadf", "#f0eadf"];
-
-      const shaftCount = pattern.loom === 'traditional' ? 2 : 4;
-      const map = (pattern.threadingMap && pattern.threadingMap.length > 0) 
-          ? pattern.threadingMap 
-          : (shaftCount === 2 ? [0,1] : [0,1,2,3]);
-
-      patternRows.forEach((rowStates, rowIndex) => {
-        const y = (rowCount - 1 - rowIndex) * cellSize;
-        const currentRowColor = (pattern.rowColors && pattern.rowColors[rowIndex]) ? pattern.rowColors[rowIndex] : fallbackWeft;
-
-        rowStates.forEach((isWarpUp, warpIndex) => {
-          const x = warpIndex * cellSize;
-          const hIdx = map.length > 0 ? map[warpIndex % map.length] : (warpIndex % shaftCount);
-          
-          // Draw Weft underneath
-          ctx.fillStyle = currentRowColor;
-          ctx.fillRect(x, y, cellSize, cellSize);
-
-          if (isWarpUp) {
-            // Draw Warp overlapping on top
-            ctx.fillStyle = safeWarpColors[hIdx] || "#ffffff"; 
-            ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize); 
-          }
-        });
-      });
-    }
-
+    /* ── DATA FETCHING ── */
     async function loadPatterns() {
       const grid = document.getElementById("pattern-grid");
       grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading patterns…</div>`;
@@ -923,204 +849,159 @@
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("Failed to fetch");
         allPatterns = await res.json();
-        
-        if (currentTab === "my") {
-            const myOnly = allPatterns.filter(p => (p.userId === currentUserId || !p.userId) && p.isImported !== true);
-            renderPatternGrid(myOnly);
-        } else {
-            // "All Patterns": Show community patterns + MY imported patterns (hide others' imports)
-            const sharedPatterns = allPatterns.filter(p => {
-                if (p.isImported === true) {
-                    return p.userId === currentUserId; 
-                }
-                return true; 
-            });
-            renderPatternGrid(sharedPatterns);
-        }
-
+        renderFiltered();
       } catch (err) {
-        grid.innerHTML = `<div class="empty-state"><svg class="icon icon-2xl" style="color:#ddd;display:block;margin:0 auto 18px;" aria-hidden="true"><use href="#icon-warning"/></svg><h3>Could not load patterns</h3><p>Make sure your server is running.</p></div>`;
+        grid.innerHTML = `<div class="empty-state"><h3>Could not load patterns</h3></div>`;
       }
     }
 
-    allPatternsTab.addEventListener("click", () => {
-      currentTab = "all";
-      allPatternsTab.classList.add("active");
-      myPatternsTab.classList.remove("active");
+    function renderFiltered() {
+      const query = document.getElementById("collection-search-input").value.toLowerCase().trim();
       
-      document.getElementById("import-btn-wrapper").style.display = "inline-flex";
-      
-      // "All Patterns": Show community patterns + MY imported patterns (hide others' imports)
-      const sharedPatterns = allPatterns.filter(p => {
-          if (p.isImported === true) {
-              return p.userId === currentUserId; 
-          }
-          return true; 
-      });
-      renderPatternGrid(sharedPatterns);
-    });
-
-    function filterPatterns(q) {
-      const query = q.toLowerCase().trim();
-      const filtered = allPatterns.filter(p =>
+      // Initial filter based on Search Input
+      let filtered = allPatterns.filter(p =>
         (p.name || "").toLowerCase().includes(query) ||
         (p.type || "").toLowerCase().includes(query) ||
-        (p.loom || "").toLowerCase().includes(query) ||
-        (p.creator || "").toLowerCase().includes(query) 
+        (p.creator || "").toLowerCase().includes(query)
       );
 
       if (currentTab === "my") {
-        renderPatternGrid(filtered.filter(p => (p.userId === currentUserId || !p.userId) && p.isImported !== true));
+        // Tab "My Patterns": Show native patterns where ID matches AND not imported
+        filtered = filtered.filter(p => 
+            getOwnerId(p) === currentUserId && p.isImported !== true
+        );
       } else {
-        // Apply the same privacy filter to search results on "All Patterns"
-        renderPatternGrid(filtered.filter(p => {
-            if (p.isImported === true) {
-                return p.userId === currentUserId; 
-            }
-            return true;
-        }));
+        // Tab "All Patterns": Server handles community visibility, but we filter others' imports just in case
+        filtered = filtered.filter(p => {
+          if (p.isImported === true) {
+            return getOwnerId(p) === currentUserId;
+          }
+          return true;
+        });
       }
+      renderPatternGrid(filtered);
     }
 
-    function getInitials(name) {
-      if (!name) return "?";
-      const parts = name.split(" ");
-      return parts.length > 1
-        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-        : parts[0].substring(0, 2).toUpperCase();
-    }
-
+    /* ── RENDER GRID ── */
     function renderPatternGrid(patterns) {
       const grid = document.getElementById("pattern-grid");
       if (!patterns || patterns.length === 0) {
         const emptyMessage = currentTab === "my"
           ? `<div class="empty-state"><span style="font-size:2.8rem;display:block;margin-bottom:16px;">🪡</span><h3>No patterns saved yet</h3><p>Head to the Weaving Studio and save your first design!</p></div>`
-          : `<div class="empty-state"><span style="font-size:2.8rem;display:block;margin-bottom:16px;">🧵</span><h3>No patterns found</h3><p>Try adjusting your search or check back later for new community patterns.</p></div>`;
+          : `<div class="empty-state"><span style="font-size:2.8rem;display:block;margin-bottom:16px;">🧵</span><h3>No patterns found</h3><p>Try adjusting your search or check back later for new patterns.</p></div>`;
         grid.innerHTML = emptyMessage;
         return;
       }
       grid.innerHTML = "";
 
       patterns.forEach(pattern => {
+        const isOwnPattern = getOwnerId(pattern) === currentUserId;
         const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-        const patternRows = pattern.patternRows && pattern.patternRows.length > 0
-            ? pattern.patternRows
-            : simulatePatternFromSteps(pattern.steps || [], shaftCount);
-            
         const lastSaved = pattern.created ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "Unknown date";
         const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
         
-        const isOwnPattern = pattern.userId === currentUserId || !pattern.userId;
-
-        // --- NAME LOGIC: Use actual name instead of "You" ---
-        let authorDisplay = pattern.creator || "Unknown Weaver";
-        
-        // If it's my pattern and NOT an import, use the name from my current session
-        if (isOwnPattern && pattern.isImported !== true && windowCurrentUserObj) {
-            authorDisplay = windowCurrentUserObj.name;
-        }
-
-        // Indicator Badge
-        let importBadge = "";
-        if (pattern.isImported === true) {
-            importBadge = ` <span style="font-size: 0.65rem; background: #e0e0e0; color: #444; padding: 2px 8px; border-radius: 4px; margin-left: 6px; font-weight: 800; vertical-align: middle;">IMPORTED</span>`;
-        }
-
-        const creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(authorDisplay)}${importBadge}</strong>`;
-
-        const cardActions = `
-          <div class="card-actions">
-            <button class="action-icon-btn btn-export-action export-btn" title="Export .habi file">
-              <svg class="icon" aria-hidden="true"><use href="#icon-download" /></svg>
-            </button>
-            ${isOwnPattern ? `
-            <button class="action-icon-btn btn-delete-action delete-btn" title="Delete pattern">
-              <svg class="icon" aria-hidden="true"><use href="#icon-trash" /></svg>
-            </button>` : ''}
-          </div>
-        `;
+        // Use populated creator name or fallback
+        const authorDisplay = pattern.creator || "Unknown Weaver";
+        const importBadge = pattern.isImported === true ? ` <span style="font-size: 0.65rem; background: #e0e0e0; color: #444; padding: 2px 8px; border-radius: 4px; margin-left: 6px; font-weight: 800; vertical-align: middle;">IMPORTED</span>` : "";
 
         const card = document.createElement("div");
         card.className = "pattern-card";
         card.innerHTML = `
         <div class="pattern-preview">
           <canvas class="pattern-canvas" width="300" height="180"></canvas>
-          ${cardActions}
+          <div class="card-actions">
+            <button class="action-icon-btn btn-export-action export-btn" title="Export .habi file">
+              <svg class="icon"><use href="#icon-download" /></svg>
+            </button>
+            ${isOwnPattern ? `
+            <button class="action-icon-btn btn-delete-action delete-btn" title="Delete pattern">
+              <svg class="icon"><use href="#icon-trash" /></svg>
+            </button>` : ''}
+          </div>
         </div>
         <div class="pattern-details">
           <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
           <p>
-            Saved ${lastSaved} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}
-            ${creatorText}
+            Saved ${lastSaved}<br>
+            <strong style="color:#555;">Created by: ${escapeHtml(authorDisplay)}${importBadge}</strong>
           </p>
           <div class="tag-row">
             <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
           </div>
         </div>`;
 
-        // RESUME CLICK LISTENER (from OG)
-        card.addEventListener("click", () => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest("button")) return;
           localStorage.setItem("resumePattern", JSON.stringify(pattern));
           window.location.href = "dashboard.html?action=resume";
         });
 
-        // Draw Canvas (using OG logic)
-        requestAnimationFrame(() => drawPatternOnCanvas(card.querySelector(".pattern-canvas"), pattern));
-
-        // EXPORT .HABI EVENT (from OG)
+        // Icon Button Listeners
         card.querySelector(".export-btn").addEventListener("click", (e) => {
-          e.stopPropagation(); 
-          
-          const exportData = { ...pattern };
-          
-          // 1. The new user claims the exported file:
-          exportData.creator = windowCurrentUserObj ? windowCurrentUserObj.name : "Unknown Weaver";
-          
-          // 2. The date resets to the exact moment they exported it:
-          exportData.created = Date.now(); 
-          
-          // Clean up any experimental fields
-          delete exportData.originalDate;
-          delete exportData.exportedDate;
-          
-          const dataStr = JSON.stringify(exportData, null, 2);
-          const blob = new Blob([dataStr], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          
-          a.href = url;
-          a.download = (exportData.name || "pattern").replace(/[^a-z0-9]/gi, '_').toLowerCase() + ".habi";
-          document.body.appendChild(a);
-          a.click();
-          
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+            e.stopPropagation();
+            exportHabi(pattern);
         });
 
-        // DELETE EVENT (from OG + Array filter)
-        const deleteBtn_elem = card.querySelector(".delete-btn");
-        if (deleteBtn_elem) {
-          deleteBtn_elem.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (!confirm(`Delete "${pattern.name}"?`)) return;
-            try {
-              const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
-              if (res.ok) {
-                card.style.transition = "opacity 0.3s,transform 0.3s";
-                card.style.opacity = "0";
-                card.style.transform = "scale(0.95)";
-                setTimeout(() => card.remove(), 300);
-                allPatterns = allPatterns.filter(p => p._id !== pattern._id);
-              } else {
-                alert("Could not delete pattern.");
-              }
-            } catch (err) {
-              alert("Server error while deleting.");
-            }
-          });
+        if (isOwnPattern) {
+            card.querySelector(".delete-btn").addEventListener("click", async (e) => {
+                e.stopPropagation();
+                if (!confirm(`Delete "${pattern.name}"?`)) return;
+                try {
+                    const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
+                    if (res.ok) loadPatterns();
+                } catch (err) { alert("Error deleting pattern."); }
+            });
         }
 
         grid.appendChild(card);
+        drawPatternOnCanvas(card.querySelector(".pattern-canvas"), pattern);
+      });
+    }
+
+    /* ── CORE ACTIONS ── */
+    function exportHabi(pattern) {
+      const exportData = { ...pattern, creator: windowCurrentUserObj.name, created: Date.now() };
+      delete exportData._id;
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (pattern.name || "pattern").replace(/\s+/g, '_').toLowerCase() + ".habi";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function drawPatternOnCanvas(canvas, pattern) {
+      const patternRows = pattern.patternRows || [];
+      if (!canvas || patternRows.length === 0) return;
+      const ctx = canvas.getContext("2d");
+      const warpCount = patternRows[0].length;
+      const rowCount = patternRows.length;
+      const cellSize = Math.min(Math.max(1, Math.floor(canvas.width / warpCount)), Math.max(1, Math.floor(canvas.height / rowCount)), 8);
+
+      canvas.width = warpCount * cellSize;
+      canvas.height = rowCount * cellSize;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const safeWarpColors = (pattern.warpColors && pattern.warpColors.length > 0) ? pattern.warpColors : ["#f0eadf", "#f0eadf", "#f0eadf", "#f0eadf"];
+      const shaftCount = pattern.loom === 'traditional' ? 2 : 4;
+      const map = (pattern.threadingMap && pattern.threadingMap.length > 0) ? pattern.threadingMap : (shaftCount === 2 ? [0,1] : [0,1,2,3]);
+
+      patternRows.forEach((rowStates, rowIndex) => {
+        const y = (rowCount - 1 - rowIndex) * cellSize;
+        const color = (pattern.rowColors && pattern.rowColors[rowIndex]) || pattern.weftColor || "#c0392b";
+        rowStates.forEach((isWarpUp, warpIndex) => {
+          const x = warpIndex * cellSize;
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, cellSize, cellSize);
+          if (isWarpUp) {
+            const hIdx = map[warpIndex % map.length];
+            ctx.fillStyle = safeWarpColors[hIdx] || "#ffffff";
+            ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
+          }
+        });
       });
     }
 
@@ -1128,42 +1009,29 @@
       return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    // 5. IMPORT .HABI FILE EVENT LISTENER
+    /* ── IMPORT .HABI ── */
     document.getElementById('import-file').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = async (event) => {
           try {
               const importedData = JSON.parse(event.target.result);
-              
               delete importedData._id; 
-              
-              // 1. Tag it as an import so it stays out of "My Patterns"
               importedData.isImported = true;
-              
-              // 2. Assign it to the current user so they are the ONLY ones who see it in "All Patterns"
               importedData.userId = currentUserId;
-
-              // 3. Ensure the original creator's name is kept
-              if (!importedData.creator) {
-                   importedData.creator = "Original Weaver"; 
-              }
+              if (!importedData.creator) importedData.creator = "Original Weaver";
               
               const res = await fetch("/api/patterns/save", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(importedData)
               });
-
               if (res.ok) {
-                  alert("Pattern imported to Community Gallery!");
+                  alert("Pattern imported to your private gallery!");
                   loadPatterns(); 
               }
-          } catch (err) {
-              alert("Error reading .habi file.");
-          }
+          } catch (err) { alert("Error reading .habi file."); }
       };
       reader.readAsText(file);
       e.target.value = ""; 
