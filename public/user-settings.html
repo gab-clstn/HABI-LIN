@@ -707,29 +707,23 @@
         }
 
         // === STATS LOGIC (MY PATTERNS ONLY) ===
-        try {
-            const patternsRes = await fetch("/api/patterns"); 
-            const allPatterns = await patternsRes.json();
+                try {
+    // 1. Call the specific "my-weaves" route
+            const patternsRes = await fetch("/api/patterns/my-weaves"); 
+            const myPatterns = await patternsRes.json();
             
-            // Get current user ID
-            const currentUserId = user._id || user.id;
-
-            // Filter out community and imported patterns
-            const myPatterns = allPatterns.filter(p => 
-                (p.userId === currentUserId || !p.userId) && p.isImported !== true
-            );
-            
+            // 2. The count is now 100% accurate to your own native work
             const count = myPatterns.length;
             document.getElementById("stats-patterns").textContent = count;
 
-            // Determine Level
+            // 3. Update the Weaver Level based on the accurate count
             let level = "Beginner Weaver";
             if (count >= 5) level = "Intermediate Weaver";
             if (count >= 15) level = "Advanced Artisan";
             if (count >= 30) level = "Master Weaver";
             document.getElementById("stats-level").textContent = level;
 
-            // Determine Favorite Weave
+            // 4. Update Favorite Weave
             if (count > 0) {
                 const types = {};
                 myPatterns.forEach(p => {
@@ -740,7 +734,7 @@
                 document.getElementById("stats-favorite").textContent = fav.charAt(0).toUpperCase() + fav.slice(1);
             }
         } catch (err) {
-            console.error("Error fetching my patterns:", err);
+            console.error("Error fetching strictly personal patterns:", err);
         }
 
     } catch (error) {
