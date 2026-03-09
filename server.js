@@ -90,7 +90,7 @@ passport.use(new LocalStrategy({ usernameField: "email" }, async (email, passwor
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    callbackURL: '${process.env.BASE_URL}/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ providerId: profile.id });
@@ -115,7 +115,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "http://localhost:3000/auth/facebook/callback",
+    callbackURL: '${process.env.BASE_URL}/auth/facebook/callback',
     profileFields: ["id", "displayName", "photos", "emails"]
 }, async (accessToken, refreshToken, profile, done) => {
     try {
