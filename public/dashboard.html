@@ -1009,7 +1009,7 @@
               </button>
             </div>
 
-            <div id="learnPatternList" style="display:flex; flex-direction:column; gap:12px;">
+            <div id="learnPatternList" style="display:flex; flex-direction:column; gap:24px;">
               <div style="color:#555; font-size:0.9rem; text-align:center; padding:40px;">Loading patterns&hellip;</div>
             </div>
             
@@ -1255,10 +1255,9 @@
     }
     
     /* ───────────────────────────────────────────
-       LEARN MODE
+       LEARN MODE - CATEGORY SELECTION
     ─────────────────────────────────────────── */
     async function goToLearnSelect() {
-      // Ensure weaving-studio is visible before showing the overlay inside it
       document.getElementById("overview-section").style.display = "none";
       document.getElementById("collection-section").style.display = "none";
       document.getElementById("weaving-studio").style.display = "block";
@@ -1266,51 +1265,103 @@
       document.getElementById("setupOverlay").style.display = "none";
       document.getElementById("learnSelectOverlay").style.display = "flex";
 
-      // Load the user's patterns into the selector
+      const list = document.getElementById("learnPatternList");
+      
+      list.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:15px; margin-top:10px;">
+          <button onclick="showLearnCategory('mine')" class="action-card" style="width:100%; cursor:pointer; text-align:left; background:#161620; border: 1px solid #333;">
+            <div class="card-visual" style="background:#1a1a2e; color:#00e5ff;"><i class="fa-solid fa-user"></i></div>
+            <div class="card-info">
+              <h4 style="color:white; margin:0;">My Patterns</h4>
+              <p style="margin:0; font-size:0.8rem; color:#666;">Patterns you created from scratch.</p>
+            </div>
+          </button>
+
+          <button onclick="showLearnCategory('community')" class="action-card" style="width:100%; cursor:pointer; text-align:left; background:#161620; border: 1px solid #333;">
+            <div class="card-visual" style="background:#2b0303; color:#ff4d4d;"><i class="fa-solid fa-users"></i></div>
+            <div class="card-info">
+              <h4 style="color:white; margin:0;">All / Community Patterns</h4>
+              <p style="margin:0; font-size:0.8rem; color:#666;">Patterns from the community and imports.</p>
+            </div>
+          </button>
+        </div>
+      `;
+    }
+
+    /* ───────────────────────────────────────────
+       SHOW SPECIFIC CATEGORY LIST
+    ─────────────────────────────────────────── */
+    async function showLearnCategory(type) {
       const list = document.getElementById("learnPatternList");
       list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
 
       try {
+        const userRes = await fetch("/auth/user");
+        const currentUser = await userRes.json();
+        const currentUserId = currentUser?._id ? currentUser._id.toString() : null;
+
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("fetch failed");
-        const patterns = await res.json();
+        const allPatterns = await res.json();
 
-        if (!patterns || patterns.length === 0) {
-          list.innerHTML = `
-              <div style="color:#555;text-align:center;padding:40px;">
-                <div style="font-size:2rem;margin-bottom:12px;">🪡</div>
-                <div style="font-weight:600;color:#888;margin-bottom:6px;">No saved patterns yet</div>
-                <div style="font-size:0.82rem;">Create and save a weave first, then come back to learn it.</div>
-              </div>`;
+        let filtered = [];
+        let categoryTitle = "";
+
+        if (type === 'mine') {
+          categoryTitle = "My Patterns";
+          // Logic: Must be your ID AND must NOT be marked as imported
+          filtered = allPatterns.filter(p => {
+             const pUserId = p.userId ? p.userId.toString() : '';
+             return pUserId === currentUserId && p.isImported !== true;
+          });
+        } else {
+          categoryTitle = "All / Community Patterns";
+          // Logic: Anyone else's pattern OR any pattern marked as imported
+          filtered = allPatterns.filter(p => {
+             const pUserId = p.userId ? p.userId.toString() : '';
+             return pUserId !== currentUserId || p.isImported === true;
+          });
+        }
+
+        list.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+            <button onclick="goToLearnSelect()" style="background:none; border:1px solid #444; color:#888; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:0.75rem;">&larr; Back</button>
+            <span style="color:#fff; font-size:0.9rem; font-weight:700;">${categoryTitle}</span>
+          </div>
+        `;
+
+        if (filtered.length === 0) {
+          list.innerHTML += `<div style="color:#555; text-align:center; padding:40px;">No patterns found in this category.</div>`;
           return;
         }
 
-        list.innerHTML = "";
-        patterns.forEach(pattern => {
+        filtered.forEach(pattern => {
           const shaftCount = pattern.loom === "traditional" ? 2 : 4;
           const rowCount = (pattern.patternRows && pattern.patternRows.length) || 0;
           const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-          const date = pattern.created
-            ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
-            : "";
+          const isImported = pattern.isImported === true;
+          const creatorName = pattern.creator || "Unknown Weaver";
 
           const card = document.createElement("div");
           card.style.cssText = `
               background:#161620; border:1px solid #2a2a35; border-radius:14px;
               padding:18px 22px; display:flex; justify-content:space-between;
-              align-items:center; cursor:pointer; transition:all 0.2s; gap:16px;
+              align-items:center; cursor:pointer; transition:all 0.2s; gap:16px; margin-bottom:10px;
             `;
           card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
           card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
 
           card.innerHTML = `
               <div style="flex:1;">
-                <div style="font-weight:700;color:white;font-size:1rem;margin-bottom:4px;">${escapeHtml(pattern.name)}</div>
-                <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows · ${date}</div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
+                  ${isImported ? `<span style="font-size:0.6rem; background:#2b0303; color:#ff4d4d; padding:2px 6px; border-radius:4px; font-weight:800; text-transform:uppercase;">Imported</span>` : ''}
+                </div>
+                <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
+                <div style="font-size:0.72rem; color:#444; margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px;">Learn</span>
-                <span style="color:#555;font-size:0.85rem;">→</span>
+              <div style="display:flex;align-items:center;">
+                <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
               </div>`;
 
           card.addEventListener("click", () => startLearnMode(pattern));
@@ -1319,7 +1370,102 @@
 
       } catch (err) {
         console.error(err);
-        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;font-size:0.9rem;">Could not load patterns. Is the server running?</div>`;
+        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;">Error loading patterns.</div>`;
+      }
+    }
+
+    /* ───────────────────────────────────────────
+       SHOW SPECIFIC CATEGORY LIST (With Name Fallback)
+    ─────────────────────────────────────────── */
+    async function showLearnCategory(type) {
+      const list = document.getElementById("learnPatternList");
+      list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
+
+      try {
+        const userRes = await fetch("/auth/user");
+        const currentUser = await userRes.json();
+        
+        const currentUserId = currentUser?._id ? currentUser._id.toString() : null;
+        const currentUserName = currentUser?.name ? currentUser.name.trim() : null;
+
+        const res = await fetch("/api/patterns");
+        if (!res.ok) throw new Error("fetch failed");
+        const allPatterns = await res.json();
+
+        let filtered = [];
+        let categoryTitle = "";
+
+        if (type === 'mine') {
+          categoryTitle = "My Patterns";
+          // Check BOTH ID and Name to be safe
+          filtered = allPatterns.filter(p => {
+             const pUserId = p.userId ? p.userId.toString() : '';
+             const pCreator = p.creator ? p.creator.trim() : '';
+             
+             const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
+             return isOwner && p.isImported !== true;
+          });
+        } else {
+          categoryTitle = "All / Community Patterns";
+          // If it's NOT mine OR it IS imported
+          filtered = allPatterns.filter(p => {
+             const pUserId = p.userId ? p.userId.toString() : '';
+             const pCreator = p.creator ? p.creator.trim() : '';
+             
+             const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
+             return !isOwner || p.isImported === true;
+          });
+        }
+
+        list.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px; padding:0 10px;">
+            <button onclick="goToLearnSelect()" style="background:none; border:1px solid #444; color:#888; border-radius:6px; padding:5px 12px; cursor:pointer; font-size:0.75rem;">&larr; Back</button>
+            <span style="color:#fff; font-size:0.9rem; font-weight:700;">${categoryTitle}</span>
+            <span style="margin-left:auto; color:#444; font-size:0.7rem;">${filtered.length} found</span>
+          </div>
+        `;
+
+        if (filtered.length === 0) {
+          list.innerHTML += `<div style="color:#555; text-align:center; padding:40px; border:1px dashed #222; border-radius:14px; margin:0 10px;">No patterns in this category.</div>`;
+          return;
+        }
+
+        filtered.forEach(pattern => {
+          const shaftCount = pattern.loom === "traditional" ? 2 : 4;
+          const rowCount = (pattern.patternRows && pattern.patternRows.length) || 0;
+          const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
+          const isImported = pattern.isImported === true;
+          const creatorName = pattern.creator || "Unknown Weaver";
+
+          const card = document.createElement("div");
+          card.style.cssText = `
+              background:#161620; border:1px solid #2a2a35; border-radius:14px;
+              padding:18px 22px; display:flex; justify-content:space-between;
+              align-items:center; cursor:pointer; transition:all 0.2s; gap:16px; margin-bottom:10px;
+            `;
+          card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
+          card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
+
+          card.innerHTML = `
+              <div style="flex:1;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
+                  ${isImported ? `<span style="font-size:0.6rem; background:#2b0303; color:#ff4d4d; padding:2px 6px; border-radius:4px; font-weight:800; text-transform:uppercase;">Imported</span>` : ''}
+                </div>
+                <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
+                <div style="font-size:0.72rem; color:#444; margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
+              </div>
+              <div style="display:flex;align-items:center;">
+                <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
+              </div>`;
+
+          card.addEventListener("click", () => startLearnMode(pattern));
+          list.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;">Error loading patterns.</div>`;
       }
     }
 
@@ -1521,7 +1667,7 @@
             </div>`;
 
         const canvas = card.querySelector(".pattern-canvas");
-        requestAnimationFrame(() => drawPatternOnCanvas(canvas, pattern));
+        requestAnimationFrame(() => drawPatternOnCanvas(canvas, patternRows, weftColor));
 
         card.querySelector(".delete-btn").addEventListener("click", async (e) => {
           e.stopPropagation();
@@ -1547,7 +1693,7 @@
     }
 
     /* ───────────────────────────────────────────
-      SEARCH / FILTER
+       SEARCH / FILTER
     ─────────────────────────────────────────── */
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("search-input");
@@ -1566,7 +1712,7 @@
     });
 
     /* ───────────────────────────────────────────
-      UTILITY
+       UTILITY
     ─────────────────────────────────────────── */
     function escapeHtml(str) {
       return String(str)
@@ -1574,19 +1720,19 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
+    }
 
     function safeNavigate(destinationFunc) {
-    if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
-        const msg = window.learnIsActive 
-            ? "Exit Learn Mode? Your progress will be lost." 
-            : "You have unsaved changes in the Loom Studio. Leave anyway?";
-        
-        if (!confirm(msg)) return;
-                window.hasUnsavedChangesInLoom = false;
-        window.learnIsActive = false;
-    }
-    destinationFunc();
-}
+      if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
+          const msg = window.learnIsActive 
+              ? "Exit Learn Mode? Your progress will be lost." 
+              : "You have unsaved changes in the Loom Studio. Leave anyway?";
+          
+          if (!confirm(msg)) return;
+                  window.hasUnsavedChangesInLoom = false;
+          window.learnIsActive = false;
+      }
+      destinationFunc();
     }
   </script>
 </body>
