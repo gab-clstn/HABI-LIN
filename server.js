@@ -46,14 +46,14 @@ mongoose.connect(process.env.MONGO_URI)
 ────────────────────────────────────────────────────────────── */
 const patternSchema = new mongoose.Schema(
     {
-        userId:      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-        name:        { type: String,  default: "Untitled Weave" },
-        type:        { type: String,  default: "plain" },
-        loom:        { type: String,  default: "standard" },
-        steps:       { type: mongoose.Schema.Types.Mixed, default: [] },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        name: { type: String, default: "Untitled Weave" },
+        type: { type: String, default: "plain" },
+        loom: { type: String, default: "standard" },
+        steps: { type: mongoose.Schema.Types.Mixed, default: [] },
         patternRows: { type: mongoose.Schema.Types.Mixed, default: [] },
-        weftColor:   { type: String,  default: "#f0eadf" },
-        created:     { type: Number,  default: () => Date.now() }
+        weftColor: { type: String, default: "#f0eadf" },
+        created: { type: Number, default: () => Date.now() }
     },
     { strict: false }
 );
@@ -88,9 +88,9 @@ passport.use(new LocalStrategy({ usernameField: "email" }, async (email, passwor
 }));
 
 passport.use(new GoogleStrategy({
-    clientID:     process.env.GOOGLE_CLIENT_ID,
+    clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:  "/auth/google/callback"
+    callbackURL: "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ providerId: profile.id });
@@ -98,8 +98,8 @@ passport.use(new GoogleStrategy({
             user = await User.findOne({ email: profile.emails[0].value });
             if (user) {
                 user.providerId = profile.id;
-                user.provider   = "google";
-                user.photo      = profile.photos[0].value;
+                user.provider = "google";
+                user.photo = profile.photos[0].value;
                 await user.save();
             } else {
                 user = await User.create({
@@ -113,10 +113,10 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.use(new FacebookStrategy({
-    clientID:      process.env.FACEBOOK_APP_ID,
-    clientSecret:  process.env.FACEBOOK_APP_SECRET,
-    callbackURL:   "http://localhost:3000/auth/facebook/callback",
-    profileFields: ["id", "displayName", "photos", "email"]
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/callback",
+    profileFields: ["id", "displayName", "photos", "emails"]
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ providerId: profile.id });
@@ -125,8 +125,8 @@ passport.use(new FacebookStrategy({
             if (email) user = await User.findOne({ email });
             if (user) {
                 user.providerId = profile.id;
-                user.provider   = "facebook";
-                user.photo      = profile.photos?.[0]?.value;
+                user.provider = "facebook";
+                user.photo = profile.photos?.[0]?.value;
                 await user.save();
             } else {
                 user = await User.create({
@@ -157,14 +157,13 @@ app.post("/auth/login", passport.authenticate("local"), (req, res) => {
     res.json({ message: "Logged in", user: req.user });
 });
 
-app.get("/auth/google",            passport.authenticate("google",   { scope: ["profile", "email"] }));
-app.get("/auth/google/callback",   passport.authenticate("google",   { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
-app.get("/auth/facebook",          passport.authenticate("facebook", { scope: ["email"] }));
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
+app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["public_profile"] }));
 app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
-
 app.get("/auth/user", (req, res) => {
     if (!req.user) return res.json(null);
-    res.json({ _id: req.user._id, name: req.user.name, email: req.user.email, photo: req.user.photo, theme: req.user.theme || "light" });
+    res.json({ _id: req.user._id, name: req.user.name, email: req.user.email, photo: req.user.photo, theme: req.user.theme || "light", provider: req.user.provider || "local" });
 });
 
 app.post("/auth/update-account", async (req, res) => {
@@ -174,7 +173,7 @@ app.post("/auth/update-account", async (req, res) => {
             req.user._id, { name: req.body.name, email: req.body.email }, { returnDocument: 'after' }
         );
         if (!updated) return res.status(404).json({ error: "User not found" });
-        req.user.name  = updated.name;
+        req.user.name = updated.name;
         req.user.email = updated.email;
         res.json({ message: "Account updated successfully", user: { name: updated.name, email: updated.email } });
     } catch (err) { console.error(err); res.status(500).json({ error: "Failed to update account." }); }
@@ -209,14 +208,14 @@ app.post("/auth/upload-photo", async (req, res) => {
         if (!photo) return res.status(400).json({ error: "No photo data provided" });
 
         await User.findByIdAndUpdate(
-            req.user._id, 
-            { photo: photo }, 
+            req.user._id,
+            { photo: photo },
             { returnDocument: "after" }
         );
         res.json({ photo: photo });
-    } catch (err) { 
-        console.error("Photo upload error:", err); 
-        res.status(500).json({ error: "Upload failed" }); 
+    } catch (err) {
+        console.error("Photo upload error:", err);
+        res.status(500).json({ error: "Upload failed" });
     }
 });
 
@@ -293,7 +292,7 @@ app.put("/api/patterns/:id", async (req, res) => {
     try {
         const updatedPattern = await Pattern.findOneAndUpdate(
             { _id: req.params.id, userId: req.user._id },
-            { ...req.body }, 
+            { ...req.body },
             { returnDocument: 'after' }
         );
 
