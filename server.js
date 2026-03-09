@@ -20,8 +20,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ------------------ PROFILE PHOTO STORAGE ------------------ */
-// Note: Keeping multer config here so your code doesn't break, 
-// but we'll use the Base64 route for Atlas/Railway compatibility.
+// Keeping multer config here for compatibility,
+// but we use the Base64 route for Atlas/Railway.
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, "public/uploads"));
@@ -31,6 +31,9 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
+
+// ── Trust Railway's reverse proxy (REQUIRED for HTTPS cookies) ──
+app.set("trust proxy", 1);
 
 // ── Middleware ────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
@@ -60,11 +63,16 @@ const patternSchema = new mongoose.Schema(
 const Pattern = mongoose.model("Pattern", patternSchema);
 
 // ── Session ───────────────────────────────────────────────────
+// FIX: Added `secure` and `proxy` settings required for Railway (runs behind HTTPS proxy)
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000, sameSite: "lax" }
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production"
+    }
 }));
 
 app.use(passport.initialize());
@@ -78,6 +86,7 @@ passport.deserializeUser(async (id, done) => {
     catch (err) { done(err); }
 });
 
+// ── Local Strategy ────────────────────────────────────────────
 passport.use(new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
         const user = await User.findOne({ email });
@@ -87,10 +96,13 @@ passport.use(new LocalStrategy({ usernameField: "email" }, async (email, passwor
     } catch (err) { return done(err); }
 }));
 
+// ── Google Strategy ───────────────────────────────────────────
+// FIX: Was using single-quoted strings '${...}' instead of backtick template literals
+// so BASE_URL was never evaluated — callbackURL was literally the string "${process.env.BASE_URL}/auth/google/callback"
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '${process.env.BASE_URL}/auth/google/callback'
+    callbackURL: `${process.env.BASE_URL}/auth/google/callback`
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ providerId: profile.id });
@@ -103,8 +115,11 @@ passport.use(new GoogleStrategy({
                 await user.save();
             } else {
                 user = await User.create({
-                    name: profile.displayName, email: profile.emails[0].value,
-                    provider: "google", providerId: profile.id, photo: profile.photos[0].value
+                    name: profile.displayName,
+                    email: profile.emails[0].value,
+                    provider: "google",
+                    providerId: profile.id,
+                    photo: profile.photos[0].value
                 });
             }
         }
@@ -112,10 +127,12 @@ passport.use(new GoogleStrategy({
     } catch (err) { return done(err); }
 }));
 
+// ── Facebook Strategy ─────────────────────────────────────────
+// FIX: Same issue — was single-quoted string instead of backtick template literal
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: '${process.env.BASE_URL}/auth/facebook/callback',
+    callbackURL: `${process.env.BASE_URL}/auth/facebook/callback`,
     profileFields: ["id", "displayName", "photos", "emails"]
 }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -130,8 +147,10 @@ passport.use(new FacebookStrategy({
                 await user.save();
             } else {
                 user = await User.create({
-                    name: profile.displayName, email,
-                    provider: "facebook", providerId: profile.id,
+                    name: profile.displayName,
+                    email,
+                    provider: "facebook",
+                    providerId: profile.id,
                     photo: profile.photos?.[0]?.value
                 });
             }
@@ -158,19 +177,36 @@ app.post("/auth/login", passport.authenticate("local"), (req, res) => {
 });
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
+app.get("/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login.html" }),
+    (req, res) => res.redirect("/dashboard.html")
+);
+
 app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["public_profile"] }));
-app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
+app.get("/auth/facebook/callback",
+    passport.authenticate("facebook", { failureRedirect: "/login.html" }),
+    (req, res) => res.redirect("/dashboard.html")
+);
+
 app.get("/auth/user", (req, res) => {
     if (!req.user) return res.json(null);
-    res.json({ _id: req.user._id, name: req.user.name, email: req.user.email, photo: req.user.photo, theme: req.user.theme || "light", provider: req.user.provider || "local" });
+    res.json({
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        photo: req.user.photo,
+        theme: req.user.theme || "light",
+        provider: req.user.provider || "local"
+    });
 });
 
 app.post("/auth/update-account", async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ error: "Please log in again." });
     try {
         const updated = await User.findByIdAndUpdate(
-            req.user._id, { name: req.body.name, email: req.body.email }, { returnDocument: 'after' }
+            req.user._id,
+            { name: req.body.name, email: req.body.email },
+            { returnDocument: "after" }
         );
         if (!updated) return res.status(404).json({ error: "User not found" });
         req.user.name = updated.name;
@@ -200,19 +236,14 @@ app.post("/auth/update-theme", async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to save theme" }); }
 });
 
-// FIXED: Atlas-compatible photo upload using Base64
+// Atlas-compatible photo upload using Base64
 app.post("/auth/upload-photo", async (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
     try {
         const { photo } = req.body;
         if (!photo) return res.status(400).json({ error: "No photo data provided" });
-
-        await User.findByIdAndUpdate(
-            req.user._id,
-            { photo: photo },
-            { returnDocument: "after" }
-        );
-        res.json({ photo: photo });
+        await User.findByIdAndUpdate(req.user._id, { photo }, { returnDocument: "after" });
+        res.json({ photo });
     } catch (err) {
         console.error("Photo upload error:", err);
         res.status(500).json({ error: "Upload failed" });
@@ -262,7 +293,7 @@ app.get("/api/patterns/my-weaves", async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Failed to fetch patterns" }); }
 });
 
-// FIXED: Filtered to specifically count only the current user's patterns for Profile stats
+// Filtered to specifically count only the current user's patterns for Profile stats
 app.get("/api/patterns", async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     try {
@@ -293,9 +324,8 @@ app.put("/api/patterns/:id", async (req, res) => {
         const updatedPattern = await Pattern.findOneAndUpdate(
             { _id: req.params.id, userId: req.user._id },
             { ...req.body },
-            { returnDocument: 'after' }
+            { returnDocument: "after" }
         );
-
         if (!updatedPattern) return res.status(404).json({ error: "Pattern not found" });
         res.status(200).json({ message: "Pattern updated successfully!", pattern: updatedPattern });
     } catch (err) {
