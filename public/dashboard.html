@@ -1092,7 +1092,32 @@
       mobileSearchInput.addEventListener("input", (e) => {
         mainSearchInput.value = e.target.value;
       });
+
     }
+    document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Get the current logged-in user to find their ID
+    const userRes = await fetch("/auth/user");
+    const user = await userRes.json();
+    
+    if (user) {
+        const currentUserId = user._id;
+
+        // 2. Fetch all patterns
+        const response = await fetch('/api/patterns');
+        const allPatterns = await response.json();
+
+        // 3. Filter: Only patterns owned by me AND NOT imported
+        const myPatterns = allPatterns.filter(p => 
+            (p.userId === currentUserId) && p.isImported !== true
+        );
+
+        // 4. Display the count
+        const countElement = document.getElementById("pattern-count-element");
+        if (countElement) {
+            countElement.textContent = myPatterns.length;
+        }
+    }
+  });
 
     /* ───────────────────────────────────────────
        USER SESSION
