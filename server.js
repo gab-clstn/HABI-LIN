@@ -63,7 +63,6 @@ const patternSchema = new mongoose.Schema(
 const Pattern = mongoose.model("Pattern", patternSchema);
 
 // ── Session ───────────────────────────────────────────────────
-// FIX: Added `secure` and `proxy` settings required for Railway (runs behind HTTPS proxy)
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -86,6 +85,12 @@ passport.deserializeUser(async (id, done) => {
     catch (err) { done(err); }
 });
 
+// ── BASE_URL: use env var if set (Railway), otherwise fall back to localhost ──
+// This is the fix: locally BASE_URL is not set, so we build it from PORT.
+// On Railway, BASE_URL is set in the dashboard and takes priority.
+const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
 // ── Local Strategy ────────────────────────────────────────────
 passport.use(new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
@@ -97,12 +102,10 @@ passport.use(new LocalStrategy({ usernameField: "email" }, async (email, passwor
 }));
 
 // ── Google Strategy ───────────────────────────────────────────
-// FIX: Was using single-quoted strings '${...}' instead of backtick template literals
-// so BASE_URL was never evaluated — callbackURL was literally the string "${process.env.BASE_URL}/auth/google/callback"
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}/auth/google/callback`
+    callbackURL: `${BASE_URL}/auth/google/callback`
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         let user = await User.findOne({ providerId: profile.id });
@@ -128,11 +131,10 @@ passport.use(new GoogleStrategy({
 }));
 
 // ── Facebook Strategy ─────────────────────────────────────────
-// FIX: Same issue — was single-quoted string instead of backtick template literal
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: `${process.env.BASE_URL}/auth/facebook/callback`,
+    callbackURL: `${BASE_URL}/auth/facebook/callback`,
     profileFields: ["id", "displayName", "photos", "emails"]
 }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -334,5 +336,4 @@ app.put("/api/patterns/:id", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
