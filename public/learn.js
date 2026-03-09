@@ -466,6 +466,400 @@ function initLearnLoom(pattern) {
             .phase-tab.active { color: #fff; border-color: currentColor; }
             #phaseTab_SHED.active    { background:#003d44; color:#00e5ff; border-color:#00e5ff; }
             #phaseTab_SHUTTLE.active { background:#433a00; color:#ffdd00; border-color:#ffdd00; }
+            #phaseTab_BEAT.active    { background:#003322; color:#00ff8}
+
+function initLearnLoom(pattern) {
+    window.learnIsActive = true;
+    const SHAFT_COUNT     = pattern.loom === "traditional" ? 2 : 4;
+    const WIDTH           = 6.5;
+    const DEPTH           = 4.2;
+    const FRONT           = 0;
+    const BACK            = -DEPTH;
+    const FOOT_EXTENSION  = 2.2;
+    const BASE_FRONT      = FRONT + FOOT_EXTENSION;
+    const TOWER_Z         = FRONT - DEPTH * 0.38;
+    const BEATER_REST_Z   = TOWER_Z + 1.2;
+    const LEG_HEIGHT      = 3.2;
+    const BREAST_BEAM_Y   = LEG_HEIGHT + 0.15;
+    const WARP_BEAM_Y     = LEG_HEIGHT;
+    const CLOTH_BEAM_Y    = 2.4;
+    const CLOTH_BEAM_Z    = BEATER_REST_Z + 0.5;
+    const LEFT            = -WIDTH / 2;
+    const RIGHT           =  WIDTH / 2;
+    const HEDDLE_WIDTH    = WIDTH - 0.85;
+    const FRAME_H         = 1.2;
+    const BASE_Y          = 0.45;
+    const SHED_OPEN_Y     = BREAST_BEAM_Y + 0.6;
+    const SHED_CLOSED_Y   = BREAST_BEAM_Y - 0.4;
+    const SHUTTLE_LIMIT   = HEDDLE_WIDTH / 2 + 0.6;
+    const ROW_SPACING     = 0.02;
+    const BEATER_HIT_Z    = BASE_FRONT - 0.2;
+    const MAX_ROWS_BEFORE_TAKEUP = 100;
+    const BEAT_DURATION   = 10; 
+
+    const zPositions = SHAFT_COUNT === 2
+        ? [TOWER_Z - 0.25, TOWER_Z + 0.25]
+        : [TOWER_Z - 0.45, TOWER_Z - 0.15, TOWER_Z + 0.15, TOWER_Z + 0.45];
+
+    const pedalPivotGroups  = [];
+    const heddleFrames      = [];
+    const warpGroups        = []; 
+    for (let i = 0; i < SHAFT_COUNT; i++) warpGroups.push([]);
+
+    let currentPressedPedals = new Set();
+    let beaterGroup, shuttleGroup, clothRoller;
+    let weftThreads  = [];
+    let activeWeft   = null;
+    let rowCounter   = 0;
+    let fellZ        = BASE_FRONT - 0.12;
+    
+    let beaterHeld   = false;
+    let beatTimer    = 0;
+
+    let shuttleCurrentSide = -1;
+    let shuttleStartSide   = -1;
+    let shuttleArmed       = false;
+    let shuttleInserted    = false;
+    let weftReadyToBeat    = false;
+    let shuttleDirectionChanges = 0;
+    let shuttleMovingPositive   = null;
+    let lastShuttleX            = 0;
+    let isTransitioning = false;
+    let mistakeStack = [];
+    const MAX_MISTAKES = 3;
+
+    const pedalHighlights = []; 
+    let   shuttleHighlight = null;
+    let   beaterHighlight  = null;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a1f);
+
+    const handleBeforeUnload = (e) => {
+        if (currentPhase !== "DONE") {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    const canvas    = document.getElementById("bg");
+    const container = document.getElementById("weaving-studio");
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.clear();
+
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    camera.position.set(4, 6, 14);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, 2, 0);
+
+    function resizeRenderer() {
+        const { width, height } = container.getBoundingClientRect();
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        if (typeof repositionHUD === 'function') repositionHUD();
+    }
+    resizeRenderer();
+    window.addEventListener("resize", resizeRenderer);
+
+    const resizeObs = new ResizeObserver(resizeRenderer);
+    resizeObs.observe(container);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(15, 20, 10);
+    scene.add(sun);
+    scene.add(new THREE.GridHelper(40, 40));
+
+    const woodMat        = new THREE.MeshStandardMaterial({ color: 0xc89b6d, roughness: 0.85, metalness: 0.05 });
+    const stringMat      = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.85 });
+    const heddleWireMat  = new THREE.LineBasicMaterial({ color: 0xaaaaaa, opacity: 0.5, transparent: true });
+    const ropeMat        = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 });
+    const reedMat        = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.4, metalness: 0.6 });
+    const clothThreadMat = new THREE.LineBasicMaterial({ color: 0xf0eadf, opacity: 0.95, transparent: true });
+    
+    const savedWeftColor = pattern.weftColor || "#c0392b";
+    const shuttleThreadMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(savedWeftColor), 
+        roughness: 0.7
+    });
+
+    const highlightPedalMat   = new THREE.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 0.6, transparent: true, opacity: 0.55 });
+    const highlightShuttleMat = new THREE.MeshStandardMaterial({ color: 0xffdd00, emissive: 0xffdd00, emissiveIntensity: 0.7, transparent: true, opacity: 0.55 });
+    const highlightBeaterMat  = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.7, transparent: true, opacity: 0.55 });
+
+    function showMistakePopup() {
+        const existing = document.getElementById("mistakeModal");
+        if (existing) return;
+
+        const modal = document.createElement("div");
+        modal.id = "mistakeModal";
+        modal.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #2b0303; color: white; padding: 40px; border-radius: 20px;
+            border: 4px solid #d93025; z-index: 1000; text-align: center;
+            box-shadow: 0 0 50px rgba(217, 48, 37, 0.6);
+            animation: pulse-red 0.5s infinite alternate;
+        `;
+        modal.innerHTML = `
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 4rem; color: #d93025; margin-bottom: 20px;"></i>
+            <h2 style="font-size: 2rem; margin-bottom: 10px;">LOOM TANGLED!</h2>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 30px;">Too many errors stacked. You must pull the shuttle back through the highlighted sheds to continue.</p>
+            <button onclick="document.getElementById('mistakeModal').remove()" style="background:#d93025; color:white; border:none; padding: 12px 30px; border-radius:10px; font-weight:700; cursor:pointer;">I UNDERSTAND</button>
+        `;
+
+        const style = document.createElement("style");
+        style.textContent = `@keyframes pulse-red { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.05); } }`;
+        document.head.appendChild(style);
+        document.body.appendChild(modal);
+        playErrorSound();
+    }
+
+    function woodBar(w, h, d, x, y, z, parent = scene) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), woodMat);
+        m.position.set(x, y, z);
+        parent.add(m);
+        return m;
+    }
+    function woodCylinder(radius, length, x, y, z, rotZ = true, parent = scene) {
+        const g = new THREE.CylinderGeometry(radius, radius, length, 32);
+        const m = new THREE.Mesh(g, woodMat);
+        if (rotZ) m.rotation.z = Math.PI / 2;
+        m.position.set(x, y, z);
+        parent.add(m);
+        return m;
+    }
+    function createRopeConnection(p1, p2, parent = scene) {
+        const dist = p1.distanceTo(p2);
+        const g    = new THREE.CylinderGeometry(0.02, 0.02, dist, 8);
+        const m    = new THREE.Mesh(g, ropeMat);
+        m.position.copy(new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5));
+        m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
+        parent.add(m);
+        return m;
+    }
+
+    function buildFrame() {
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT,  LEG_HEIGHT / 2, BASE_FRONT);
+        woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BASE_FRONT);
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT,  LEG_HEIGHT / 2, BACK);
+        woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BACK);
+        const SL = Math.abs(BASE_FRONT - BACK), SC = (BASE_FRONT + BACK) / 2;
+        woodBar(0.3, 0.3, SL, LEFT,  LEG_HEIGHT, SC);
+        woodBar(0.3, 0.3, SL, RIGHT, LEG_HEIGHT, SC);
+        const TH = 3.5;
+        woodBar(0.3, TH, 0.3, LEFT,  LEG_HEIGHT + TH / 2, TOWER_Z);
+        woodBar(0.3, TH, 0.3, RIGHT, LEG_HEIGHT + TH / 2, TOWER_Z);
+        const TOP_Y = LEG_HEIGHT + TH;
+        woodBar(WIDTH + 0.6, 0.4, 0.4, 0, TOP_Y, TOWER_Z);
+        woodBar(WIDTH + 0.2, 0.3, 0.4, 0, BREAST_BEAM_Y, BASE_FRONT);
+        woodCylinder(0.3, WIDTH, 0, WARP_BEAM_Y, BACK);
+        clothRoller = woodCylinder(0.28, WIDTH, 0, CLOTH_BEAM_Y, CLOTH_BEAM_Z);
+        woodBar(WIDTH - 0.45, 0.25, 0.25, 0, BASE_Y, BASE_FRONT);
+        woodBar(WIDTH - 0.45, 0.25, 0.25, 0, BASE_Y, BACK);
+        return TOP_Y;
+    }
+    const TOP_BEAM_Y = buildFrame();
+
+    function createHeddleSystem() {
+        const group = new THREE.Group();
+        const SUPPORT_BAR_Y = TOP_BEAM_Y - 0.65;
+        const ROLLER_Y      = SUPPORT_BAR_Y - 0.5;
+        woodCylinder(0.18, WIDTH, 0, SUPPORT_BAR_Y, TOWER_Z, true, group);
+        function addRoller(zPos) {
+            woodCylinder(0.06, WIDTH - 0.3, 0, ROLLER_Y, zPos, true, group);
+            woodBar(0.15, 0.15, 0.15, LEFT  + 0.15, ROLLER_Y, zPos, group);
+            woodBar(0.15, 0.15, 0.15, RIGHT - 0.15, ROLLER_Y, zPos, group);
+        }
+        addRoller((zPositions[0] + zPositions[1]) / 2);
+        if (SHAFT_COUNT === 4) addRoller((zPositions[2] + zPositions[3]) / 2);
+
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            const fg = new THREE.Group();
+            fg.position.set(0, SHED_OPEN_Y, zPositions[i]);
+            [-1, 1].forEach(side => {
+                const xp     = side * (HEDDLE_WIDTH / 2 - 0.50);
+                const rz     = i < 2 ? (zPositions[0] + zPositions[1]) / 2 : (zPositions[2] + zPositions[3]) / 2;
+                const cordG  = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xp, ROLLER_Y, rz),
+                    new THREE.Vector3(xp, SHED_OPEN_Y + FRAME_H / 2, zPositions[i])
+                ]);
+                scene.add(new THREE.Line(cordG, stringMat));
+            });
+            woodBar(HEDDLE_WIDTH, 0.1, 0.1, 0,  FRAME_H / 2, 0, fg);
+            woodBar(HEDDLE_WIDTH, 0.1, 0.1, 0, -FRAME_H / 2, 0, fg);
+            woodBar(0.1, FRAME_H, 0.1, -HEDDLE_WIDTH / 2, 0, 0, fg);
+            woodBar(0.1, FRAME_H, 0.1,  HEDDLE_WIDTH / 2, 0, 0, fg);
+            const hPts = [];
+            for (let h = 0; h <= 110; h++) {
+                const hx = (h / 110) * (HEDDLE_WIDTH - 0.14) - (HEDDLE_WIDTH - 0.14) / 2;
+                hPts.push(new THREE.Vector3(hx,  FRAME_H / 2 - 0.05, 0),
+                           new THREE.Vector3(hx, -FRAME_H / 2 + 0.05, 0));
+            }
+            fg.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(hPts), heddleWireMat));
+            scene.add(fg);
+            heddleFrames.push(fg);
+        }
+        scene.add(group);
+    }
+    createHeddleSystem();
+
+    function createBeater() {
+            beaterGroup = new THREE.Group();
+            beaterGroup.position.set(0, BREAST_BEAM_Y + 0.25, BEATER_REST_Z);
+            const bh = FRAME_H * 0.55;
+            woodBar(WIDTH - 0.5, 0.2,  0.3, 0,  bh / 2,  0,    beaterGroup);
+            woodBar(WIDTH - 0.5, 0.15, 0.6, 0, -bh / 2, -0.1, beaterGroup);
+            beaterGroup.add(new THREE.Mesh(new THREE.BoxGeometry(HEDDLE_WIDTH, bh - 0.1, 0.05), reedMat));
+            scene.add(beaterGroup);
+
+            beaterHighlight = new THREE.Mesh(
+                new THREE.BoxGeometry(WIDTH + 0.2, bh + 0.6, 0.8),
+                highlightBeaterMat
+            );
+            beaterHighlight.position.z = -0.05; 
+            beaterHighlight.visible = false;
+            beaterGroup.add(beaterHighlight);
+        }
+    createBeater();
+
+    function createShuttle() {
+        shuttleGroup = new THREE.Group();
+        const sw   = 1.2;
+        const bodyG = new THREE.BoxGeometry(sw, 0.22, 0.35);
+        const pos   = bodyG.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            if (Math.abs(pos.getX(i)) > sw * 0.3) {
+                pos.setZ(i, pos.getZ(i) * 0.25);
+                pos.setY(i, pos.getY(i) * 0.8);
+            }
+        }
+        shuttleGroup.add(new THREE.Mesh(bodyG, woodMat));
+        const cav = new THREE.Mesh(new THREE.BoxGeometry(sw * 0.6, 0.12, 0.22), new THREE.MeshStandardMaterial({ color: 0x332211 }));
+        cav.position.y = 0.05; shuttleGroup.add(cav);
+        const quill = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, sw * 0.5, 12), new THREE.MeshStandardMaterial({ color: 0xeeddcc }));
+        quill.rotation.z = Math.PI / 2; quill.position.y = 0.05; shuttleGroup.add(quill);
+        const wrap = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, sw * 0.45, 12), shuttleThreadMat);
+        wrap.rotation.z = Math.PI / 2; wrap.position.y = 0.05; shuttleGroup.add(wrap);
+
+        shuttleHighlight = new THREE.Mesh(
+            new THREE.BoxGeometry(sw + 0.4, 0.5, 0.6),
+            highlightShuttleMat
+        );
+        shuttleHighlight.visible = false;
+        shuttleGroup.add(shuttleHighlight);
+
+        scene.add(shuttleGroup);
+    }
+    createShuttle();
+
+    function createPedals() {
+        const restAngle = 13 * (Math.PI / 180);
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            const xPos  = (i - (SHAFT_COUNT - 1) / 2) * 0.8;
+            const pivot = new THREE.Group();
+            pivot.position.set(xPos, BASE_Y + 0.05, BASE_FRONT);
+            pivot.rotation.x = restAngle;
+            const lever = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 4.6), woodMat);
+            lever.position.set(0, 0, -2.3);
+            pivot.add(lever);
+            scene.add(pivot);
+            pedalPivotGroups.push(pivot);
+            woodBar(0.45, 0.4, 0.5, xPos, BASE_Y + 0.05, BASE_FRONT);
+
+            const vo = Math.abs(TOWER_Z - BASE_FRONT) * Math.tan(restAngle);
+            createRopeConnection(
+                new THREE.Vector3(xPos, BASE_Y + 0.05 + vo, TOWER_Z),
+                new THREE.Vector3(xPos, BREAST_BEAM_Y - FRAME_H / 2, TOWER_Z)
+            );
+
+            const hl = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.15, 4.8),
+                highlightPedalMat.clone()
+            );
+            hl.position.set(xPos, BASE_Y + 0.05, BASE_FRONT - 2.3);
+            hl.visible = false;
+            scene.add(hl);
+            pedalHighlights.push(hl);
+        }
+    }
+    createPedals();
+
+    function createDynamicWarp() {
+        const totalThreads = learnPattern.totalThreads || 60;
+        const savedWarpColors = (learnPattern.warpColors && learnPattern.warpColors.length > 0) 
+            ? learnPattern.warpColors : ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+
+        for (let i = 0; i < totalThreads; i++) {
+            const x = (i / (totalThreads - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const hIdx = threading[i];
+
+            const pts = [
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, SHED_OPEN_Y, zPositions[hIdx]),
+                new THREE.Vector3(x, WARP_BEAM_Y + 0.3, BACK)
+            ];
+
+            const threadColor = savedWarpColors[hIdx] || "#ffffff";
+            const t = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(pts), 
+                new THREE.LineBasicMaterial({ color: new THREE.Color(threadColor), opacity: 0.7, transparent: true })
+            );
+            scene.add(t);
+            warpGroups[hIdx].push(t);
+        } 
+    }
+
+    function createClothBase() {
+        const totalThreads = learnPattern.totalThreads || 60;
+        for (let i = 0; i < totalThreads; i++) {
+            const x = (i / (totalThreads - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const wobble = Math.sin(i * 0.6) * 0.015;
+            const points = [
+                new THREE.Vector3(x + wobble, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT + 0.1),
+                new THREE.Vector3(x, CLOTH_BEAM_Y, CLOTH_BEAM_Z)
+            ];
+            scene.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                clothThreadMat
+            ));
+        }
+    }
+
+    createDynamicWarp();
+    createClothBase();
+
+    function createLearnHUD() {
+        container.style.containerType = "inline-size";
+        container.style.containerName = "learnStudio";
+
+        const style = document.createElement("style");
+        style.id = "learnHUD-styles";
+        style.textContent = `
+            /* Phase tabs */
+            .phase-tab {
+                flex: 1;
+                text-align: center;
+                padding: 4px 2px;
+                border-radius: 8px;
+                font-size: 0.65rem;
+                font-weight: 600;
+                background: #1a1a22;
+                color: #555;
+                border: 1px solid #2a2a35;
+                transition: all 0.25s;
+                white-space: nowrap;
+            }
+            .phase-tab.active { color: #fff; border-color: currentColor; }
+            #phaseTab_SHED.active    { background:#003d44; color:#00e5ff; border-color:#00e5ff; }
+            #phaseTab_SHUTTLE.active { background:#433a00; color:#ffdd00; border-color:#ffdd00; }
             #phaseTab_BEAT.active    { background:#003322; color:#00ff88; border-color:#00ff88; }
 
             /* HUD kbd keys */
