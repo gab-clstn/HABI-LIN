@@ -787,7 +787,9 @@
       
       document.getElementById("import-btn-wrapper").style.display = "inline-flex";
       
-      renderPatternGrid(allPatterns);
+      // Filter out imported patterns before rendering
+      const sharedPatterns = allPatterns.filter(p => p.isImported !== true);
+      renderPatternGrid(sharedPatterns);
     });
 
     /* ── HAMBURGER ── */
@@ -922,12 +924,18 @@
         if (!res.ok) throw new Error("Failed to fetch");
         allPatterns = await res.json();
         
-        // FIX: If we are on the 'my' tab (default), filter out imports immediately on load
         if (currentTab === "my") {
             const myOnly = allPatterns.filter(p => (p.userId === currentUserId || !p.userId) && p.isImported !== true);
             renderPatternGrid(myOnly);
         } else {
-            renderPatternGrid(allPatterns);
+            // "All Patterns": Show community patterns + MY imported patterns (hide others' imports)
+            const sharedPatterns = allPatterns.filter(p => {
+                if (p.isImported === true) {
+                    return p.userId === currentUserId; 
+                }
+                return true; 
+            });
+            renderPatternGrid(sharedPatterns);
         }
 
       } catch (err) {
@@ -935,19 +943,42 @@
       }
     }
 
+    allPatternsTab.addEventListener("click", () => {
+      currentTab = "all";
+      allPatternsTab.classList.add("active");
+      myPatternsTab.classList.remove("active");
+      
+      document.getElementById("import-btn-wrapper").style.display = "inline-flex";
+      
+      // "All Patterns": Show community patterns + MY imported patterns (hide others' imports)
+      const sharedPatterns = allPatterns.filter(p => {
+          if (p.isImported === true) {
+              return p.userId === currentUserId; 
+          }
+          return true; 
+      });
+      renderPatternGrid(sharedPatterns);
+    });
+
     function filterPatterns(q) {
       const query = q.toLowerCase().trim();
       const filtered = allPatterns.filter(p =>
         (p.name || "").toLowerCase().includes(query) ||
         (p.type || "").toLowerCase().includes(query) ||
         (p.loom || "").toLowerCase().includes(query) ||
-        (p.creator || "").toLowerCase().includes(query) // Included OG search param
+        (p.creator || "").toLowerCase().includes(query) 
       );
 
       if (currentTab === "my") {
-        renderPatternGrid(filtered.filter(p => p.userId === currentUserId || !p.userId));
+        renderPatternGrid(filtered.filter(p => (p.userId === currentUserId || !p.userId) && p.isImported !== true));
       } else {
-        renderPatternGrid(filtered);
+        // Apply the same privacy filter to search results on "All Patterns"
+        renderPatternGrid(filtered.filter(p => {
+            if (p.isImported === true) {
+                return p.userId === currentUserId; 
+            }
+            return true;
+        }));
       }
     }
 
@@ -1097,7 +1128,7 @@
       return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    // 5. IMPORT .HABI FILE EVENT LISTENER (from OG)
+    // 5. IMPORT .HABI FILE EVENT LISTENER
     document.getElementById('import-file').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1111,8 +1142,11 @@
               
               // 1. Tag it as an import so it stays out of "My Patterns"
               importedData.isImported = true;
+              
+              // 2. Assign it to the current user so they are the ONLY ones who see it in "All Patterns"
+              importedData.userId = currentUserId;
 
-              // 2. Ensure the original creator's name is kept
+              // 3. Ensure the original creator's name is kept
               if (!importedData.creator) {
                    importedData.creator = "Original Weaver"; 
               }
