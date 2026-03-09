@@ -680,75 +680,74 @@
             if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
         });
 
-        // === LOAD USER DATA ===
+        // === LOAD USER DATA & PERSONAL STATS ===
         document.addEventListener("DOMContentLoaded", async () => {
-            try {
-                const response = await fetch("/auth/user", {
-                    credentials: "include"
+    try {
+        // Fetch User Data
+        const response = await fetch("/auth/user", { credentials: "include" });
+        if (!response.ok) { window.location.href = "/login.html"; return; }
+        const user = await response.json();
+        if (!user) return;
+
+        // Update UI Text & PFP
+        document.getElementById("settings-name").textContent = user.name;
+        document.getElementById("user-firstname").textContent = user.name.split(" ")[0];
+
+        if (user.photo) {
+            // Main card PFP
+            const pfp = document.getElementById("settings-photo");
+            pfp.src = user.photo;
+            pfp.style.display = "block";
+            document.getElementById("settings-icon").style.display = "none";
+            // Nav PFP
+            const navPfp = document.getElementById("user-photo");
+            navPfp.src = user.photo;
+            navPfp.style.display = "block";
+            document.getElementById("default-avatar-icon").style.display = "none";
+        }
+
+        // === STATS LOGIC (MY PATTERNS ONLY) ===
+        try {
+            const patternsRes = await fetch("/api/patterns"); 
+            const allPatterns = await patternsRes.json();
+            
+            // Get current user ID
+            const currentUserId = user._id || user.id;
+
+            // Filter out community and imported patterns
+            const myPatterns = allPatterns.filter(p => 
+                (p.userId === currentUserId || !p.userId) && p.isImported !== true
+            );
+            
+            const count = myPatterns.length;
+            document.getElementById("stats-patterns").textContent = count;
+
+            // Determine Level
+            let level = "Beginner Weaver";
+            if (count >= 5) level = "Intermediate Weaver";
+            if (count >= 15) level = "Advanced Artisan";
+            if (count >= 30) level = "Master Weaver";
+            document.getElementById("stats-level").textContent = level;
+
+            // Determine Favorite Weave
+            if (count > 0) {
+                const types = {};
+                myPatterns.forEach(p => {
+                    const type = p.type || "plain";
+                    types[type] = (types[type] || 0) + 1;
                 });
-
-                if (!response.ok) {
-                    window.location.href = "/login.html";
-                    return;
-                }
-
-                const user = await response.json();
-
-                if (!user) {
-                    window.location.href = "/login.html";
-                    return;
-                }
-
-                // Update user data
-                const firstName = user.name.split(" ")[0];
-                document.getElementById("settings-name").textContent = user.name;
-                document.getElementById("user-firstname").textContent = firstName;
-
-                // Update avatar
-                if (user.photo) {
-                    const img = document.getElementById("settings-photo");
-                    img.src = user.photo;
-                    img.style.display = "block";
-                    document.getElementById("settings-icon").style.display = "none";
-
-                    const navPhoto = document.getElementById("user-photo");
-                    navPhoto.src = user.photo;
-                    navPhoto.style.display = "block";
-                    document.getElementById("default-avatar-icon").style.display = "none";
-                }
-
-                // Fetch patterns for stats
-                try {
-                    const patternsRes = await fetch("/api/patterns");
-                    const patterns = await patternsRes.json();
-                    const patternCount = patterns.length;
-                    document.getElementById("stats-patterns").textContent = patternCount;
-
-                    // Determine weaver level based on pattern count
-                    let level = "Beginner";
-                    if (patternCount >= 5) level = "Intermediate";
-                    if (patternCount >= 15) level = "Advanced";
-                    if (patternCount >= 30) level = "Expert Weaver";
-                    document.getElementById("stats-level").textContent = level;
-
-                    // Find favorite weave type
-                    if (patterns.length > 0) {
-                        const weaveTypes = {};
-                        patterns.forEach(p => {
-                            weaveTypes[p.type] = (weaveTypes[p.type] || 0) + 1;
-                        });
-                        const favorite = Object.keys(weaveTypes).reduce((a, b) => weaveTypes[a] > weaveTypes[b] ? a : b);
-                        document.getElementById("stats-favorite").textContent = favorite.charAt(0).toUpperCase() + favorite.slice(1);
-                    }
-                } catch (err) {
-                    console.log("Could not load pattern stats:", err);
-                }
-
-            } catch (error) {
-                console.error("Session error:", error);
-                window.location.href = "/login.html";
+                const fav = Object.keys(types).reduce((a, b) => types[a] > types[b] ? a : b);
+                document.getElementById("stats-favorite").textContent = fav.charAt(0).toUpperCase() + fav.slice(1);
             }
-        });
+        } catch (err) {
+            console.error("Error fetching my patterns:", err);
+        }
+
+    } catch (error) {
+        console.error("Session error:", error);
+        window.location.href = "/login.html";
+    }
+});
     </script>
 
 </body>
