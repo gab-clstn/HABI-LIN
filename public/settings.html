@@ -1524,6 +1524,7 @@
         try {
           const response = await fetch("/auth/user");
           const user = await response.json();
+          console.log("Provider:", user.provider); // ADD THIS
 
           if (user) {
             const sidebarName = document.getElementById(
