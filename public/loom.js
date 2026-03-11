@@ -29,7 +29,8 @@ function attachStartButton() {
     // ── REBUILD COLOR SECTION IN HEDDLES OVERLAY ──
     // Hides the old 4-shaft inline pickers and replaces with a full-width
     // tabbed panel: "Warp Threads" (by range) | "Weft Picks" (by range).
-    (function buildColorUI() {
+    // Called from nextBtn click so the DOM is guaranteed ready.
+    function buildColorUI() {
         if (document.getElementById("color-section-root")) return;
 
         // ── Inject styles ──
@@ -55,8 +56,7 @@ function attachStartButton() {
                 #color-section-root {
                     width: 100%;
                     box-sizing: border-box;
-                    border-top: 1px solid rgba(255,255,255,0.1);
-                    padding-top: 16px;
+                    padding-top: 0;
                 }
                 .cs-heading {
                     font-size: 0.72rem;
@@ -221,16 +221,6 @@ function attachStartButton() {
             document.head.appendChild(s);
         }
 
-        // ── Hide legacy pickers immediately ──
-        ["wrap-warpColor1", "wrap-warpColor2", "wrap-warpColor3", "wrap-warpColor4"].forEach(id => {
-            const el = heddlesOverlay.querySelector ? heddlesOverlay.querySelector(`#${id}`) : document.getElementById(id);
-            if (el) el.style.display = "none";
-        });
-        // Also hide the parent "WARP COLORS" label if it exists as a sibling label
-        heddlesOverlay.querySelectorAll && heddlesOverlay.querySelectorAll("label, .field-label, .form-label").forEach(el => {
-            if (el.textContent.trim().toUpperCase() === "WARP COLORS") el.style.display = "none";
-        });
-
         // ── Build root ──
         const root = document.createElement("div");
         root.id = "color-section-root";
@@ -269,12 +259,19 @@ function attachStartButton() {
             </div>
         `;
 
-        // ── Append to overlay (before Start Weaving button) ──
-        const startBtnEl = heddlesOverlay.querySelector("#startWeavingFromHeddles");
-        if (startBtnEl && startBtnEl.parentNode) {
-            startBtnEl.parentNode.insertBefore(root, startBtnEl);
+        // ── Inject into the right column mount point ──
+        const mountEl = document.getElementById("color-panel-mount");
+        if (mountEl) {
+            mountEl.innerHTML = ""; // clear placeholder text
+            mountEl.appendChild(root);
         } else {
-            heddlesOverlay.appendChild(root);
+            // fallback: inject before Start Weaving button
+            const startBtnEl = heddlesOverlay.querySelector("#startWeavingFromHeddles");
+            if (startBtnEl && startBtnEl.parentNode) {
+                startBtnEl.parentNode.insertBefore(root, startBtnEl);
+            } else {
+                heddlesOverlay.appendChild(root);
+            }
         }
 
         // ── Tab switching ──
@@ -400,7 +397,7 @@ function attachStartButton() {
         // Expose helpers on the element so startBtn handler can read them
         root._buildWarpColorArray = buildWarpColorArray;
         root._buildWeftColorArray = buildWeftColorArray;
-    })();
+    }
 
     nextBtn.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -459,6 +456,7 @@ function attachStartButton() {
         });
 
         setupOverlay.style.display = "none";
+        buildColorUI();
         heddlesOverlay.style.display = "flex";
     });
 

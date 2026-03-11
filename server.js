@@ -15,6 +15,7 @@ import User from "./models/user.js";
 dotenv.config();
 
 const app = express();
+const isProduction = process.env.NODE_ENV === "production";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +32,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ── Trust Railway's reverse proxy (REQUIRED for HTTPS cookies in production) ──
-app.set("trust proxy", 1);
+if (isProduction) {
+    app.set("trust proxy", 1);
+}
 
 // ── Middleware ────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
@@ -64,13 +67,13 @@ const Pattern = mongoose.model("Pattern", patternSchema);
 
 // ── Session ───────────────────────────────────────────────────
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "local-dev-secret",
     resave: false,
     saveUninitialized: false,
     cookie: { 
         maxAge: 24 * 60 * 60 * 1000, 
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        secure: process.env.NODE_ENV === "production"
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction
     }
 }));
 
@@ -94,58 +97,64 @@ passport.use(new LocalStrategy({ usernameField: "email" }, async (email, passwor
     } catch (err) { return done(err); }
 }));
 
-passport.use(new GoogleStrategy({
-    clientID:     process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:  `${process.env.BASE_URL}/auth/google/callback`
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
-        let user = await User.findOne({ providerId: profile.id });
-        if (!user) {
-            user = await User.findOne({ email: profile.emails[0].value });
-            if (user) {
-                user.providerId = profile.id;
-                user.provider   = "google";
-                user.photo      = profile.photos[0].value;
-                await user.save();
-            } else {
-                user = await User.create({
-                    name: profile.displayName, email: profile.emails[0].value,
-                    provider: "google", providerId: profile.id, photo: profile.photos[0].value
-                });
+// ── Google OAuth (only register if credentials are present) ──
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID:     process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL:  `${process.env.BASE_URL}/auth/google/callback`
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            let user = await User.findOne({ providerId: profile.id });
+            if (!user) {
+                user = await User.findOne({ email: profile.emails[0].value });
+                if (user) {
+                    user.providerId = profile.id;
+                    user.provider   = "google";
+                    user.photo      = profile.photos[0].value;
+                    await user.save();
+                } else {
+                    user = await User.create({
+                        name: profile.displayName, email: profile.emails[0].value,
+                        provider: "google", providerId: profile.id, photo: profile.photos[0].value
+                    });
+                }
             }
-        }
-        return done(null, user);
-    } catch (err) { return done(err); }
-}));
+            return done(null, user);
+        } catch (err) { return done(err); }
+    }));
+}
 
-passport.use(new FacebookStrategy({
-    clientID:      process.env.FACEBOOK_APP_ID,
-    clientSecret:  process.env.FACEBOOK_APP_SECRET,
-    callbackURL:   `${process.env.BASE_URL}/auth/facebook/callback`,
-    profileFields: ["id", "displayName", "photos", "emails"]
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
-        let user = await User.findOne({ providerId: profile.id });
-        if (!user) {
-            const email = profile.emails?.[0]?.value;
-            if (email) user = await User.findOne({ email });
-            if (user) {
-                user.providerId = profile.id;
-                user.provider   = "facebook";
-                user.photo      = profile.photos?.[0]?.value;
-                await user.save();
-            } else {
-                user = await User.create({
-                    name: profile.displayName, email,
-                    provider: "facebook", providerId: profile.id,
-                    photo: profile.photos?.[0]?.value
-                });
+// ── Facebook OAuth (only register if credentials are present) ──
+if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    passport.use(new FacebookStrategy({
+        clientID:      process.env.FACEBOOK_APP_ID,
+        clientSecret:  process.env.FACEBOOK_APP_SECRET,
+        callbackURL:   `${process.env.BASE_URL}/auth/facebook/callback`,
+        profileFields: ["id", "displayName", "photos", "emails"]
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            let user = await User.findOne({ providerId: profile.id });
+            if (!user) {
+                const email = profile.emails?.[0]?.value;
+                if (email) user = await User.findOne({ email });
+                if (user) {
+                    user.providerId = profile.id;
+                    user.provider   = "facebook";
+                    user.photo      = profile.photos?.[0]?.value;
+                    await user.save();
+                } else {
+                    user = await User.create({
+                        name: profile.displayName, email,
+                        provider: "facebook", providerId: profile.id,
+                        photo: profile.photos?.[0]?.value
+                    });
+                }
             }
-        }
-        return done(null, user);
-    } catch (err) { console.error("Facebook Auth Error:", err); return done(err); }
-}));
+            return done(null, user);
+        } catch (err) { console.error("Facebook Auth Error:", err); return done(err); }
+    }));
+}
 
 /* ══════════════════════════════════════════════════════════════
    AUTH ROUTES
@@ -164,10 +173,24 @@ app.post("/auth/login", passport.authenticate("local"), (req, res) => {
     res.json({ message: "Logged in", user: req.user });
 });
 
-app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
-app.get("/auth/facebook", passport.authenticate("facebook", { scope: ["public_profile"] }));
-app.get("/auth/facebook/callback", passport.authenticate("facebook", { failureRedirect: "/login.html" }), (req, res) => res.redirect("/dashboard.html"));
+// ── OAuth routes with graceful fallback if not configured ──
+app.get("/auth/google", (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID) return res.redirect("/login.html?error=google-not-configured");
+    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+});
+app.get("/auth/google/callback", (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID) return res.redirect("/login.html");
+    passport.authenticate("google", { failureRedirect: "/login.html" })(req, res, next);
+}, (req, res) => res.redirect("/dashboard.html"));
+
+app.get("/auth/facebook", (req, res, next) => {
+    if (!process.env.FACEBOOK_APP_ID) return res.redirect("/login.html?error=facebook-not-configured");
+    passport.authenticate("facebook", { scope: ["public_profile"] })(req, res, next);
+});
+app.get("/auth/facebook/callback", (req, res, next) => {
+    if (!process.env.FACEBOOK_APP_ID) return res.redirect("/login.html");
+    passport.authenticate("facebook", { failureRedirect: "/login.html" })(req, res, next);
+}, (req, res) => res.redirect("/dashboard.html"));
 
 app.get("/auth/user", (req, res) => {
     if (!req.user) return res.json(null);
@@ -267,7 +290,6 @@ app.get("/api/patterns", async (req, res) => {
         .sort({ created: -1 })
         .lean();
 
-        // Ensure every pattern has a creator name pulled from the User collection
         const fixedPatterns = patterns.map(p => ({
             ...p,
             creator: p.userId ? p.userId.name : "Unknown Weaver"
@@ -342,4 +364,9 @@ app.put("/api/patterns/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 http://localhost:${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`📦 Environment: ${isProduction ? "production" : "development"}`);
+    console.log(`🔐 Google OAuth: ${process.env.GOOGLE_CLIENT_ID ? "enabled" : "disabled (no credentials)"}`);
+    console.log(`🔐 Facebook OAuth: ${process.env.FACEBOOK_APP_ID ? "enabled" : "disabled (no credentials)"}`);
+});

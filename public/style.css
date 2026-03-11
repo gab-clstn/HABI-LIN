@@ -56,7 +56,7 @@ form {
     padding: 0 50px; 
     height: 100%;
     text-align: center;
-    position: relative; /* CRITICAL for absolute floating messages */
+    position: relative;
 }
 
 .auth-container h1 {
@@ -115,7 +115,6 @@ form {
 .overlay {
     background: linear-gradient(to right, #2b0303, #000000, #2b0303);
     color: #FFFFFF;
-    
     position: relative; 
     left: -100%;
     height: 100%;
@@ -306,7 +305,6 @@ input {
     6. WEAVING STUDIO & OVERLAY FIXES
    ========================================= */
 
-/* Main Container Fix */
 #weaving-studio {
     width: 100%;
     height: 100vh;
@@ -326,7 +324,7 @@ input {
 /* ── OVERLAY CENTERING FIX ── */
 #modeSelectionOverlay,
 #setupOverlay {
-    position: fixed !important;
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
@@ -335,10 +333,9 @@ input {
     align-items: center !important;
     justify-content: center !important;
     background: rgba(0, 0, 0, 0.7) !important;
-    z-index: 999 !important;
+    z-index: 15 !important;
 }
 
-/* Make the Setup Windows Smaller and Centered */
 #modeSelectionOverlay > div, 
 #setupOverlay > div {
     max-width: clamp(280px, 90vw, 450px);
@@ -353,7 +350,6 @@ input {
     overflow-y: auto;
 }
 
-/* Typography adjustments for smaller windows */
 #modeSelectionOverlay h2, 
 #setupOverlay h2 {
     font-size: clamp(1.3rem, 3vw, 1.8rem) !important;
@@ -369,7 +365,6 @@ input {
     margin-bottom: 15px;
 }
 
-/* Remove "Excess Box" behavior from inputs */
 #setupOverlay input, 
 #setupOverlay select {
     background-color: #25252b !important;
@@ -393,12 +388,6 @@ input {
     text-align: left;
 }
 
-/* Form group wrapper */
-#setupOverlay > div > label + input {
-    margin-bottom: 15px;
-}
-
-/* Action Buttons inside Studio */
 #startWeaving, 
 .goToSetupBtn,
 #modeSelectionOverlay .btn-primary {
@@ -424,7 +413,6 @@ input {
     transform: translateY(-2px);
 }
 
-/* Responsive fix to prevent "Cut Off" look on small screens */
 @media (max-height: 700px) {
     #setupOverlay > div {
         transform: scale(0.85);
@@ -432,7 +420,6 @@ input {
     }
 }
 
-/* Fix for the Loom Control panel positioning */
 .loom-control-panel {
     position: absolute;
     right: 20px;
@@ -440,7 +427,6 @@ input {
     z-index: 100;
 }
 
-/* Compact Save Notification */
 .save-alert {
     position: fixed;
     bottom: 20px;
@@ -481,50 +467,84 @@ input {
 }
 
 /* =========================================
-    7. HEDDLES CUSTOMIZATION OVERLAY (MATCHED TO SETUP)
+    7. HEDDLES CUSTOMIZATION OVERLAY
    ========================================= */
+
+/* The overlay sits inside #weaving-studio (position:absolute parent) */
 #heddlesOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #121214;
+    position: absolute !important; /* stays inside the studio, not fixed to viewport */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(18, 18, 20, 0.97) !important;
     display: none;
-    justify-content: center; /* center horizontally */
-    align-items: center;     /* center vertically */
-    z-index: 999;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 15 !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
-#heddlesOverlay .setup-card {
-    /* constrain the card to viewport — DO NOT let it grow taller */
-    width: min(860px, 96vw);
-    max-width: 96vw;
-    height: min(92vh, 860px);   /* ← THE KEY LINE: fixed height so flex children work */
-    max-height: 92vh;
-    padding: 0 !important;      /* layout-root handles all padding internally */
-    overflow: hidden !important; /* no scroll on the card itself */
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    border-radius: 16px;
+/* The two-column card — let dashboard.html inline styles + .heddles-two-col-card class handle layout */
+#heddlesOverlay .setup-card,
+#heddlesOverlay .heddles-two-col-card {
+    /* Reset any conflicting overrides from the old section 7 */
+    position: relative !important;
+    z-index: 1 !important;          /* no longer needs 9999 — parent overlay handles stacking */
+    pointer-events: auto !important;
+
+    /* Sizing — fits inside viewport with breathing room */
+    width: min(780px, calc(100vw - 32px)) !important;
+    max-height: calc(100vh - 80px) !important;
+    height: auto !important;        /* let content dictate height, not a fixed value */
+
+    /* Layout */
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto 1fr auto !important;
+    gap: 0 24px !important;
+
+    /* Appearance */
+    background: #1e1e21 !important;
+    border-radius: 18px !important;
+    padding: 24px 28px !important;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;    /* columns scroll independently, not the card */
+    border: none !important;        /* remove setup-card default border if any */
 }
 
-/* Buttons like setup page */
+/* Ensure all interactive elements inside are clickable */
+#heddlesOverlay input,
+#heddlesOverlay select,
+#heddlesOverlay button {
+    position: relative !important;
+    z-index: auto !important;       /* no need for 10000 — parent stacking context is correct */
+    pointer-events: auto !important;
+}
+
+/* Start Weaving button */
 #startWeavingFromHeddles {
-    padding: 12px;
-    font-size: 14px;
-    margin-top: 15px;
-    border-radius: 20px;
-    background: linear-gradient(to right, #2b0303, #000000);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    text-transform: uppercase;
+    padding: 14px 24px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(to right, #2b0303, #000000) !important;
+    color: #fff !important;
+    border: none !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+    letter-spacing: 0.5px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    margin-top: 0 !important;
 }
+
 #startWeavingFromHeddles:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(43, 3, 3, 0.4) !important;
 }
 
 .warp-color-group {
@@ -533,6 +553,7 @@ input {
     gap: 10px;
     margin-bottom: 10px;
 }
+
 .warp-color-group input[type="color"] {
     width: 40px;
     height: 40px;
@@ -540,10 +561,16 @@ input {
     border: none;
 }
 
-/* Responsive Scaling */
-@media (max-height: 700px) {
-    #heddlesOverlay .setup-card {
-        transform: scale(0.85);
+/* Mobile: stack columns */
+@media (max-width: 640px) {
+    #heddlesOverlay .setup-card,
+    #heddlesOverlay .heddles-two-col-card {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto auto auto !important;
+        max-height: calc(100vh - 60px) !important;
+        overflow-y: auto !important;
+        padding: 18px !important;
+        gap: 0 !important;
     }
 }
 
@@ -552,7 +579,7 @@ input {
    ========================================= */
 .floating-modal {
     position: fixed;
-    top: 90px; /* Safely below the 70px header */
+    top: 90px;
     left: 50%;
     transform: translateX(-50%) translateY(-20px);
     z-index: 9999;
@@ -610,23 +637,23 @@ input {
     50%, 100% { opacity: 1; z-index: 5; }
 }
 
+/* Pointer-events: keep overlays interactive */
 #setupOverlay, 
 #heddlesOverlay {
     pointer-events: auto;
 }
 
+/* .setup-card z-index REMOVED — no longer needs 9999 now that
+   the overlay itself correctly establishes the stacking context */
 .setup-card {
     position: relative;
-    z-index: 9999 !important; /* Pushes the card through the invisible shield */
-    pointer-events: auto; /* Turns clicks back on just for the card */
+    pointer-events: auto;
 }
 
 .setup-card button,
 .setup-card input,
 .setup-card select {
-    position: relative;
-    z-index: 10000 !important;
-    pointer-events: auto !important; /* Forces the buttons and inputs to be clickable */
+    pointer-events: auto !important;
 }
 
 /* ── DESKTOP: Controls top-right, pattern bottom-right ── */
