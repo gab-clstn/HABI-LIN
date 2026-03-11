@@ -1,5 +1,6 @@
-const CACHE_NAME = "habi-lin-v3"; // Bumped version
+const CACHE_NAME = "habi-lin-v2";
 
+// Pages and assets to cache immediately on install
 const STATIC_ASSETS = [
     "/dashboard.html",
     "/collection.html",
@@ -8,24 +9,15 @@ const STATIC_ASSETS = [
     "/settings.html",
     "/user-settings.html",
     "/offline.html",
-    "/manifest.json",
-    "/global.js" // Added global.js since your pages depend on it
+    "/manifest.json"
 ];
 
-// ── INSTALL: Cache assets one by one for better reliability ──
+// ── INSTALL: cache all static assets ──────────────────────────
 self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(async (cache) => {
-            console.log("SW: Pre-caching offline assets...");
-            for (const asset of STATIC_ASSETS) {
-                try {
-                    await cache.add(asset);
-                } catch (err) {
-                    console.warn(`SW: Failed to cache ${asset}. Check if the filename matches exactly.`);
-                }
-            }
-            return self.skipWaiting();
-        })
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(STATIC_ASSETS))
+            .then(() => self.skipWaiting())
     );
 });
 
@@ -45,29 +37,61 @@ self.addEventListener("fetch", event => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Skip non-GET requests and external CDNs if needed, but let's keep it simple:
-    if (request.method !== 'GET') return;
-
-    // API/Auth bypass
-    if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) {
-        return; 
+    // Let API calls and auth routes pass through (don't cache)
+    if (url.pathname.startsWith("/api/") ||
+        url.pathname.startsWith("/auth/")) {
+        event.respondWith(
+            fetch(request).catch(() => {
+                // If API call fails offline, return a JSON error
+                return new Response(
+                    JSON.stringify({ error: "You are offline. Please reconnect to access this feature." }),
+                    { status: 503, headers: { "Content-Type": "application/json" } }
+                );
+            })
+        );
+        return;
     }
 
-    event.respondWith(
-        fetch(request)
-            .then(response => {
-                // If network works, put a copy in cache
-                if (response.status === 200) {
+    // For HTML pages: try network first, fall back to cache, then offline page
+    if (request.mode === "navigate" || request.headers.get("accept")?.includes("text/html")) {
+        event.respondWith(
+            fetch(request)
+                .then(response => {
+                    // Cache the fresh page
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-                }
+                    return response;
+                })
+                .catch(() =>
+                    caches.match(request).then(cached => cached || caches.match("/offline.html"))
+                )
+        );
+        return;
+    }
+
+    // For everything else (CSS, JS, images): cache first, then network
+    event.respondWith(
+        caches.match(request).then(cached => {
+            if (cached) return cached;
+            return fetch(request).then(response => {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
                 return response;
-            })
-            .catch(() => {
-                // If network fails, try cache, then offline.html
-                return caches.match(request).then(cached => {
-                    return cached || caches.match("/offline.html");
-                });
-            })
+            });
+        })
     );
 });
+
+// ── BACKGROUND SYNC: retry failed pattern saves ───────────────
+self.addEventListener("sync", event => {
+    if (event.tag === "sync-patterns") {
+        event.waitUntil(syncOfflinePatterns());
+    }
+});
+
+async function syncOfflinePatterns() {
+    // This will be triggered when internet is restored
+    // The main app handles the actual sync via IndexedDB
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => client.postMessage({ type: "SYNC_PATTERNS" }));
+}
