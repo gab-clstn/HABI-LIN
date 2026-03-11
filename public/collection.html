@@ -1175,8 +1175,8 @@
         const patterns = await res.json();
         allPatterns = patterns;
         
-        // 3. Render the grid
-        renderPatternGrid(patterns);
+        // 3. Render the grid using the active tab filter!
+        renderFiltered(); 
       } catch (err) {
         console.error("Collection fetch error:", err);
         grid.innerHTML = `
