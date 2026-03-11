@@ -1,2161 +1,2033 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-  <link rel="icon" href="/icons/icon-192.png" type="image/png" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#2b0303" />
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/service-worker.js");
-    }
-  </script>
-  <script src="global.js"></script><!-- ✅ Only once -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
-      }
-    }
-  </script>
-  <title>HABI-LIN | Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    body {
-      background-color: #fcfcfb;
-      color: #1a1a1a;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .dashboard-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    /* ── CSS VARIABLES ── */
-    :root {
-      --nav-height: 70px;
-      --brand: #2b0303;
-      --brand-mid: #4a0606;
-      --brand-light: #fdf2f2;
-      --bg: #fcfcfb;
-      --surface: #ffffff;
-      --border: #f0f0f0;
-      --border-color: #eee;
-      --text: #1a1a1a;
-      --muted: #888;
-      --danger: #d93025;
-      --content-px: clamp(20px, 5vw, 80px);
-      --card-radius: 20px;
-      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ── ICONS ── */
-    .icon {
-      display: inline-block;
-      width: 1em;
-      height: 1em;
-      vertical-align: -0.125em;
-      fill: currentColor;
-      flex-shrink: 0;
-    }
-
-    .icon-sm {
-      width: 0.85em;
-      height: 0.85em;
-    }
-
-    .icon-lg {
-      width: 1.25em;
-      height: 1.25em;
-    }
-
-    .icon-xl {
-      width: 1.6em;
-      height: 1.6em;
-    }
-
-    .icon-2xl {
-      width: 2em;
-      height: 2em;
-    }
-
-    /* ── SIDEBAR / NAV ── */
-    .sidebar {
-      width: 100%;
-      height: var(--nav-height);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      padding: 0 var(--content-px);
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      gap: 8px;
-    }
-
-    .sidebar-header h2 {
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-right: 32px;
-      white-space: nowrap;
-      font-size: 1.4rem;
-      color: #2b0303;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex: 1;
-      gap: 0;
-      margin-left: 0;
-    }
-
-    .nav-item {
-      color: #666;
-      text-decoration: none;
-      padding: 8px 0;
-      margin: 0 15px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      position: relative;
-      white-space: nowrap;
-    }
-
-    .nav-item::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -6px;
-      width: 0;
-      height: 2px;
-      background-color: #2b0303;
-      transition: width 0.3s ease;
-    }
-
-    .logo-link,
-    .logo-link h2 {
-      text-decoration: none;
-    }
-
-    .nav-item:hover {
-      color: #2b0303;
-    }
-
-    .nav-item:hover::after,
-    .nav-item.active::after {
-      width: 100%;
-    }
-
-    .nav-item.active {
-      color: #2b0303;
-      font-weight: 700;
-    }
-
-    .nav-spacer {
-      margin-left: auto;
-    }
-
-    .logout {
-      color: #d93025 !important;
-      font-weight: 600;
-      margin-left: 10px;
-    }
-
-    /* ── MAIN ── */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      margin-top: 70px;
-    }
-
-    .top-header {
-      background: transparent;
-      padding: 25px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header-breadcrumb {
-      font-size: 0.85rem;
-      color: #888;
-      font-weight: 500;
-    }
-
-    .active-crumb {
-      color: #2b0303;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-text {
-      text-align: right;
-    }
-
-    .greeting {
-      display: block;
-      font-size: 0.75rem;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .user-info strong {
-      color: #1a1a1a;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .profile-circle {
-      width: 42px;
-      height: 42px;
-      background: #f0f0f0;
-      color: #2b0303;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 2px solid white;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .profile-circle:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-    }
-
-    .dashboard-content {
-      padding: 0 40px 40px;
-    }
-
-    /* ── WELCOME BANNER ── */
-    .welcome-banner {
-      background: #2b0303;
-      background-image: linear-gradient(45deg, #2b0303 0%, #4a0606 100%);
-      padding: 50px;
-      border-radius: 24px;
-      color: white;
-      margin-bottom: 40px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .welcome-banner h1 {
-      font-size: 2.4rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .welcome-banner p {
-      opacity: 0.8;
-      font-weight: 300;
-      max-width: 500px;
-    }
-
-    .section-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 25px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-
-    /* ── CARDS ── */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 30px;
-    }
-
-    .action-card {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      display: flex;
-      align-items: flex-start;
-      gap: 25px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid #f0f0f0;
-    }
-
-    .action-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    }
-
-    .card-visual {
-      width: 54px;
-      height: 54px;
-      background: #fdf2f2;
-      border-radius: 14px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2rem;
-      color: #2b0303;
-      flex-shrink: 0;
-    }
-
-    .card-info h4 {
-      color: #1a1a1a;
-      margin-bottom: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-    }
-
-    .card-info p {
-      font-size: 0.9rem;
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-
-    .card-btn {
-      background: #2b0303;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: 0.2s;
-    }
-
-    .card-btn:hover {
-      background: #4a0606;
-    }
-
-    .card-btn-outline {
-      background: transparent;
-      border: 1px solid #ddd;
-      color: #444;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: 0.2s;
-    }
-
-    .card-btn-outline:hover {
-      border-color: #2b0303;
-      color: #2b0303;
-    }
-
-    /* ── OVERLAYS ── */
-    .overlay-card,
-    .setup-card {
-      background: #1e1e21;
-      padding: 40px;
-      border-radius: 24px;
-      text-align: center;
-      width: 480px;
-      color: white;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-    }
-
-    .overlay-card h2,
-    .setup-card h2 {
-      margin-bottom: 15px;
-      font-weight: 700;
-    }
-
-    .overlay-card p {
-      color: #aaa;
-      margin-bottom: 35px;
-      font-size: 0.95rem;
-    }
-
-    .overlay-btns {
-      display: flex;
-      gap: 15px;
-    }
-
-    .btn-primary {
-      background: #2b0303;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      flex: 1;
-    }
-
-    .btn-secondary {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      flex: 1;
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: #888;
-      border: none;
-      padding: 10px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .form-group-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      text-align: left;
-    }
-
-    .input-wrap label {
-      display: block;
-      font-size: 0.75rem;
-      color: #888;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .input-wrap input,
-    .input-wrap select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background: #2a2a30;
-      color: white;
-      outline: none;
-    }
-
-    .dual-input {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #555;
-    }
-
-    .full-width {
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    /* ── MEASUREMENT EXPAND PANEL (HOVER) ── */
-    .measure-expand {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to top, #0c1a0f 0%, rgba(12, 26, 15, 0.97) 100%);
-      border-top: 1px solid #1a3320;
-      padding: 14px 20px 18px;
-      transform: translateY(100%);
-      transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
-      z-index: 50;
-      border-radius: 0 0 18px 18px;
-    }
-
-    .pattern-card:hover .measure-expand {
-      transform: translateY(0);
-    }
-
-    .measure-expand.no-data {
-      display: none;
-    }
-
-    .measure-expand__title {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #3ecf5a;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .measure-expand__title::before {
-      content: '';
-      display: inline-block;
-      width: 5px;
-      height: 5px;
-      background: #3ecf5a;
-      border-radius: 50%;
-    }
-
-    .measure-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 14px;
-    }
-
-    .measure-cell {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .measure-cell__label {
-      font-size: 0.6rem;
-      color: #4a7a52;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .measure-cell__value {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #b8e8be;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .measure-cell__value em {
-      font-style: normal;
-      font-size: 0.65rem;
-      font-weight: 500;
-      color: #4a7a52;
-      margin-left: 2px;
-    }
-
-    /* ── WEAVING STUDIO ── */
-    #weaving-studio {
-      position: relative;
-      width: 100%;
-      height: 75vh;
-      min-height: 600px;
-    }
-
-    #bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── LEARN OVERLAY SCROLL FIX ── */
-    #learnSelectOverlay {
-      overflow-y: auto;
-      align-items: flex-start !important;
-      padding: 40px 0;
-    }
-
-    #learnSelectOverlay>div {
-      display: flex;
-      flex-direction: column;
-      margin: auto 0;
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    #learnSelectOverlay>div::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* ── ANIMATIONS ── */
-    #overview-section,
-    #weaving-studio,
-    #collection-section {
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ── COLLECTION STYLES ── */
-    .collection-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 35px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .header-text h1 {
-      font-size: 2rem;
-      color: #2b0303;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .header-text p {
-      color: #666;
-      font-size: 0.95rem;
-    }
-
-    .pattern-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 30px;
-    }
-
-    .pattern-card {
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid #eee;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pattern-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-      border-color: #2b0303;
-    }
-
-    .pattern-preview {
-      height: 180px;
-      background: #f9f9f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .pattern-preview canvas {
-      width: 100%;
-      height: 100%;
-      image-rendering: pixelated;
-    }
-
-    .pattern-details {
-      padding: 24px;
-    }
-
-    .pattern-details h4 {
-      color: #1a1a1a;
-      margin-bottom: 8px;
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
-
-    .pattern-details p {
-      font-size: 0.85rem;
-      color: #888;
-      margin-bottom: 18px;
-    }
-
-    .tag-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pattern-tag {
-      font-size: 0.7rem;
-      background: #fdf2f2;
-      color: #2b0303;
-      padding: 5px 12px;
-      border-radius: 50px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-new {
-      background: #2b0303;
-      color: white;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: 0.3s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-new:hover {
-      background: #4a0606;
-      box-shadow: 0 4px 15px rgba(43, 3, 3, 0.2);
-    }
-
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 80px 20px;
-      color: #aaa;
-    }
-
-    .empty-state i {
-      font-size: 3rem;
-      margin-bottom: 20px;
-      color: #ddd;
-      display: block;
-    }
-
-    .empty-state h3 {
-      font-size: 1.2rem;
-      color: #666;
-      margin-bottom: 8px;
-    }
-
-    .empty-state p {
-      font-size: 0.9rem;
-    }
-
-    .loading-state {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 80px 20px;
-      gap: 12px;
-      color: #888;
-      font-size: 0.9rem;
-    }
-
-    .spinner {
-      width: 22px;
-      height: 22px;
-      border: 3px solid #f0f0f0;
-      border-top-color: #2b0303;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .pattern-card .delete-btn {
-      opacity: 0;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(43, 3, 3, 0.85);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      z-index: 5;
-    }
-
-    .pattern-card .privacy-btn {
-      opacity: 0;
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      border: none;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      text-transform: uppercase;
-    }
-
-    .pattern-card:hover .privacy-btn {
-      opacity: 1;
-    }
-
-    .privacy-btn.private {
-      background: rgba(43, 3, 3, 0.85);
-      color: #aaa;
-    }
-    .privacy-btn.private:hover {
-      background: rgba(43, 3, 3, 1);
-      color: white;
-    }
-
-    .privacy-btn.public {
-      background: rgba(0, 229, 255, 0.15);
-      color: #00e5ff;
-      border: 1px solid rgba(0, 229, 255, 0.3);
-    }
-    .privacy-btn.public:hover {
-      background: rgba(0, 229, 255, 0.25);
-    }
-
-    .pattern-card:hover .delete-btn {
-      opacity: 1;
-    }
-
-    /* ── HAMBURGER ── */
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 8px;
-      color: var(--brand);
-      font-size: 1.2rem;
-      margin-left: auto;
-      transition: background 0.2s;
-    }
-
-    .hamburger:hover {
-      background: var(--brand-light);
-    }
-
-    /* ── MOBILE DRAWER ── */
-    .mobile-drawer {
-      display: none;
-      position: fixed;
-      top: var(--nav-height);
-      left: 0;
-      width: 100%;
-      background: var(--surface);
-      border-bottom: 1px solid #eee;
-      z-index: 999;
-      padding: 12px 20px 20px;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
-      transform: translateY(-10px);
-      opacity: 0;
-      transition: transform 0.25s ease, opacity 0.25s ease;
-    }
-
-    .mobile-drawer.open {
-      display: flex;
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .mobile-drawer .nav-item {
-      display: block;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-    }
-
-    .mobile-search {
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      background: #f5f5f5;
-      border-radius: 10px;
-      padding: 10px 14px;
-      border: 1px solid transparent;
-    }
-
-    .mobile-search:focus-within {
-      background: #fff;
-      border-color: var(--brand);
-    }
-
-    .mobile-search input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 0.9rem;
-    }
-
-    /* ── HEDDLES TWO-COLUMN LAYOUT ── */
-    #heddlesOverlay {
-      align-items: center !important;
-      justify-content: center !important;
-      overflow: hidden;
-    }
-
-    .heddles-two-col-card {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      /* Header: auto, Columns: fill remaining space, Footer: auto */
-      grid-template-rows: auto 1fr auto;
-      gap: 0 24px;
-      background: #1e1e21;
-      border-radius: 18px;
-      padding: 24px 28px;
-      width: min(780px, calc(100vw - 32px));
-      /* Fixed height so the grid rows have a finite space to divide */
-      height: min(560px, calc(100vh - 80px));
-      max-height: calc(100vh - 80px);
-      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5);
-      box-sizing: border-box;
-      overflow: hidden;
-    }
-
-    .heddles-col {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;   /* CRITICAL: prevents flex children from blowing out grid row height */
-      overflow: hidden;
-    }
-
-    .heddles-col--left {
-      border-right: 1px solid #2a2a35;
-      padding-right: 24px;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    /* ── RIGHT COLUMN: Thread Colors — scrollable only here ── */
-    .heddles-col--right {
-      padding-left: 4px;
-      /* Must be a flex column so children can fill height */
-      display: flex;
-      flex-direction: column;
-      /* Clip overflow — the inner mount point scrolls, not this wrapper */
-      overflow: hidden;
-    }
-
-    /* Mount point fills the column and scrolls internally */
-    #color-panel-mount {
-      flex: 1;
-      min-height: 0;        /* critical: allows flex child to shrink below content size */
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: thin;
-      scrollbar-color: #444 transparent;
-    }
-
-    #color-panel-mount::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    #color-panel-mount::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    #color-panel-mount::-webkit-scrollbar-thumb {
-      background: #444;
-      border-radius: 4px;
-    }
-
-    #color-panel-mount::-webkit-scrollbar-thumb:hover {
-      background: #666;
-    }
-
-    /* Override loom.js injected styles: root must NOT be a fixed-height flex column.
-       It should be a normal block that grows naturally inside the scrollable mount. */
-    #color-section-root {
-      display: block !important;
-      height: auto !important;
-      min-height: 0 !important;
-      overflow: visible !important;
-      padding-bottom: 8px;
-    }
-
-    .heddles-footer {
-      grid-column: 1 / -1;
-      display: flex;
-      flex-direction: row-reverse;
-      gap: 10px;
-      padding-top: 14px;
-      border-top: 1px solid #2a2a35;
-      margin-top: 14px;
-      flex-shrink: 0;
-    }
-
-    @media (max-width: 640px) {
-      .heddles-two-col-card {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto auto;
-        padding: 18px;
-        gap: 0;
-        /* On mobile: full card scrolls, columns are natural height */
-        height: auto;
-        max-height: calc(100vh - 60px);
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #333 transparent;
-      }
-
-      .heddles-col--left {
-        border-right: none;
-        border-bottom: 1px solid #2a2a35;
-        padding-right: 0;
-        padding-bottom: 14px;
-        margin-bottom: 14px;
-        overflow: visible;
-      }
-
-      .heddles-col--right {
-        padding-left: 0;
-        /* On mobile, let it expand naturally since the card scrolls */
-        overflow: visible;
-        max-height: none;
-      }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 1024px) {
-      .sidebar-nav {
-        margin-left: 12px;
-        gap: 0;
-      }
-
-      .nav-item {
-        padding: 8px 8px;
-        font-size: clamp(0.8rem, 1.4vw, 0.9rem);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        padding: 0 16px;
-        justify-content: space-between;
-      }
-
-      .sidebar-header h2 {
-        margin-right: 0;
-      }
-
-      .user-info {
-        margin-left: 0 !important;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-
-      .user-text {
-        display: none;
-      }
-
-      .hamburger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 0;
-      }
-
-      .sidebar-nav {
-        display: none;
-      }
-
-      .dashboard-content {
-        padding: 0 16px 48px;
-      }
-
-      .top-header {
-        padding: 16px 16px 8px;
-      }
-
-      .welcome-banner {
-        padding: 26px 22px;
-        border-radius: 14px;
-        margin-bottom: 24px;
-      }
-
-      .card-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
-      .action-card {
-        padding: 22px;
-        border-radius: 14px;
-      }
-
-      .overlay-btns {
-        flex-direction: column;
-      }
-
-      .btn-primary,
-      .btn-secondary {
-        min-width: unset;
-      }
-
-      #weaving-studio {
-        height: calc(100svh - var(--nav-height) - 60px);
-        min-height: 350px;
-        border-radius: 14px;
-      }
-    }
-
-    @media (max-width: 420px) {
-      :root {
-        --nav-height: 56px;
-      }
-
-      .sidebar-header h2 {
-        font-size: 1rem;
-      }
-
-      .profile-circle {
-        width: 34px;
-        height: 34px;
-        font-size: 0.8rem;
-      }
-
-      .card-visual {
-        width: 44px;
-        height: 44px;
-        font-size: 1rem;
-        border-radius: 11px;
-      }
-
-      .welcome-banner h1 {
-        font-size: 1.4rem;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <!-- ── SVG SPRITE ── -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-    <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
-      <path
-        d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
-    </symbol>
-    <symbol id="icon-user" viewBox="0 0 448 512">
-      <path
-        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
-    </symbol>
-    <symbol id="icon-bars" viewBox="0 0 448 512">
-      <path
-        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
-    </symbol>
-    <symbol id="icon-xmark" viewBox="0 0 384 512">
-      <path
-        d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-    </symbol>
-    <symbol id="icon-plus" viewBox="0 0 448 512">
-      <path
-        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
-    </symbol>
-    <symbol id="icon-book-open" viewBox="0 0 576 512">
-      <path
-        d="M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5l0-377.4c0-7.1-4.7-13.3-11.5-15.1C222.4 52.7 192.2 48 160 48C129.2 48 100.9 51.8 75.2 58.4C56.7 63 48 79.8 48 98L48 432c0 17.5 16.4 29.6 33.2 25C106.6 450.4 132.5 448 160 448c45 0 87.1 8 129.6 23.5zm76.8 0C368.9 456 411 448 456 448c27.5 0 53.4 2.4 78.8 9c16.8 4.6 33.2-7.5 33.2-25L568 98c0-18.2-8.7-35-27.2-39.6C515.1 51.8 486.8 48 456 48c-32.2 0-62.4 4.7-100.5 15.5c-6.8 1.8-11.5 8-11.5 15.1l0 377.4c0 11.4 11.6 19.3 22.4 15.5z" />
-    </symbol>
-  </svg>
-
-  <div class="dashboard-wrapper">
-
-    <!-- ── TOP NAV ── -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <a href="dashboard.html" class="logo-link">
-          <h2 id="brand-logo">HABI-LIN</h2>
-        </a>
-      </div>
-
-      <nav class="sidebar-nav">
-        <a href="dashboard.html" class="nav-item active" id="home-link">Home</a>
-        <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
-        <a href="about.html" class="nav-item" id="about-link">About</a>
-        <div class="nav-spacer" style="margin-left:auto;"></div>
-        <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
-        <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
-      </nav>
-
-      <div class="user-info" style="margin-left:auto;">
-        <div class="user-text">
-          <span class="greeting">Hello,</span>
-          <strong id="user-firstname">Weaver</strong>
-        </div>
-        <a href="user-settings.html" class="profile-circle" id="profile-btn">
-          <i class="fa-solid fa-user" id="default-avatar-icon"></i>
-          <img id="user-photo" src="" alt=""
-            style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;" />
-        </a>
-      </div>
-
-      <button class="hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
-        <svg class="icon icon-lg" id="hamburger-icon" aria-hidden="true">
-          <use href="#icon-bars" />
-        </svg>
-      </button>
-    </aside>
-
-    <!-- ── MOBILE DRAWER ── -->
-    <div class="mobile-drawer" id="mobile-drawer" role="navigation">
-      <a href="dashboard.html" class="nav-item">Home</a>
-      <a href="collection.html" class="nav-item">Collection</a>
-      <a href="about.html" class="nav-item">About</a>
-      <a href="settings.html" class="nav-item">Settings</a>
-      <a href="/auth/logout" class="nav-item logout">Logout</a>
-      <div class="mobile-search">
-        <input type="text" id="mobile-search-input" placeholder="Search patterns…" />
-        <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true">
-          <use href="#icon-magnifying-glass" />
-        </svg>
-      </div>
-    </div>
-
-    <!-- ── MAIN ── -->
-    <main class="main-container">
-      <header class="top-header">
-        <div class="header-breadcrumb">
-          <span>Dashboard</span> / <span class="active-crumb">Overview</span>
-        </div>
-      </header>
-
-      <section class="dashboard-content">
-
-        <!-- ── WEAVING STUDIO ── (single instance) -->
-        <div id="weaving-studio"
-          style="display:none;height:calc(100vh - 180px);position:relative;background:#121214;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.2);">
-          <canvas id="bg" style="width:100%;height:100%;display:block;"></canvas>
-
-          <!-- Mode Selection -->
-          <div id="modeSelectionOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,.95);
-                   display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
-            <div class="overlay-card">
-              <h2>Handloom Weaving</h2>
-              <p>Select your preferred creative mode</p>
-              <div class="overlay-btns">
-                <button onclick="goToSetup()" class="btn-primary">Create Weave Pattern</button>
-                <button onclick="goToLearnSelect()" class="btn-secondary">Learn Weave Pattern</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Setup Overlay -->
-          <div id="setupOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
-                   display:none;justify-content:center;align-items:center;z-index:15;overflow-y:auto;padding:20px;">
-            <div class="setup-card">
-              <h2>Weaving Setup</h2>
-              <div class="form-group-grid">
-                <div class="input-wrap">
-                  <label>Pattern Name</label>
-                  <input type="text" id="patternName" placeholder="Ex: Plain Weave Practice" />
-                </div>
-                <div class="input-wrap">
-                  <label>Handloom Equipment</label>
-                  <select id="loomType">
-                    <option value="standard">Modern (4 Pedals)</option>
-                    <option value="traditional">Traditional (2 Pedals)</option>
-                  </select>
-                </div>
-                <input type="hidden" id="patternType" value="plain" />
-                <div class="input-wrap">
-                  <label>Textile Width (cm)</label>
-                  <input type="number" id="clothWidth" value="6.5" />
-                </div>
-                <button id="startSetup" class="btn-primary full-width">Next</button>
-                <button id="backToSetup" onclick="backToMenu()" class="btn-ghost">Back</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Heddles Overlay -->
-          <div id="heddlesOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
-                   display:none;justify-content:center;align-items:center;z-index:15;padding:20px;box-sizing:border-box;">
-
-            <!-- Two-column wide card -->
-            <div class="heddles-two-col-card">
-
-              <!-- Title spanning both columns -->
-              <h2 style="grid-column:1/-1;margin:0 0 14px 0;font-size:1.15rem;font-weight:800;color:white;flex-shrink:0;">Heddles Customization</h2>
-
-              <!-- LEFT COLUMN: Thread settings (static, no scroll) -->
-              <div class="heddles-col heddles-col--left">
-                <div class="form-group-grid" style="gap:10px;">
-                  <div class="input-wrap">
-                    <label>Threads per Pattern Repeat (Max 120)</label>
-                    <input type="number" id="patternSize" placeholder="e.g., 30" max="120" min="1" value="30" />
-                  </div>
-                  <div class="input-wrap">
-                    <label>Heddle 1 (Comma-separated thread numbers)</label>
-                    <input type="text" id="heddle1" placeholder="e.g., 1, 5, 9, 13" />
-                  </div>
-                  <div class="input-wrap">
-                    <label>Heddle 2</label>
-                    <input type="text" id="heddle2" placeholder="e.g., 2, 6, 10, 14" />
-                  </div>
-                  <div class="input-wrap" id="wrap-heddle3">
-                    <label>Heddle 3</label>
-                    <input type="text" id="heddle3" placeholder="e.g., 3, 7, 11, 15" />
-                  </div>
-                  <div class="input-wrap" id="wrap-heddle4">
-                    <label>Heddle 4</label>
-                    <input type="text" id="heddle4" placeholder="e.g., 4, 8, 12, 16" />
-                  </div>
-                  <!-- Legacy warp color pickers kept hidden for JS compatibility -->
-                  <div style="display:none;">
-                    <label id="wrap-warpColor1" style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
-                      1 <input type="color" id="warp1" value="#ffffff" style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
-                    </label>
-                    <label id="wrap-warpColor2" style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
-                      2 <input type="color" id="warp2" value="#ffffff" style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
-                    </label>
-                    <label id="wrap-warpColor3" style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
-                      3 <input type="color" id="warp3" value="#ffffff" style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
-                    </label>
-                    <label id="wrap-warpColor4" style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
-                      4 <input type="color" id="warp4" value="#ffffff" style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- RIGHT COLUMN: Thread colors — loom.js injects #color-section-root here — SCROLLABLE ONLY HERE -->
-              <div class="heddles-col heddles-col--right" id="color-panel-mount">
-                <div style="color:#555;font-size:0.8rem;text-align:center;padding:20px 0;">Loading color panel…</div>
-              </div>
-
-              <!-- FOOTER: action buttons spanning both columns -->
-              <div class="heddles-footer">
-                <button id="startWeavingFromHeddles" class="btn-primary" style="flex:1;">Start Weaving</button>
-                <button id="backToSetup2" onclick="backToSetupFromHeddles()" class="btn-secondary" style="flex:0 0 auto;padding:14px 20px;">← Back</button>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Learn Select Overlay -->
-          <div id="learnSelectOverlay"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;
-                   display:none;justify-content:center;z-index:18;overflow-y:auto;box-sizing:border-box;padding:40px 20px;">
-            <div style="width:100%;max-width:600px;background:transparent;display:flex;flex-direction:column;gap:0;">
-              <div
-                style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-shrink:0;">
-                <div>
-                  <h2 style="color:white;font-size:1.5rem;font-weight:700;margin-bottom:4px;">Learn a Pattern</h2>
-                  <p style="color:#666;font-size:0.85rem;">Select a saved pattern to practice on the 3D loom</p>
-                </div>
-                <button onclick="backToMenu()"
-                  style="background:none;border:1px solid #333;color:#888;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.8rem;white-space:nowrap;margin-left:10px;">
-                  &larr; Back
-                </button>
-              </div>
-              <div id="learnPatternList" style="display:flex;flex-direction:column;gap:24px;">
-                <div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns&hellip;</div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /#weaving-studio -->
-
-        <!-- ── OVERVIEW ── -->
-        <div id="overview-section">
-          <div class="welcome-banner">
-            <div class="banner-content">
-              <h1 id="dash-welcome">Welcome back, <span id="user-firstname-display">Weaver</span>!</h1>
-              <p id="dash-banner-sub">Pick up where you left off or explore new traditional techniques.</p>
-            </div>
-          </div>
-          <div class="section-header">
-            <h3 class="section-title" id="dash-quick">Quick Actions</h3>
-          </div>
-          <div class="card-grid">
-            <div class="action-card">
-              <div class="card-visual"><i class="fa-solid fa-plus"></i></div>
-              <div class="card-info">
-                <h4 id="dash-create-h">Create New Weave</h4>
-                <p id="dash-create-p">Start a blank pattern draft from scratch using our 3D loom.</p>
-                <button class="card-btn" onclick="showLoom()" id="dash-create-btn">Get Started</button>
-              </div>
-            </div>
-            <div class="action-card secondary" onclick="window.location.href='collection.html'" style="cursor:pointer;">
-              <div class="card-visual"><i class="fa-solid fa-book-open"></i></div>
-              <div class="card-info">
-                <h4 id="dash-lib-h">Pattern Library</h4>
-                <p id="dash-lib-p">Browse through your saved collection and community favorites.</p>
-                <button class="card-btn-outline" id="dash-lib-btn">Open Library</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── COLLECTION (in-dashboard view) ── -->
-        <div id="collection-section" style="display:none;">
-          <div class="collection-header">
-            <div class="header-text">
-              <h1>Digital Patterns</h1>
-              <p>Your saved weave drafts from the loom studio.</p>
-            </div>
-            <button onclick="showLoom()" class="btn-new">
-              <i class="fa-solid fa-plus"></i> New Design
-            </button>
-          </div>
-          <div class="pattern-grid" id="pattern-grid"></div>
-        </div>
-
-      </section>
-    </main>
-  </div><!-- /.dashboard-wrapper -->
-
-  <div id="pwa-fab" style="position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: none; flex-direction: column; align-items: flex-end; gap: 10px;">
-    <div id="pwa-tooltip" style="background: #1a1a1a; color: white; padding: 8px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 500; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .15); display: none; position: relative;">
-        Install HABI-LIN as an app!
-    </div>
-    <button id="pwa-install-fab" onclick="installPWA()" title="Install HABI-LIN App" 
-        style="width: 56px; height: 56px; border-radius: 50%; background: #2b0303; color: white; border: none; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(43, 3, 3, .35); transition: transform 0.2s;">
-        ⬇️
-    </button>
-  </div>
-
-  <div id="pwa-toast" style="position: fixed; bottom: 100px; right: 28px; background: #1a1a1a; color: white; padding: 12px 20px; border-radius: 12px; font-size: 0.82rem; font-weight: 500; z-index: 9999; display: none; box-shadow: 0 4px 20px rgba(0, 0, 0, .2); max-width: 220px; line-height: 1.4; transition: opacity 0.3s;"></div>
-
-  <script>
-    let deferredPrompt = null;
-    const fab = document.getElementById("pwa-fab");
-    const tooltip = document.getElementById("pwa-tooltip");
-    const fabBtn = document.getElementById("pwa-install-fab");
-    const toast = document.getElementById("pwa-toast");
-
-    // Listen for the install prompt
-    window.addEventListener("beforeinstallprompt", (e) => {
-      console.log("✅ PWA: beforeinstallprompt event fired!");
-      e.preventDefault();
-      deferredPrompt = e;
-      
-      // Show the button
-      fab.style.display = "flex";
-      
-      // Auto-show tooltip for 4 seconds
-      setTimeout(() => {
-        tooltip.style.display = "block";
-        setTimeout(() => tooltip.style.display = "none", 4000);
-      }, 2000);
-    });
-
-    window.addEventListener("appinstalled", () => {
-      console.log("🎉 PWA: Successfully installed");
-      deferredPrompt = null;
-      fab.style.display = "none";
-      showPwaToast("✅ HABI-LIN installed successfully!");
-    });
-
-    // Hover effects for tooltip
-    if (fabBtn) {
-        fabBtn.addEventListener("mouseenter", () => tooltip.style.display = "block");
-        fabBtn.addEventListener("mouseleave", () => tooltip.style.display = "none");
-    }
-
-    async function installPWA() {
-      if (!deferredPrompt) {
-        showPwaToast("ℹ️ Installation not ready. Ensure you are on Chrome and HTTPS.");
-        console.log("❌ PWA: deferredPrompt is null. Check F12 > Application > Manifest for errors.");
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+//////////////////////////////////////////////////
+// TOP-LEVEL STATE
+//////////////////////////////////////////////////
+let recordedSteps = [];
+let loomConfig = null;
+let threading = [];
+let beatTimer = 0;
+let heddleThreading = [0, 1, 2, 3];
+let warpColors = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+const BEAT_DURATION = 10;
+
+//////////////////////////////////////////////////
+// SETUP OVERLAY — Entry point
+//////////////////////////////////////////////////
+function attachStartButton() {
+    const nextBtn = document.getElementById("startSetup");
+    const startBtn = document.getElementById("startWeavingFromHeddles");
+    const heddlesOverlay = document.getElementById("heddlesOverlay");
+    const setupOverlay = document.getElementById("setupOverlay");
+
+    if (!nextBtn || !startBtn || !setupOverlay || !heddlesOverlay) {
+        requestAnimationFrame(attachStartButton);
         return;
-      }
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to install: ${outcome}`);
-      
-      if (outcome === "accepted") {
-          showPwaToast("🎉 Installing HABI-LIN...");
-          deferredPrompt = null;
-          fab.style.display = "none";
-      }
     }
 
-    function showPwaToast(message) {
-      toast.textContent = message;
-      toast.style.display = "block";
-      toast.style.opacity = "1";
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => toast.style.display = "none", 300);
-      }, 4000);
-    }
+    // Prevent duplicate event listeners if startLoom is called multiple times
+    if (nextBtn.dataset.listenerAttached) return;
+    nextBtn.dataset.listenerAttached = "true";
 
-    // Hide if already in app mode
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      fab.style.display = "none";
-    }
-  </script>
-  
-  <script>
-    /* ── HAMBURGER ── */
-    const hamburgerBtn = document.getElementById("hamburger-btn");
-    const mobileDrawer = document.getElementById("mobile-drawer");
+    // ── REBUILD COLOR SECTION IN HEDDLES OVERLAY ──
+    function buildColorUI() {
+        const existingRoot = document.getElementById("color-section-root");
+        if (existingRoot) existingRoot.remove();
 
-    if (hamburgerBtn && mobileDrawer) {
-      hamburgerBtn.addEventListener("click", () => {
-        const isOpen = mobileDrawer.classList.toggle("open");
-        hamburgerBtn.setAttribute("aria-expanded", isOpen);
-        document.getElementById("hamburger-icon").querySelector("use")
-          .setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
-      });
-
-      function closeDrawer() {
-        mobileDrawer.classList.remove("open");
-        hamburgerBtn.setAttribute("aria-expanded", "false");
-        document.getElementById("hamburger-icon").querySelector("use")
-          .setAttribute("href", "#icon-bars");
-      }
-
-      document.addEventListener("click", (e) => {
-        if (!mobileDrawer.contains(e.target) && !hamburgerBtn.contains(e.target)) closeDrawer();
-      });
-    }
-
-    const mobileSearchInput = document.getElementById("mobile-search-input");
-    const mainSearchInput = document.getElementById("search-input");
-    if (mobileSearchInput && mainSearchInput) {
-      mobileSearchInput.addEventListener("input", (e) => {
-        mainSearchInput.value = e.target.value;
-      });
-    }
-
-    /* ── USER SESSION ── */
-    document.addEventListener("DOMContentLoaded", async () => {
-      // Pattern count badge
-      try {
-        const userRes = await fetch("/auth/user");
-        const user = await userRes.json();
-        if (user) {
-          const currentUserId = user._id;
-          const response = await fetch('/api/patterns');
-          const allPatterns = await response.json();
-          const myPatterns = allPatterns.filter(p =>
-            p.userId === currentUserId && p.isImported !== true
-          );
-          const countElement = document.getElementById("pattern-count-element");
-          if (countElement) countElement.textContent = myPatterns.length;
+        if (!document.getElementById("color-section-styles")) {
+            const s = document.createElement("style");
+            s.id = "color-section-styles";
+            s.textContent = `
+                #wrap-warpColor1, #wrap-warpColor2,
+                #wrap-warpColor3, #wrap-warpColor4 { display: none !important; }
+                #heddlesOverlay .heddles-inner { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
+                #color-section-root { display: block !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding-bottom: 8px; }
+                .cs-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+                .cs-panel { display: flex; flex-direction: column; gap: 8px; }
+                .cs-rows { display: flex; flex-direction: column; gap: 6px; }
+                .cs-row { display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 8px 10px; box-sizing: border-box; }
+                .cs-row-label { font-size: 0.7rem; color: #777; white-space: nowrap; }
+                .cs-row-sep { font-size: 0.75rem; color: #555; padding: 0 2px; }
+                .cs-row input[type="number"] { width: 48px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.14); border-radius: 6px; color: #e8e8e8; font-size: 0.78rem; padding: 4px 5px; text-align: center; }
+                .cs-row input[type="color"] { width: 32px; height: 26px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; cursor: pointer; padding: 2px; background: rgba(0,0,0,0.2); }
+                .cs-row-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: rgba(220,60,60,0.15); border: 1px solid rgba(220,60,60,0.3); color: #e06060; border-radius: 6px; cursor: pointer; font-size: 0.7rem; }
+                .cs-add-btn { width: 100%; padding: 10px 12px; background: rgba(100,180,100,0.1); border: 1px dashed rgba(100,180,100,0.35); color: #7ecf7e; border-radius: 9px; cursor: pointer; font-size: 0.75rem; font-weight: 600; text-align: center; transition: 0.2s; }
+                .cs-add-btn:hover { background: rgba(100,180,100,0.2); }
+                .cs-hint { font-size: 0.67rem; color: #555; line-height: 1.5; padding: 2px 0; }
+                .cs-preview-wrap { margin-top: 15px; }
+                .cs-preview-label { font-size: 0.67rem; color: #555; margin-bottom: 4px; }
+                #cs-warp-preview { width: 100%; height: 12px; border-radius: 4px; display: block; image-rendering: pixelated; border: 1px solid rgba(255,255,255,0.08); }
+                
+                /* PRETTIER TOGGLE BUTTONS */
+                .warp-toggle-container { display: flex; background: #111; border-radius: 10px; padding: 4px; margin-bottom: 18px; border: 1px solid #333; }
+                .warp-toggle-btn { flex: 1; text-align: center; padding: 8px; font-size: 0.78rem; color: #666; cursor: pointer; border-radius: 8px; transition: all 0.25s ease; font-weight: 700; border: none; background: none; font-family: inherit; }
+                .warp-toggle-btn:hover { color: #aaa; }
+                .warp-toggle-btn.active { background: #2a2a35; color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+            `;
+            document.head.appendChild(s);
         }
-      } catch (e) { /* silently skip */ }
 
-      // Session display
-      try {
-        const res = await fetch("/auth/user");
-        if (!res.ok) throw new Error("No session");
-        const user = await res.json();
-        if (user) {
-          window.currentUserId = user._id;
-          const firstName = user.name.split(" ")[0];
-          document.getElementById("user-firstname").textContent = firstName + "!";
-          document.getElementById("user-firstname-display").textContent = firstName;
-          if (user.photo) {
-            document.getElementById("user-photo").src = user.photo;
-            document.getElementById("user-photo").style.display = "block";
-            document.getElementById("default-avatar-icon").style.display = "none";
-          }
-        }
-      } catch (e) { console.log("Session not ready."); }
+        const root = document.createElement("div");
+        root.id = "color-section-root";
 
-      // URL action routing
-      const urlParams = new URLSearchParams(window.location.search);
-      const action = urlParams.get('action');
-      if (action === 'new') {
-        showLoom();
-      } else if (action === 'resume') {
-        startResumeProcess();
-      }
-    });
-
-    async function startResumeProcess() {
-      document.getElementById("overview-section").style.display = "none";
-      document.getElementById("collection-section").style.display = "none";
-      document.getElementById("weaving-studio").style.display = "block";
-      document.querySelector(".active-crumb").textContent = "Weaving Studio";
-      document.getElementById("modeSelectionOverlay").style.display = "none";
-      document.getElementById("setupOverlay").style.display = "none";
-      document.getElementById("heddlesOverlay").style.display = "none";
-      window.loomStarted = true;
-      const patternData = JSON.parse(localStorage.getItem("resumePattern"));
-      const m = await import(`./loom.js?v=${Date.now()}`);
-      if (m.resumeLoom) m.resumeLoom(patternData);
-    }
-
-    /* ── NAVIGATION ── */
-
-    // Unsaved-changes guard for all outbound links
-    document.addEventListener('click', function (e) {
-      const link = e.target.closest('a');
-      if (!link) return;
-      if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
-        if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
-          const msg = window.learnIsActive
-            ? "Exit Learn Mode? Your progress will be lost."
-            : "You have unsaved changes in the Loom Studio. Leave anyway?";
-          if (!confirm(msg)) {
-            e.preventDefault();
-          } else {
-            window.hasUnsavedChangesInLoom = false;
-            window.learnIsActive = false;
-          }
-        }
-      }
-    });
-
-    function showDashboard() {
-      document.getElementById("overview-section").style.display = "block";
-      document.getElementById("weaving-studio").style.display = "none";
-      document.getElementById("collection-section").style.display = "none";
-      document.querySelector(".active-crumb").textContent = "Overview";
-      updateActiveLink("home-link");
-      if (typeof closeDrawer === 'function') closeDrawer();
-    }
-
-    async function showCollection() {
-      document.getElementById("overview-section").style.display = "none";
-      document.getElementById("weaving-studio").style.display = "none";
-      document.getElementById("collection-section").style.display = "block";
-      document.querySelector(".active-crumb").textContent = "Collection";
-      updateActiveLink("collection-link");
-      if (typeof closeDrawer === 'function') closeDrawer();
-      await loadPatterns();
-    }
-
-    async function showLoom() {
-      document.getElementById("overview-section").style.display = "none";
-      document.getElementById("collection-section").style.display = "none";
-      document.getElementById("weaving-studio").style.display = "block";
-      document.querySelector(".active-crumb").textContent = "Weaving Studio";
-      updateActiveLink("");
-      document.getElementById("modeSelectionOverlay").style.display = "flex";
-      document.getElementById("setupOverlay").style.display = "none";
-      if (typeof closeDrawer === 'function') closeDrawer();
-      if (window.loomStarted) return;
-      window.loomStarted = true;
-      await import(`./loom.js?v=${Date.now()}`).then(m => m.startLoom && m.startLoom());
-    }
-
-    function updateActiveLink(id) {
-      document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-      if (id) document.getElementById(id)?.classList.add("active");
-    }
-
-    function goToSetup() {
-      document.getElementById("modeSelectionOverlay").style.display = "none";
-      document.getElementById("setupOverlay").style.display = "flex";
-    }
-
-    function backToMenu() {
-      document.getElementById("modeSelectionOverlay").style.display = "flex";
-      document.getElementById("setupOverlay").style.display = "none";
-      document.getElementById("learnSelectOverlay").style.display = "none";
-    }
-
-    function goToHeddles() {
-      document.getElementById("setupOverlay").style.display = "none";
-      document.getElementById("heddlesOverlay").style.display = "flex";
-    }
-
-    function backToSetupFromHeddles() {
-      document.getElementById("heddlesOverlay").style.display = "none";
-      document.getElementById("setupOverlay").style.display = "flex";
-    }
-
-    function safeNavigate(destinationFunc) {
-      if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
-        const msg = window.learnIsActive
-          ? "Exit Learn Mode? Your progress will be lost."
-          : "You have unsaved changes in the Loom Studio. Leave anyway?";
-        if (!confirm(msg)) return;
-        window.hasUnsavedChangesInLoom = false;
-        window.learnIsActive = false;
-      }
-      destinationFunc();
-    }
-
-    /* ── LEARN MODE ── */
-    async function goToLearnSelect() {
-      document.getElementById("overview-section").style.display = "none";
-      document.getElementById("collection-section").style.display = "none";
-      document.getElementById("weaving-studio").style.display = "block";
-      document.getElementById("modeSelectionOverlay").style.display = "none";
-      document.getElementById("setupOverlay").style.display = "none";
-      document.getElementById("learnSelectOverlay").style.display = "flex";
-
-      const list = document.getElementById("learnPatternList");
-      list.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:15px;margin-top:10px;">
-          <button onclick="showLearnCategory('mine')" class="action-card"
-            style="width:100%;cursor:pointer;text-align:left;background:#161620;border:1px solid #333;">
-            <div class="card-visual" style="background:#1a1a2e;color:#00e5ff;"><i class="fa-solid fa-user"></i></div>
-            <div class="card-info">
-              <h4 style="color:white;margin:0;">My Patterns</h4>
-              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns you created from scratch.</p>
+        root.innerHTML = `
+            <div class="cs-heading">Warp Thread Colors</div>
+            <div class="warp-toggle-container">
+                <button type="button" class="warp-toggle-btn active" data-mode="range">By Range</button>
+                <button type="button" class="warp-toggle-btn" data-mode="heddle">By Heddle</button>
             </div>
-          </button>
-          <button onclick="showLearnCategory('community')" class="action-card"
-            style="width:100%;cursor:pointer;text-align:left;background:#161620;border:1px solid #333;">
-            <div class="card-visual" style="background:#2b0303;color:#ff4d4d;"><i class="fa-solid fa-users"></i></div>
-            <div class="card-info">
-              <h4 style="color:white;margin:0;">All / Community Patterns</h4>
-              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns from the community and imports (Excluding your patterns).</p>
+
+            <div class="cs-panel" id="cs-panel-warp-range">
+                <div class="cs-hint">Color warp threads by range. Ranges stack — last one wins.</div>
+                <div class="cs-rows" id="cs-warp-rows"></div>
+                <button type="button" class="cs-add-btn" id="cs-warp-add">+ Add Thread Range</button>
             </div>
-          </button>
-        </div>`;
-    }
 
-    /* ── showLearnCategory ── (single, best version with name+ID fallback) */
-    async function showLearnCategory(type) {
-      const list = document.getElementById("learnPatternList");
-      list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
-
-      try {
-        const userRes = await fetch("/auth/user");
-        const currentUser = await userRes.json();
-        const currentUserId = currentUser?._id ? currentUser._id.trim() : null;
-        const currentUserName = currentUser?.name ? currentUser.name.trim() : null;
-
-        const res = await fetch("/api/patterns");
-        if (!res.ok) throw new Error("fetch failed");
-        const allPatterns = await res.json();
-
-        let filtered = [];
-        let categoryTitle = "";
-
-        if (type === 'mine') {
-          categoryTitle = "My Patterns";
-          filtered = allPatterns.filter(p => {
-            const pUserId = p.userId ? p.userId.toString().trim() : '';
-            const pCreator = p.creator ? p.creator.trim() : '';
-            const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
-            return isOwner && p.isImported !== true;
-          });
-        } else {
-          categoryTitle = "Community Patterns";
-          filtered = allPatterns.filter(p => {
-            const pUserId = p.userId ? p.userId.toString().trim() : '';
-            const pCreator = p.creator ? p.creator.trim() : '';
-            const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
-            return !isOwner || p.isImported === true;
-          });
-        }
-
-        list.innerHTML = `
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:0 10px;">
-            <button onclick="goToLearnSelect()"
-              style="background:none;border:1px solid #444;color:#888;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:0.75rem;">&larr; Back</button>
-            <span style="color:#fff;font-size:0.9rem;font-weight:700;">${categoryTitle}</span>
-            <span style="margin-left:auto;color:#444;font-size:0.7rem;">${filtered.length} found</span>
-          </div>`;
-
-        if (filtered.length === 0) {
-          list.innerHTML += `<div style="color:#555;text-align:center;padding:40px;border:1px dashed #222;border-radius:14px;margin:0 10px;">No patterns in this category.</div>`;
-          return;
-        }
-
-        filtered.forEach(pattern => {
-          const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-          const rowCount = (pattern.patternRows && pattern.patternRows.length) || 0;
-          const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-          const isImported = pattern.isImported === true;
-          const creatorName = pattern.creator || "Unknown Weaver";
-
-          const card = document.createElement("div");
-          card.style.cssText = `background:#161620;border:1px solid #2a2a35;border-radius:14px;
-            padding:18px 22px;display:flex;justify-content:space-between;
-            align-items:center;cursor:pointer;transition:all 0.2s;gap:16px;margin-bottom:10px;`;
-          card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
-          card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
-
-          card.innerHTML = `
-            <div style="flex:1;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
-                ${isImported ? `<span style="font-size:0.6rem;background:#2b0303;color:#ff4d4d;padding:2px 6px;border-radius:4px;font-weight:800;text-transform:uppercase;">Imported</span>` : ''}
-              </div>
-              <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
-              <div style="font-size:0.72rem;color:#444;margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
+            <div class="cs-panel" id="cs-panel-warp-heddle" style="display:none;">
+                <div class="cs-hint">Assign one color per heddle shaft.</div>
+                <div class="cs-row"><span class="cs-row-label">Heddle 1</span><input type="color" id="hc1" value="#ffffff"></div>
+                <div class="cs-row"><span class="cs-row-label">Heddle 2</span><input type="color" id="hc2" value="#ffffff"></div>
+                <div class="cs-row" id="hc3-row"><span class="cs-row-label">Heddle 3</span><input type="color" id="hc3" value="#ffffff"></div>
+                <div class="cs-row" id="hc4-row"><span class="cs-row-label">Heddle 4</span><input type="color" id="hc4" value="#ffffff"></div>
             </div>
-            <div style="display:flex;align-items:center;">
-              <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
-            </div>`;
 
-          card.addEventListener("click", () => startLearnMode(pattern));
-          list.appendChild(card);
-        });
-
-      } catch (err) {
-        console.error(err);
-        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;">Error loading patterns.</div>`;
-      }
-    }
-
-    async function startLearnMode(pattern) {
-      document.getElementById("learnSelectOverlay").style.display = "none";
-      document.getElementById("modeSelectionOverlay").style.display = "none";
-      document.getElementById("setupOverlay").style.display = "none";
-      document.getElementById("weaving-studio").style.display = "block";
-      const oldHud = document.getElementById("tutorial-hud");
-      if (oldHud) oldHud.remove();
-      try {
-        const module = await import(`./learn.js?v=${Date.now()}`);
-        if (module.startLearn) module.startLearn(pattern);
-      } catch (err) {
-        console.error("Failed to load learn.js:", err);
-        alert("Tutorial module failed to load.");
-      }
-    }
-
-    /* ── PATTERN RENDERING ── */
-    function simulatePatternFromSteps(steps, shaftCount) {
-      const history = [];
-      const warpCount = 60;
-      const threading = [];
-      for (let i = 0; i < warpCount + 1; i++) threading.push(i % shaftCount);
-      let pressedPedals = new Set();
-      for (const step of steps) {
-        if (step.action === "pedal") pressedPedals.add(step.value);
-        else if (step.action === "pedals") pressedPedals = new Set(step.value);
-        else if (step.action === "beat") {
-          const shed = [];
-          for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
-          const rowStates = [];
-          for (let i = 0; i <= warpCount; i++) rowStates.push(shed[threading[i % threading.length]]);
-          history.push(rowStates);
-        }
-      }
-      return history;
-    }
-
-    function drawPatternOnCanvas(canvas, pattern) {
-      const patternRows = pattern.patternRows && pattern.patternRows.length > 0
-        ? pattern.patternRows
-        : simulatePatternFromSteps(pattern.steps || [], pattern.loom === "traditional" ? 2 : 4);
-
-      if (!canvas || patternRows.length === 0) return;
-
-      const ctx = canvas.getContext("2d");
-      const warpCount = patternRows[0].length;
-      const rowCount = patternRows.length;
-
-      // ── PIXEL-GRID THUMBNAIL ──
-      const CELL_PX = 6;          // px per warp/weft cell
-      const MAX_COLS = 48;         // columns (warp threads) shown in the crop
-      const MAX_ROWS = 30;         // rows (weft picks) shown in the crop
-
-      const cropCols = Math.min(warpCount, MAX_COLS);
-      const cropRows = Math.min(rowCount, MAX_ROWS);
-
-      // Centre the crop horizontally; show the most-recently-woven rows at top
-      const startCol = Math.floor((warpCount - cropCols) / 2);
-      const startRow = Math.max(0, rowCount - cropRows);   // newest picks
-
-      canvas.width = cropCols * CELL_PX;
-      canvas.height = cropRows * CELL_PX;
-
-      // Background
-      ctx.fillStyle = "#1a1a1a";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const safeWarpColors = (pattern.warpColors && pattern.warpColors.length > 0)
-        ? pattern.warpColors
-        : ["#f0eadf", "#f0eadf", "#f0eadf", "#f0eadf"];
-      const isPerThread = safeWarpColors.length > 4;
-      const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-      const map = (pattern.threadingMap && pattern.threadingMap.length > 0)
-        ? pattern.threadingMap
-        : (shaftCount === 2 ? [0, 1] : [0, 1, 2, 3]);
-
-      for (let ci = 0; ci < cropRows; ci++) {
-        // ci=0 is the top of the canvas → newest row; mirror Y so newest = top
-        const rowIndex = startRow + (cropRows - 1 - ci);
-        if (rowIndex < 0 || rowIndex >= rowCount) continue;
-        const rowStates = patternRows[rowIndex];
-        const weftColor = (pattern.rowColors && pattern.rowColors[rowIndex])
-          || pattern.weftColor || "#c0392b";
-
-        for (let cj = 0; cj < cropCols; cj++) {
-          const warpIndex = startCol + cj;
-          if (warpIndex >= warpCount) continue;
-
-          const x = cj * CELL_PX;
-          const y = ci * CELL_PX;
-          const isWarpUp = rowStates[warpIndex];
-
-          if (!isWarpUp) {
-            ctx.fillStyle = weftColor;
-            ctx.fillRect(x, y, CELL_PX, CELL_PX);
-          } else {
-            const warpColor = isPerThread
-              ? (safeWarpColors[warpIndex] || "#f0eadf")
-              : (safeWarpColors[map[warpIndex % map.length]] || "#f0eadf");
-            ctx.fillStyle = warpColor;
-            ctx.fillRect(x, y, CELL_PX, CELL_PX);
-          }
-
-          // Subtle 1px dark grid lines
-          ctx.strokeStyle = "rgba(0,0,0,0.18)";
-          ctx.lineWidth = 0.5;
-          ctx.strokeRect(x + 0.25, y + 0.25, CELL_PX - 0.5, CELL_PX - 0.5);
-        }
-      }
-
-      // Crop indicator label
-      if (rowCount > MAX_ROWS) {
-        ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillRect(0, canvas.height - 14, canvas.width, 14);
-        ctx.fillStyle = "#ccc";
-        ctx.font = "bold 9px sans-serif";
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "center";
-        ctx.fillText(`${rowCount} picks total`, canvas.width / 2, canvas.height - 7);
-      }
-    }
-
-    /* ── LOAD PATTERNS ── */
-    let allPatterns = [];
-
-    async function loadPatterns() {
-      const grid = document.getElementById("pattern-grid");
-      grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
-      try {
-        // 1. Fetch user FIRST so we definitely know who is logged in
-        try {
-          const userRes = await fetch("/auth/user");
-          const user = await userRes.json();
-          if (user) {
-            window.currentUserId = user._id;
-            window.currentUserName = user.name;
-          }
-        } catch(e) { console.log("Could not verify user for grid"); }
-
-        // 2. Fetch the patterns
-        const res = await fetch("/api/patterns");
-        if (!res.ok) throw new Error("Failed to fetch");
-        const patterns = await res.json();
-        allPatterns = patterns;
-        
-        // 3. Render the grid
-        renderPatternGrid(patterns);
-      } catch (err) {
-        console.error("Collection fetch error:", err);
-        grid.innerHTML = `
-          <div class="empty-state">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <h3>Could not load patterns</h3>
-            <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
-          </div>`;
-      }
-    }
-
-    function renderPatternGrid(patterns) {
-      const grid = document.getElementById("pattern-grid");
-      if (!patterns || patterns.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-state">
-            <span style="font-family:sans-serif;font-style:normal;font-size:3rem;display:block;margin-bottom:20px;">🪡</span>
-            <h3>No patterns saved yet</h3>
-            <p>Head to the Weaving Studio and save your first design!</p>
-          </div>`;
-        return;
-      }
-      grid.innerHTML = "";
-      
-      patterns.forEach(pattern => {
-        // CHECK OWNERSHIP SAFELY
-        const isOwnPattern = (pattern.userId === window.currentUserId) || (pattern.creator === window.currentUserName);
-        
-        const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-        const weftColor = pattern.weftColor || "#c0392b";
-        const lastSaved = pattern.created
-          ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
-          : "Unknown date";
-        const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-
-        let creatorText = "";
-        if (pattern.creator) {
-          creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)}</strong>`;
-        }
-
-        // ── HOVER MEASUREMENTS OVERLAY ──
-        const m = pattern.measurements;
-        let measureExpandHTML = "";
-
-        if (m && typeof m.weftCount === "number") {
-          const hasMeasure = m.physicalWidthCm || m.estimatedHeightCm || m.weftCount;
-          if (hasMeasure) {
-            const heightDisplay = m.estimatedHeightCm ? `${m.estimatedHeightCm.toFixed(1)}` : "—";
-            const widthDisplay = m.physicalWidthCm ? `${m.physicalWidthCm}` : "—";
-            const epcDisplay = m.endsPerCm ? `${parseFloat(m.endsPerCm).toFixed(1)}` : "—";
-
-            measureExpandHTML = `
-              <div class="measure-expand">
-                <div class="measure-expand__title">Physical Measurements</div>
-                <div class="measure-grid">
-                  <div class="measure-cell">
-                    <span class="measure-cell__label">Width</span>
-                    <span class="measure-cell__value">${widthDisplay}<em> cm</em></span>
-                  </div>
-                  <div class="measure-cell">
-                    <span class="measure-cell__label">Est. Height</span>
-                    <span class="measure-cell__value">${heightDisplay}<em> cm</em></span>
-                  </div>
-                  <div class="measure-cell">
-                    <span class="measure-cell__label">Weft Count</span>
-                    <span class="measure-cell__value">${m.weftCount}<em> picks</em></span>
-                  </div>
-                  <div class="measure-cell">
-                    <span class="measure-cell__label">Ends / cm</span>
-                    <span class="measure-cell__value">${epcDisplay}<em> e/cm</em></span>
-                  </div>
-                </div>
-              </div>`;
-          }
-        }
-
-        const card = document.createElement("div");
-        card.className = "pattern-card";
-        card.style.position = "relative";
-        card.style.overflow = "hidden";
-
-        // ── PRIVACY BUTTON LOGIC ──
-        const isPrivate = pattern.isPrivate !== false; // defaults to true
-        let privacyBtnHTML = "";
-        
-        if (isOwnPattern) {
-          const pClass = isPrivate ? "private" : "public";
-          const pIcon = isPrivate ? '<i class="fa-solid fa-lock"></i> Private' : '<i class="fa-solid fa-globe"></i> Public';
-          privacyBtnHTML = `
-            <button class="privacy-btn ${pClass}" title="Click to toggle visibility">
-              ${pIcon}
-            </button>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="pattern-preview" style="display:flex; justify-content:center; align-items:center;">
-            ${privacyBtnHTML}
-            <canvas class="pattern-canvas" style="max-width:100%; max-height:100%; object-fit:contain;"></canvas>
-            ${isOwnPattern ? `<button class="delete-btn" title="Delete pattern"><i class="fa-solid fa-trash-can"></i></button>` : ''}
-          </div>
-          <div class="pattern-details">
-            <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
-            <p>Saved ${lastSaved} ${creatorText}</p>
-            <div class="tag-row">
-              <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
-              <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
+            <div class="cs-preview-wrap">
+                <div class="cs-preview-label">Warp Preview</div>
+                <canvas id="cs-warp-preview" height="1"></canvas>
             </div>
-          </div>
-          ${measureExpandHTML}
         `;
 
-        const canvas = card.querySelector(".pattern-canvas");
-        requestAnimationFrame(() => drawPatternOnCanvas(canvas, pattern));
-
-        // DELETE LOGIC
-        const deleteBtn = card.querySelector(".delete-btn");
-        if (deleteBtn) {
-          deleteBtn.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (!confirm(`Delete "${pattern.name}"?`)) return;
-            try {
-              const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
-              if (res.ok) {
-                card.style.transition = "opacity 0.3s, transform 0.3s";
-                card.style.opacity = "0";
-                card.style.transform = "scale(0.95)";
-                setTimeout(() => card.remove(), 300);
-              } else {
-                alert("Could not delete pattern.");
-              }
-            } catch (err) {
-              console.error(err);
-              alert("Server error while deleting.");
+        const mountEl = document.getElementById("color-panel-mount");
+        if (mountEl) {
+            mountEl.innerHTML = ""; 
+            mountEl.appendChild(root);
+        } else {
+            const startBtnEl = heddlesOverlay.querySelector("#startWeavingFromHeddles");
+            if (startBtnEl && startBtnEl.parentNode) {
+                startBtnEl.parentNode.insertBefore(root, startBtnEl);
+            } else {
+                heddlesOverlay.appendChild(root);
             }
-          });
         }
 
-        // PRIVACY TOGGLE LOGIC
-        const privacyBtn = card.querySelector(".privacy-btn");
-        if (privacyBtn) {
-          privacyBtn.addEventListener("click", async (e) => {
-            e.stopPropagation(); 
-            const newPrivacyState = !pattern.isPrivate;
-            
-            // Optimistically update UI instantly
-            pattern.isPrivate = newPrivacyState;
-            renderPatternGrid(allPatterns); // Re-render to show new color/icon
+        const warpRows = root.querySelector("#cs-warp-rows");
+        const warpAddBtn = root.querySelector("#cs-warp-add");
+        let currentWarpMode = "range";
 
-            try {
-              const res = await fetch(`/api/patterns/${pattern._id}/privacy`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ isPrivate: newPrivacyState })
-              });
-              
-              if (!res.ok) throw new Error("Failed to update on server");
-            } catch (err) {
-              console.error(err);
-              alert("Failed to update privacy setting. Make sure your server route is set up!");
-              pattern.isPrivate = !newPrivacyState; // Revert if failed
-              renderPatternGrid(allPatterns);
-            }
-          });
-        }
-
-        // Trigger resume on card click
-        card.addEventListener("click", (e) => {
-          if (e.target.closest(".delete-btn") || e.target.closest(".privacy-btn") || e.target.closest(".measure-expand")) return;
-          localStorage.setItem("resumePattern", JSON.stringify(pattern));
-          startResumeProcess();
+        // Prettier Toggle Logic
+        root.querySelectorAll('.warp-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                root.querySelectorAll('.warp-toggle-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentWarpMode = e.target.dataset.mode;
+                
+                if (currentWarpMode === 'range') {
+                    root.querySelector('#cs-panel-warp-range').style.display = 'flex';
+                    root.querySelector('#cs-panel-warp-heddle').style.display = 'none';
+                } else {
+                    root.querySelector('#cs-panel-warp-range').style.display = 'none';
+                    root.querySelector('#cs-panel-warp-heddle').style.display = 'flex';
+                }
+                drawWarpPreview();
+            });
         });
 
-        grid.appendChild(card);
-      });
+        // Hide Heddle 3 & 4 if traditional loom
+        if (document.getElementById("loomType")?.value === "traditional") {
+            root.querySelector('#hc3-row').style.display = 'none';
+            root.querySelector('#hc4-row').style.display = 'none';
+        }
+
+        root.querySelectorAll('#cs-panel-warp-heddle input[type="color"]').forEach(inp => {
+            inp.addEventListener('input', drawWarpPreview);
+        });
+
+        function drawWarpPreview() {
+            const canvas = root.querySelector("#cs-warp-preview");
+            if (!canvas) return;
+            const total = 120;
+            canvas.width = total;
+            const ctx = canvas.getContext("2d");
+            const colors = buildWarpColorArray(total);
+            for (let i = 0; i < total; i++) {
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(i, 0, 1, 1);
+            }
+        }
+
+        function buildWarpColorArray(total) {
+            const arr = new Array(total).fill("#ffffff");
+
+            if (currentWarpMode === 'range') {
+                warpRows.querySelectorAll(".cs-row").forEach(row => {
+                    const from = Math.max(1, parseInt(row.querySelector(".range-from").value) || 1);
+                    const to = Math.min(total, parseInt(row.querySelector(".range-to").value) || total);
+                    const col = row.querySelector(".range-color").value || "#ffffff";
+                    for (let i = from - 1; i < to; i++) arr[i] = col;
+                });
+            } else {
+                const colors = [
+                    root.querySelector('#hc1').value,
+                    root.querySelector('#hc2').value,
+                    root.querySelector('#hc3').value,
+                    root.querySelector('#hc4').value
+                ];
+                
+                const parseHeddleStr = (id) => {
+                    const el = document.getElementById(id);
+                    return (el && el.value) ? el.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) : [];
+                };
+                const patternSize = parseInt(document.getElementById("patternSize")?.value || "4");
+                let tempMap = new Array(patternSize).fill(0);
+                parseHeddleStr("heddle1").forEach(n => { if(n<=patternSize) tempMap[n-1] = 0; });
+                parseHeddleStr("heddle2").forEach(n => { if(n<=patternSize) tempMap[n-1] = 1; });
+                parseHeddleStr("heddle3").forEach(n => { if(n<=patternSize) tempMap[n-1] = 2; });
+                parseHeddleStr("heddle4").forEach(n => { if(n<=patternSize) tempMap[n-1] = 3; });
+
+                for (let i = 0; i < total; i++) {
+                    arr[i] = colors[tempMap[i % patternSize] || 0];
+                }
+            }
+            return arr;
+        }
+
+        function makeRow(from, to, color) {
+            const row = document.createElement("div");
+            row.className = "cs-row";
+            row.innerHTML = `
+                <span class="cs-row-label">Threads</span>
+                <input type="number" class="range-from" value="${from}" min="1" />
+                <span class="cs-row-sep">–</span>
+                <input type="number" class="range-to" value="${to}" min="1" />
+                <input type="color" class="range-color" value="${color}" />
+                <button type="button" class="cs-row-del" title="Remove">✕</button>
+            `;
+            row.querySelector(".cs-row-del").addEventListener("click", () => { row.remove(); drawWarpPreview(); });
+            row.querySelectorAll("input").forEach(el => el.addEventListener("input", drawWarpPreview));
+            warpRows.appendChild(row);
+            drawWarpPreview();
+        }
+
+        warpAddBtn.addEventListener("click", () => {
+            const rows = warpRows.querySelectorAll(".cs-row");
+            let nextFrom = 1;
+            if (rows.length > 0) {
+                const lastTo = parseInt(rows[rows.length - 1].querySelector(".range-to").value);
+                if (!isNaN(lastTo)) nextFrom = lastTo + 1;
+            }
+            const currentMax = parseInt(document.getElementById("patternSize")?.value || "4");
+            const maxT = Math.floor(120 / Math.max(1, currentMax)) * currentMax;
+            makeRow(nextFrom, maxT, "#000000");
+        });
+
+        makeRow(1, 120, "#ffffff");
+        root._buildWarpColorArray = buildWarpColorArray;
     }
 
-    /* ── SEARCH ── */
-    document.addEventListener("DOMContentLoaded", () => {
-      const searchInput = document.getElementById("search-input");
-      if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-          const q = e.target.value.toLowerCase().trim();
-          if (!document.getElementById("collection-section").offsetParent) return;
-          const filtered = allPatterns.filter(p =>
-            (p.name || "").toLowerCase().includes(q) ||
-            (p.type || "").toLowerCase().includes(q) ||
-            (p.loom || "").toLowerCase().includes(q)
-          );
-          renderPatternGrid(filtered);
+    nextBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const patternNameInput = document.getElementById("patternName");
+        const patternName = patternNameInput ? patternNameInput.value.trim() : "";
+
+        if (!patternName) {
+            alert("Please enter a pattern name before proceeding.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/patterns");
+            if (response.ok) {
+                const existingPatterns = await response.json();
+                const isDuplicate = existingPatterns.some(p => p.name.toLowerCase() === patternName.toLowerCase());
+                if (isDuplicate) {
+                    alert("Pattern name already exists! Please choose a unique name for your design.");
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error("Could not verify pattern name uniqueness", err);
+        }
+
+        const loomType = document.getElementById("loomType").value;
+        const h3Wrap = document.getElementById("wrap-heddle3");
+        const h4Wrap = document.getElementById("wrap-heddle4");
+
+        if (loomType === "traditional") {
+            if (h3Wrap) h3Wrap.style.display = "none";
+            if (h4Wrap) h4Wrap.style.display = "none";
+        } else {
+            if (h3Wrap) h3Wrap.style.display = "block";
+            if (h4Wrap) h4Wrap.style.display = "block";
+        }
+
+        const patternSize = parseInt(document.getElementById("patternSize").value) || 4;
+        const maxThreads = 120;
+        const repeats = Math.floor(maxThreads / patternSize);
+        const totalThreads = repeats * patternSize;
+        document.querySelectorAll(".range-from, .range-to").forEach(el => {
+            el.max = totalThreads;
+            el.placeholder = el.classList.contains("range-to") ? totalThreads : "1";
         });
-      }
+        document.querySelectorAll(".range-to").forEach(el => {
+            if (!el.value) el.value = totalThreads;
+        });
+
+        setupOverlay.style.display = "none";
+        buildColorUI();
+        heddlesOverlay.style.display = "flex";
     });
 
-    /* ── UTILITY ── */
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    const backBtn = document.getElementById("backToSetup2");
+    if (backBtn) {
+        backBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            heddlesOverlay.style.display = "none";
+            setupOverlay.style.display = "flex";
+        });
     }
-  </script>
 
-</body>
+    startBtn.addEventListener("click", (e) => {
+        e.preventDefault();
 
-</html>
+        const patternSize = parseInt(document.getElementById("patternSize").value);
+
+        if (isNaN(patternSize) || patternSize <= 0) {
+            alert("Please enter a valid pattern size.");
+            return;
+        }
+
+        const parseHeddle = (id) => {
+            const el = document.getElementById(id);
+            if (!el || !el.value.trim()) return [];
+            return el.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+        };
+
+        const loomType = document.getElementById("loomType").value;
+
+        const h1 = parseHeddle("heddle1");
+        const h2 = parseHeddle("heddle2");
+        const h3 = loomType === "traditional" ? [] : parseHeddle("heddle3");
+        const h4 = loomType === "traditional" ? [] : parseHeddle("heddle4");
+
+        const allAssigned = [...h1, ...h2, ...h3, ...h4];
+        const uniqueAssigned = new Set(allAssigned);
+
+        if (allAssigned.length !== patternSize || uniqueAssigned.size !== patternSize) {
+            alert(`Error: Assign exactly 1 to ${patternSize} without duplicates.`, "error");
+            return;
+        }
+
+        const outOfBounds = allAssigned.some(n => n < 1 || n > patternSize);
+        if (outOfBounds) {
+            alert(`Error: Thread numbers must be between 1 and ${patternSize}.`);
+            return;
+        }
+
+        let finalThreadingMap = new Array(patternSize).fill(0);
+        h1.forEach(n => finalThreadingMap[n - 1] = 0);
+        h2.forEach(n => finalThreadingMap[n - 1] = 1);
+        h3.forEach(n => finalThreadingMap[n - 1] = 2);
+        h4.forEach(n => finalThreadingMap[n - 1] = 3);
+
+        const maxThreads = 120;
+        const repeats = Math.floor(maxThreads / patternSize);
+        const totalThreads = repeats * patternSize;
+
+        if (totalThreads === 0) {
+            alert("Pattern size is too large (max 120).");
+            return;
+        }
+
+        const rawWidth = parseFloat(document.getElementById("clothWidth").value);
+        const physicalWidthCm = isNaN(rawWidth) || rawWidth <= 0 ? 30 : rawWidth;
+
+        loomConfig = {
+            patternName: document.getElementById("patternName").value,
+            loomType: loomType,
+            patternType: document.getElementById("patternType").value,
+            width: physicalWidthCm,
+            patternSize: patternSize,
+            totalThreads: totalThreads,
+            customThreadingMap: finalThreadingMap
+        };
+
+        const colorRoot = document.getElementById("color-section-root");
+        const perThreadColors = colorRoot && colorRoot._buildWarpColorArray
+            ? colorRoot._buildWarpColorArray(totalThreads)
+            : new Array(totalThreads).fill("#ffffff");
+        warpColors = perThreadColors;
+
+        loomConfig.presetWeftColors = [];
+
+        heddlesOverlay.style.display = "none";
+        initLoom();
+    });
+}
+
+//////////////////////////////////////////////////
+// INJECT LOOM UI STYLES
+//////////////////////////////////////////////////
+function injectLoomStyles() {
+    if (document.getElementById("loom-ui-styles")) return;
+    const style = document.createElement("style");
+    style.id = "loom-ui-styles";
+    style.textContent = `
+        .loom-panel {
+            position: absolute;
+            top: clamp(10px, 2%, 20px);
+            left: clamp(10px, 2%, 20px);
+            width: clamp(160px, 18vw, 220px);
+            max-height: 80vh;
+            background: rgba(13, 13, 18, 0.96);
+            color: #e0e0e0;
+            border: 1px solid #2a2a35;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(10px, 1.1vw, 12px);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        .loom-panel.collapsed {
+            max-height: 48px !important;
+            min-height: 48px !important;
+            padding-bottom: 0 !important;
+            overflow: hidden !important;
+        }
+        .loom-panel.collapsed > :not(.loom-panel__header) {
+            display: none !important;
+        }
+        .loom-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2a2a35;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+        .loom-panel.collapsed .loom-panel__header {
+            border-bottom: none;
+            padding-bottom: 0;
+            height: 100%;
+        }
+        .loom-panel__title {
+            font-weight: 700;
+            font-size: clamp(11px, 1.2vw, 13px);
+            color: #fff;
+            letter-spacing: 0.3px;
+            flex: 1;
+            min-width: 0;
+        }
+        .loom-btn-back {
+            padding: 4px 8px;
+            background: none;
+            border: 1px solid #3a3a45;
+            color: #888;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: clamp(9px, 0.9vw, 10px);
+            font-family: inherit;
+            transition: border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .loom-btn-back:hover { border-color: #666; color: #ccc; }
+        .loom-btn {
+            padding: clamp(6px, 1vh, 9px) 8px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: clamp(10px, 1vw, 11px);
+            width: 100%;
+            font-family: inherit;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.2px;
+        }
+        .loom-btn:hover  { opacity: 0.88; }
+        .loom-btn:active { transform: scale(0.97); }
+        .loom-btn--ble   { background: #007bff; }
+        .loom-btn--export { background: #28a745; }
+        .loom-btn--save  { background: #fd7e14; }
+        .loom-hint {
+            font-size: clamp(9px, 0.95vw, 10px);
+            color: #666;
+            line-height: 1.4;
+            background: #141418;
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+        .loom-divider {
+            border: none;
+            border-top: 1px solid #2a2a35;
+            margin: 0;
+        }
+        .loom-color-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .loom-color-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: clamp(10px, 1vw, 11px);
+            color: #aaa;
+        }
+        .loom-color-label input[type="color"] {
+            border: none;
+            width: clamp(22px, 2.5vw, 28px);
+            height: clamp(16px, 2vh, 20px);
+            background: none;
+            cursor: pointer;
+            padding: 0;
+            border-radius: 4px;
+        }
+
+        /* ── MEASUREMENT PANEL (TOP-RIGHT) ── */
+        .loom-measure-panel {
+            position: absolute;
+            top: clamp(10px, 2%, 20px);
+            right: clamp(10px, 2%, 20px);
+            width: clamp(170px, 16vw, 210px);
+            background: rgba(10, 15, 10, 0.96);
+            color: #e0e0e0;
+            border: 1px solid #1a2e1a;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(10px, 1.1vw, 12px);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .loom-measure-panel__title {
+            font-weight: 700;
+            font-size: clamp(11px, 1.2vw, 12px);
+            color: #7edd8f;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a2e1a;
+        }
+        .loom-measure-panel__title::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #4ecb5e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(0.7); }
+        }
+        .measure-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .measure-label {
+            font-size: clamp(9px, 0.9vw, 10px);
+            color: #668866;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .measure-value {
+            font-size: clamp(11px, 1.1vw, 13px);
+            font-weight: 700;
+            color: #c8f0cb;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .measure-value span {
+            font-size: 0.75em;
+            color: #668866;
+            font-weight: 500;
+        }
+        .measure-divider {
+            border: none;
+            border-top: 1px solid #1a2e1a;
+            margin: 2px 0;
+        }
+
+        /* ── 2D PATTERN PANEL (BOTTOM-RIGHT) ── */
+        .loom-pattern-panel {
+            position: absolute;
+            bottom: clamp(10px, 2%, 20px);
+            right: clamp(10px, 2%, 20px);
+            width: clamp(200px, 28vw, 420px);
+            height: clamp(140px, 22vh, 260px);
+            background: rgba(0, 0, 0, 0.92);
+            color: white;
+            border-radius: 12px;
+            border: 1px solid #2a2a35;
+            padding: clamp(10px, 1.5%, 15px);
+            box-sizing: border-box;
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+        }
+        .loom-pattern-panel__title {
+            font-weight: 700;
+            font-size: clamp(11px, 1.2vw, 13px);
+            margin-bottom: 8px;
+            color: #ddd;
+            letter-spacing: 0.3px;
+        }
+        .loom-pattern-panel__scroll {
+            flex: 1;
+            overflow: auto;
+            background: #111;
+            padding: 4px;
+            border-radius: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+        .loom-pattern-panel__scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .loom-pattern-panel__scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        #patternCanvas {
+            background: white;
+            border-radius: 3px;
+            display: block;
+        }
+        .hardware-sim-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        @media (max-width: 768px) {
+            .hardware-sim-container { display: none !important; }
+            .loom-measure-panel { display: none !important; }
+        }
+        @media (min-width: 901px) {
+            .loom-panel { width: clamp(200px, 18vw, 250px); max-height: 50vh; }
+            .loom-pattern-panel { width: clamp(220px, 30vw, 450px); height: clamp(150px, 25vh, 300px); }
+            .loom-measure-panel { width: clamp(180px, 16vw, 220px); }
+        }
+        @media (min-width: 601px) and (max-width: 900px) {
+            .loom-panel { width: clamp(150px, 20vw, 200px); max-height: 45vh; }
+            .loom-pattern-panel { width: clamp(180px, 32vw, 300px); height: clamp(120px, 20vh, 200px); }
+            .loom-measure-panel { width: clamp(150px, 18vw, 190px); }
+        }
+        @media (max-width: 600px) {
+            .loom-panel { top: 10px !important; left: 10px !important; width: auto !important; min-width: 180px; max-height: 60vh !important; padding: 10px !important; }
+            .loom-pattern-panel { bottom: 0 !important; right: 0 !important; left: 0 !important; width: 100% !important; height: 28vh !important; max-width: none !important; border-radius: 16px 16px 0 0 !important; border-bottom: none; }
+            #patternCanvas { width: 100% !important; height: auto !important; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+//////////////////////////////////////////////////
+// MAIN LOOM INITIALIZER
+//////////////////////////////////////////////////
+function initLoom() {
+    let hasUnsavedChanges = false;
+
+    const SHAFT_COUNT = (loomConfig.loomType === "traditional") ? 2 : 4;
+
+    // ── PHYSICAL SCALE ──
+    const PHYSICAL_WIDTH_CM = Math.max(1, Math.min(200, loomConfig.width || 30));
+    const WIDTH = 6.5;
+
+    const DEPTH = 4.2;
+    const FRONT = 0;
+    const BACK = -DEPTH;
+    const FOOT_EXTENSION = 2.2;
+    const BASE_FRONT = FRONT + FOOT_EXTENSION;
+    const TOWER_Z = FRONT - DEPTH * 0.38;
+    const BEATER_REST_Z = TOWER_Z + 1.2;
+    const LEG_HEIGHT = 3.2;
+    const BREAST_BEAM_Y = LEG_HEIGHT + 0.15;
+    const WARP_BEAM_Y = LEG_HEIGHT;
+    const CLOTH_BEAM_Y = 2.4;
+    const CLOTH_BEAM_Z = BEATER_REST_Z + 0.5;
+    const LEFT = -WIDTH / 2;
+    const RIGHT = WIDTH / 2;
+    const HEDDLE_WIDTH = WIDTH - 0.85;
+    const FRAME_H = 1.2;
+    const BASE_Y = 0.45;
+    const SHED_OPEN_Y = BREAST_BEAM_Y + 0.6;
+    const SHED_CLOSED_Y = BREAST_BEAM_Y - 0.4;
+    const SHUTTLE_LIMIT = HEDDLE_WIDTH / 2 + 0.6;
+    const ROW_SPACING = 0.02;
+    const BEATER_HIT_Z = BASE_FRONT - 0.2;
+    const MAX_ROWS_BEFORE_TAKEUP = 100;
+    const TOTAL_THREADS = loomConfig.totalThreads;
+    const PATTERN_SIZE = loomConfig.patternSize;
+
+    // ── PHYSICAL MEASUREMENT CONSTANTS ──
+    const EXPECTED_PPC = loomConfig.patternType === "twill" ? 10
+        : loomConfig.patternType === "basket" ? 6
+            : loomConfig.patternType === "rib" ? 5
+                : 8; // plain default
+                
+    const EXPECTED_WEFT_PER_CM = EXPECTED_PPC;
+    
+    // NEW: Warp density matches Weft density for a balanced textile
+    const THREADS_PER_CM = EXPECTED_WEFT_PER_CM; 
+    const TOTAL_PHYSICAL_THREADS = Math.round(PHYSICAL_WIDTH_CM * THREADS_PER_CM);
+
+    let zPositions = [];
+    if (SHAFT_COUNT === 2) {
+        zPositions = [TOWER_Z - 0.25, TOWER_Z + 0.25];
+    } else {
+        zPositions = [TOWER_Z - 0.45, TOWER_Z - 0.15, TOWER_Z + 0.15, TOWER_Z + 0.45];
+    }
+
+    const activeKeys = new Set();
+    const pedalPivotGroups = [];
+    const heddleFrames = [];
+    const warpGroups = [];
+    for (let i = 0; i < SHAFT_COUNT; i++) warpGroups.push([]);
+
+    let currentPressedPedals = new Set();
+    let isBeaterPulled = false;
+    let hasProcessedCurrentBeat = false;
+
+    let beaterGroup, shuttleGroup, clothRoller;
+    let weftThreads = [];
+    let activeWeft = null;
+    let patternHistory = loomConfig.resumeHistory || [];
+    let rowCounter = 0;
+    let weftColorHistory = (loomConfig.rowColors && Array.isArray(loomConfig.rowColors)) ? Array.from(loomConfig.rowColors) : [];
+    
+    const presetWeftColors = Array.isArray(loomConfig.presetWeftColors) ? loomConfig.presetWeftColors : [];
+    let fellZ = BASE_FRONT - 0.12;
+
+    let shuttleSideToggle = false;
+    let shuttleArmed = false;
+    let shuttleInserted = false;
+    let shuttleStartSide = -1;
+    let shuttleCrossed = false;
+
+    let shuttleDirectionChanges = 0;
+    let shuttleMovingPositive = null;
+    let lastShuttleX = 0;
+
+    let treadlingSequence = [];
+    let treadlingIndex = 0;
+    let weftReadyToBeat = false;
+    let shuttleCurrentSide = -1;
+
+    let weftCount = patternHistory.length;
+    let colorMode = "manual";
+
+    //----------------------------------------------
+    // THREE.JS SCENE
+    //----------------------------------------------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x202025);
+
+    const canvas = document.getElementById("bg");
+    const container = document.getElementById("weaving-studio");
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(0x202025, 1);
+
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    camera.position.set(4, 6, 14);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, 2, 0);
+
+    function resizeRenderer() {
+        const rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return; // Prevent black screen bug if container is hidden
+        renderer.setSize(rect.width, rect.height, false);
+        camera.aspect = rect.width / rect.height;
+        camera.updateProjectionMatrix();
+    }
+    
+    // Add multiple delay points to handle CSS fade-in causing 0 height initially
+    resizeRenderer();
+    setTimeout(resizeRenderer, 50);
+    setTimeout(resizeRenderer, 300);
+    window.addEventListener("resize", resizeRenderer);
+
+    const resizeObserver = new ResizeObserver(() => resizeRenderer());
+    resizeObserver.observe(container);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(15, 20, 10);
+    scene.add(sun);
+    scene.add(new THREE.GridHelper(40, 40));
+
+    //----------------------------------------------
+    // MATERIALS
+    //----------------------------------------------
+    const woodMaterial = new THREE.MeshStandardMaterial({ color: 0xc89b6d, roughness: 0.85, metalness: 0.05 });
+    const threadMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true });
+    const stringMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.85 });
+    const heddleWireMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa, opacity: 0.5, transparent: true });
+    const ropeMaterial = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 });
+    const reedMaterial = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.4, metalness: 0.6 });
+    const clothThreadMaterial = new THREE.LineBasicMaterial({ color: 0xf0eadf, opacity: 0.95, transparent: true });
+    const shuttleThreadMaterial = new THREE.MeshStandardMaterial({ color: 0xf0eadf, roughness: 0.7 });
+
+    //----------------------------------------------
+    // GEOMETRY HELPERS
+    //----------------------------------------------
+    function woodBar(w, h, d, x, y, z, parent = scene) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), woodMaterial);
+        mesh.position.set(x, y, z);
+        parent.add(mesh);
+        return mesh;
+    }
+
+    function woodCylinder(radius, length, x, y, z, rotationZ = true, parent = scene) {
+        const geo = new THREE.CylinderGeometry(radius, radius, length, 32);
+        const mesh = new THREE.Mesh(geo, woodMaterial);
+        if (rotationZ) mesh.rotation.z = Math.PI / 2;
+        mesh.position.set(x, y, z);
+        parent.add(mesh);
+        return mesh;
+    }
+
+    function createRopeConnection(p1, p2, parent = scene) {
+        const distance = p1.distanceTo(p2);
+        const geometry = new THREE.CylinderGeometry(0.02, 0.02, distance, 8);
+        const mesh = new THREE.Mesh(geometry, ropeMaterial);
+        const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+        mesh.position.copy(mid);
+        mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.clone().sub(p1).normalize());
+        parent.add(mesh);
+        return mesh;
+    }
+
+    //----------------------------------------------
+    // TREADLING
+    //----------------------------------------------
+    function generateTreadling(patternType) {
+        if (SHAFT_COUNT === 2) {
+            if (patternType === "plain") treadlingSequence = [0, 1];
+            else if (patternType === "basket") treadlingSequence = [0, 0, 1, 1];
+            else if (patternType === "rib") treadlingSequence = [0, 0, 0, 1, 1, 1];
+            else treadlingSequence = [0, 1];
+        } else {
+            if (patternType === "plain") treadlingSequence = [0, 1];
+            else if (patternType === "twill") treadlingSequence = [0, 1, 2, 3];
+            else if (patternType === "basket") treadlingSequence = [0, 0, 1, 1, 2, 2, 3, 3];
+            else if (patternType === "rib") treadlingSequence = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3];
+            else treadlingSequence = [0, 1, 2, 3];
+        }
+    }
+
+    generateTreadling(loomConfig.patternType);
+
+    //----------------------------------------------
+    // FRAME
+    //----------------------------------------------
+    function buildFrame() {
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT, LEG_HEIGHT / 2, BASE_FRONT);
+        woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BASE_FRONT);
+        woodBar(0.35, LEG_HEIGHT, 0.35, LEFT, LEG_HEIGHT / 2, BACK);
+        woodBar(0.35, LEG_HEIGHT, 0.35, RIGHT, LEG_HEIGHT / 2, BACK);
+        const SIDE_LEN = Math.abs(BASE_FRONT - BACK);
+        const SIDE_CEN = (BASE_FRONT + BACK) / 2;
+        woodBar(0.3, 0.3, SIDE_LEN, LEFT, LEG_HEIGHT, SIDE_CEN);
+        woodBar(0.3, 0.3, SIDE_LEN, RIGHT, LEG_HEIGHT, SIDE_CEN);
+        const TOWER_H = 3.5;
+        woodBar(0.3, TOWER_H, 0.3, LEFT, LEG_HEIGHT + TOWER_H / 2, TOWER_Z);
+        woodBar(0.3, TOWER_H, 0.3, RIGHT, LEG_HEIGHT + TOWER_H / 2, TOWER_Z);
+        const TOP_BEAM_Y = LEG_HEIGHT + TOWER_H;
+        woodBar(WIDTH + 0.6, 0.4, 0.4, 0, TOP_BEAM_Y, TOWER_Z);
+        woodBar(WIDTH + 0.2, 0.3, 0.4, 0, BREAST_BEAM_Y, BASE_FRONT);
+        woodCylinder(0.3, WIDTH, 0, WARP_BEAM_Y, BACK);
+        clothRoller = woodCylinder(0.28, WIDTH, 0, CLOTH_BEAM_Y, CLOTH_BEAM_Z);
+        woodBar(WIDTH - 0.45, 0.25, 0.25, 0, BASE_Y, BASE_FRONT);
+        woodBar(WIDTH - 0.45, 0.25, 0.25, 0, BASE_Y, BACK);
+        return TOP_BEAM_Y;
+    }
+
+    const TOP_BEAM_Y = buildFrame();
+
+    //----------------------------------------------
+    // HEDDLE SYSTEM
+    //----------------------------------------------
+    function createHeddleSystem() {
+        const group = new THREE.Group();
+        const FRAME_W = HEDDLE_WIDTH;
+        const SUPPORT_BAR_Y = TOP_BEAM_Y - 0.65;
+        const ROLLER_Y = SUPPORT_BAR_Y - 0.5;
+        const ROLLER_SPAN = WIDTH - 0.3;
+
+        woodCylinder(0.18, WIDTH, 0, SUPPORT_BAR_Y, TOWER_Z, true, group);
+
+        function addConnectedRoller(zPos) {
+            woodCylinder(0.06, ROLLER_SPAN, 0, ROLLER_Y, zPos, true, group);
+            woodBar(0.15, 0.15, 0.15, LEFT + 0.15, ROLLER_Y, zPos, group);
+            woodBar(0.15, 0.15, 0.15, RIGHT - 0.15, ROLLER_Y, zPos, group);
+        }
+
+        addConnectedRoller((zPositions[0] + zPositions[1]) / 2);
+        if (SHAFT_COUNT === 4) addConnectedRoller((zPositions[2] + zPositions[3]) / 2);
+
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            const frameGroup = new THREE.Group();
+            frameGroup.position.set(0, SHED_OPEN_Y, zPositions[i]);
+
+            [-1, 1].forEach(side => {
+                const xPos = side * (FRAME_W / 2 - 0.50);
+                const rollerZ = i < 2
+                    ? (zPositions[0] + zPositions[1]) / 2
+                    : (zPositions[2] + zPositions[3]) / 2;
+                const cordGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(xPos, ROLLER_Y, rollerZ),
+                    new THREE.Vector3(xPos, SHED_OPEN_Y + FRAME_H / 2, zPositions[i])
+                ]);
+                scene.add(new THREE.Line(cordGeo, stringMaterial));
+            });
+
+            woodBar(FRAME_W, 0.1, 0.1, 0, FRAME_H / 2, 0, frameGroup);
+            woodBar(FRAME_W, 0.1, 0.1, 0, -FRAME_H / 2, 0, frameGroup);
+            woodBar(0.1, FRAME_H, 0.1, -FRAME_W / 2, 0, 0, frameGroup);
+            woodBar(0.1, FRAME_H, 0.1, FRAME_W / 2, 0, 0, frameGroup);
+
+            const hPoints = [];
+            for (let h = 0; h <= 110; h++) {
+                const hx = (h / 110) * (FRAME_W - 0.14) - (FRAME_W - 0.14) / 2;
+                hPoints.push(
+                    new THREE.Vector3(hx, FRAME_H / 2 - 0.05, 0),
+                    new THREE.Vector3(hx, -FRAME_H / 2 + 0.05, 0)
+                );
+            }
+            frameGroup.add(new THREE.LineSegments(
+                new THREE.BufferGeometry().setFromPoints(hPoints),
+                heddleWireMaterial
+            ));
+
+            scene.add(frameGroup);
+            heddleFrames.push(frameGroup);
+        }
+        scene.add(group);
+    }
+    createHeddleSystem();
+
+    //----------------------------------------------
+    // BEATER
+    //----------------------------------------------
+    function createBeater() {
+        beaterGroup = new THREE.Group();
+        beaterGroup.position.set(0, BREAST_BEAM_Y + 0.25, BEATER_REST_Z);
+        const bh = FRAME_H * 0.55;
+        woodBar(WIDTH - 0.5, 0.2, 0.3, 0, bh / 2, 0, beaterGroup);
+        woodBar(WIDTH - 0.5, 0.15, 0.6, 0, -bh / 2, -0.1, beaterGroup);
+        beaterGroup.add(new THREE.Mesh(
+            new THREE.BoxGeometry(HEDDLE_WIDTH, bh - 0.1, 0.05),
+            reedMaterial
+        ));
+        scene.add(beaterGroup);
+    }
+    createBeater();
+
+    //----------------------------------------------
+    // SHUTTLE
+    //----------------------------------------------
+    function createShuttle() {
+        shuttleGroup = new THREE.Group();
+        const sWidth = 1.2;
+        const bodyGeom = new THREE.BoxGeometry(sWidth, 0.22, 0.35);
+        const pos = bodyGeom.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            if (Math.abs(pos.getX(i)) > sWidth * 0.3) {
+                pos.setZ(i, pos.getZ(i) * 0.25);
+                pos.setY(i, pos.getY(i) * 0.8);
+            }
+        }
+        shuttleGroup.add(new THREE.Mesh(bodyGeom, woodMaterial));
+        const cavity = new THREE.Mesh(
+            new THREE.BoxGeometry(sWidth * 0.6, 0.12, 0.22),
+            new THREE.MeshStandardMaterial({ color: 0x332211 })
+        );
+        cavity.position.y = 0.05;
+        shuttleGroup.add(cavity);
+        const quill = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, sWidth * 0.5, 12),
+            new THREE.MeshStandardMaterial({ color: 0xeeddcc })
+        );
+        quill.rotation.z = Math.PI / 2;
+        quill.position.y = 0.05;
+        shuttleGroup.add(quill);
+        const threadWrap = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.08, sWidth * 0.45, 12),
+            shuttleThreadMaterial
+        );
+        threadWrap.rotation.z = Math.PI / 2;
+        threadWrap.position.y = 0.05;
+        shuttleGroup.add(threadWrap);
+        scene.add(shuttleGroup);
+    }
+    createShuttle();
+
+    //----------------------------------------------
+    // PEDALS
+    //----------------------------------------------
+    function createPedals() {
+        const pedalY = BASE_Y + 0.05;
+        const restAngle = 13 * (Math.PI / 180);
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            const xPos = (i - (SHAFT_COUNT - 1) / 2) * 0.8;
+            const pivot = new THREE.Group();
+            pivot.position.set(xPos, pedalY, BASE_FRONT);
+            pivot.rotation.x = restAngle;
+            const pedalLever = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.22, 4.6),
+                woodMaterial
+            );
+            pedalLever.position.set(0, 0, -2.3);
+            pivot.add(pedalLever);
+            scene.add(pivot);
+            pedalPivotGroups.push(pivot);
+            woodBar(0.45, 0.4, 0.5, xPos, pedalY, BASE_FRONT);
+            const verticalOffset = Math.abs(TOWER_Z - BASE_FRONT) * Math.tan(restAngle);
+            createRopeConnection(
+                new THREE.Vector3(xPos, pedalY + verticalOffset, TOWER_Z),
+                new THREE.Vector3(xPos, BREAST_BEAM_Y - (FRAME_H / 2), TOWER_Z)
+            );
+        }
+    }
+    createPedals();
+
+    //----------------------------------------------
+    // WARP THREADS & CLOTH BASE
+    //----------------------------------------------
+    function createDynamicWarp() {
+        for (let i = 0; i < TOTAL_THREADS; i++) {
+            const x = (i / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const threadInBlock = i % PATTERN_SIZE;
+            const hIdx = loomConfig.customThreadingMap[threadInBlock];
+            threading[i] = hIdx;
+            const points = [
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, SHED_OPEN_Y, zPositions[hIdx]),
+                new THREE.Vector3(x, WARP_BEAM_Y + 0.3, BACK)
+            ];
+
+            const threadColor = Array.isArray(warpColors) && warpColors.length > 4
+                ? (warpColors[i] || "#ffffff")
+                : (warpColors[hIdx] || "#ffffff");
+
+            const thread = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                new THREE.LineBasicMaterial({ color: threadColor })
+            );
+            scene.add(thread);
+            warpGroups[hIdx].push(thread);
+        }
+    }
+
+    function createClothBase() {
+        for (let i = 0; i < TOTAL_THREADS; i++) {
+            const x = (i / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const wobble = Math.sin(i * 0.6) * 0.015;
+            const points = [
+                new THREE.Vector3(x + wobble, BREAST_BEAM_Y + 0.05, BASE_FRONT - 0.1),
+                new THREE.Vector3(x, BREAST_BEAM_Y + 0.05, BASE_FRONT + 0.1),
+                new THREE.Vector3(x, CLOTH_BEAM_Y, CLOTH_BEAM_Z)
+            ];
+            scene.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                clothThreadMaterial
+            ));
+        }
+    }
+
+    createDynamicWarp();
+    createClothBase();
+
+    //----------------------------------------------
+    function triggerShuttleThrow(targetSide) {
+        shuttleStartSide = -targetSide;
+        shuttleCurrentSide = targetSide;
+        shuttleArmed = true;
+        shuttleInserted = false;
+        lastShuttleX = shuttleGroup.position.x;
+        recordedSteps.push({ action: "shuttle" });
+    }
+
+    function handleHardwareInput(data) {
+        data = data.trim();
+        const pedalMapDown = { "1": 0, "2": 1, "3": 2, "4": 3 };
+        if (pedalMapDown[data] !== undefined) {
+            currentPressedPedals.add(pedalMapDown[data]);
+            recordedSteps.push({ action: "pedal", value: pedalMapDown[data] });
+            return;
+        }
+        const pedalMapUp = { "7": 0, "8": 1, "9": 2, "0": 3 };
+        if (pedalMapUp[data] !== undefined) {
+            currentPressedPedals.delete(pedalMapUp[data]);
+            return;
+        }
+        if (data.includes(",")) {
+            currentPressedPedals.clear();
+            data.split(",").forEach(p => {
+                const pedalIdx = parseInt(p) - 1;
+                if (!isNaN(pedalIdx)) currentPressedPedals.add(pedalIdx);
+            });
+            recordedSteps.push({ action: "pedals", value: Array.from(currentPressedPedals) });
+            return;
+        }
+        if (data === "R") { currentPressedPedals.clear(); return; }
+        if (data === "B" || data === "RFID_3" || data === "RFID_4") { isBeaterPulled = true; return; }
+        if (data === "B_1" || data === "V") {
+            isBeaterPulled = false;
+            hasProcessedCurrentBeat = false;
+            return;
+        }
+        if (data === "S1S2") { triggerShuttleThrow(1); return; }
+        if (data === "S2S1") { triggerShuttleThrow(-1); return; }
+    }
+
+    async function connectBLE() {
+        const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+        const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+        const btn = document.getElementById('bleConnect');
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'ESP32' }],
+                optionalServices: [SERVICE_UUID]
+            });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService(SERVICE_UUID);
+            const characteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
+            await characteristic.startNotifications();
+            characteristic.addEventListener('characteristicvaluechanged', (e) => {
+                const val = new TextDecoder().decode(e.target.value).trim();
+                handleHardwareInput(val);
+            });
+            btn.style.background = "#28a745";
+            btn.innerHTML = "Loom Connected";
+        } catch (err) {
+            console.error("BLE Error:", err);
+        }
+    }
+
+    //----------------------------------------------
+    // KEYBOARD INPUT
+    //----------------------------------------------
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return;
+        if (e.code === 'Digit1') handleHardwareInput("1");
+        if (e.code === 'Digit2') handleHardwareInput("2");
+        if (e.code === 'Digit3') handleHardwareInput("3");
+        if (e.code === 'Digit4') handleHardwareInput("4");
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (shuttleCurrentSide === -1) handleHardwareInput("S1S2");
+            else handleHardwareInput("S2S1");
+        }
+        if (e.code === 'KeyB') handleHardwareInput("B");
+        if (e.code === 'KeyV') handleHardwareInput("B_1");
+    }, true);
+
+    window.addEventListener('keyup', (e) => {
+        if (e.code === 'Digit1') handleHardwareInput("7");
+        if (e.code === 'Digit2') handleHardwareInput("8");
+        if (e.code === 'Digit3') handleHardwareInput("9");
+        if (e.code === 'Digit4') handleHardwareInput("0");
+    });
+
+    //----------------------------------------------
+    // WEFT / WEAVING LOGIC
+    //----------------------------------------------
+    function addWeftThread() {
+        if (activeWeft) return;
+        hasUnsavedChanges = true;
+
+        const warpCount = TOTAL_THREADS;
+        const points = [];
+        const shed = [];
+        for (let i = 0; i < SHAFT_COUNT; i++) shed.push(!currentPressedPedals.has(i));
+
+        const rowStates = [];
+        for (let i = 0; i < warpCount; i++) {
+            const x = (i / (warpCount - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+            const shaft = threading[i % threading.length];
+            const isUp = shed[shaft];
+            rowStates.push(isUp);
+            const y = (BREAST_BEAM_Y + 0.05) + (isUp ? 0.18 : -0.18);
+            points.push(new THREE.Vector3(x, y, shuttleGroup.position.z));
+        }
+
+        patternHistory.push(rowStates);
+
+        const insertionColor = "#" + shuttleThreadMaterial.color.getHexString();
+
+        const line = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(points),
+            new THREE.LineBasicMaterial({ color: shuttleThreadMaterial.color.clone() })
+        );
+        scene.add(line);
+
+        activeWeft = {
+            line,
+            isBeaten: false,
+            live: true,
+            valid: true,
+            capturedShed: shed.slice(),
+            warpPattern: rowStates.slice(),
+            capturedColor: insertionColor
+        };
+        weftThreads.push(activeWeft);
+
+        shuttleMovingPositive = null;
+        lastShuttleX = shuttleGroup.position.x;
+        shuttleDirectionChanges = 0;
+    }
+
+    function voidActiveWeft() {
+        shuttleSideToggle = (shuttleCurrentSide === 1);
+        weftReadyToBeat = false;
+        if (!activeWeft || activeWeft.isBeaten) return;
+
+        if (activeWeft.capturedColor && colorMode === "preset") {
+            shuttleThreadMaterial.color.set(activeWeft.capturedColor);
+            const shuttleColorInput = document.getElementById("shuttleColor");
+            if (shuttleColorInput) shuttleColorInput.value = activeWeft.capturedColor;
+        }
+
+        scene.remove(activeWeft.line);
+        activeWeft.line.geometry.dispose();
+        activeWeft.line.material.dispose();
+
+        weftThreads.pop();
+        patternHistory.pop();
+
+        activeWeft = null;
+        shuttleDirectionChanges = 0;
+        shuttleMovingPositive = null;
+        shuttleInserted = false;
+        shuttleArmed = false;
+        shuttleCrossed = false;
+    }
+
+    //----------------------------------------------
+    // ── MEASUREMENT UTILITIES ──
+    //----------------------------------------------
+    function computeMeasurements() {
+        const count = weftCount;
+        const widthCm = PHYSICAL_WIDTH_CM;
+        const heightCm = count > 0 ? (count / EXPECTED_WEFT_PER_CM) : 0;
+        const endPerCm = THREADS_PER_CM;
+
+        return { widthCm, heightCm: heightCm.toFixed(1), endPerCm: endPerCm.toFixed(1), count };
+    }
+
+    function updateMeasurePanel() {
+        const m = computeMeasurements();
+        const elWidth = document.getElementById("measure-width");
+        const elHeight = document.getElementById("measure-height");
+        const elEPC = document.getElementById("measure-epc");
+        const elWeft = document.getElementById("measure-weft");
+
+        if (elWidth) elWidth.textContent = m.widthCm;
+        if (elHeight) elHeight.textContent = m.heightCm;
+        if (elEPC) elEPC.textContent = m.endPerCm;
+        if (elWeft) elWeft.textContent = m.count;
+    }
+
+    //----------------------------------------------
+    // UI PANEL
+    //----------------------------------------------
+    function createUI() {
+        injectLoomStyles();
+
+        document.querySelectorAll('.loom-panel, .loom-measure-panel, .loom-pattern-panel').forEach(el => el.remove());
+        const gui = document.createElement('div');
+        gui.className = 'loom-panel';
+        gui.innerHTML = `
+            <div class="loom-panel__header">
+                <span class="loom-panel__title">Loom Controls</span>
+                <button id="backToMenuBtn" class="loom-btn-back">← Back</button>
+            </div>
+            <button id="bleConnect" class="loom-btn loom-btn--ble">Connect ESP32</button>
+            <div class="loom-hint">
+                Hold 1-4: Shed &nbsp;|&nbsp; Space: Shuttle<br>Hold B: Beat &nbsp;|&nbsp; V: Release Beat
+            </div>
+            <hr class="loom-divider" />
+            
+            <div style="font-size:clamp(10px, 1vw, 11px); color:#aaa; margin-bottom:4px; font-weight:700;">Weft Strategy</div>
+            <select id="weftStrategySelect" style="width:100%; background:#222; color:#fff; border:1px solid #444; border-radius:6px; padding:6px; margin-bottom:8px; font-size:10px; cursor:pointer;">
+                <option value="manual">Manual (One by One)</option>
+                <option value="range">Preset Ranges</option>
+            </select>
+
+            <div style="font-size: 0.7rem; color: #999; margin-bottom: 12px; line-height: 1.5; background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px; border-left: 3px solid #00e5ff;">
+                💡 <b>Color changes only affect new throws.</b> Existing picks are permanently locked in.
+            </div>
+            
+            <div id="manual-weft-box" class="loom-color-row">
+                <label class="loom-color-label">
+                    Shuttle Color
+                    <input type="color" id="shuttleColor" value="#f0eadf" />
+                </label>
+            </div>
+
+            <div id="range-weft-box" style="display:none; flex-direction:column; gap:6px;">
+                <div id="weft-ranges-container" style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto; padding-right:4px;"></div>
+                <button id="addWeftRangeBtn" style="background:rgba(100,180,100,0.1); border:1px dashed rgba(100,180,100,0.35); color:#7ecf7e; padding:8px; border-radius:6px; cursor:pointer; font-size:10px; transition:0.2s; font-weight:600;">+ Add Pick Range</button>
+            </div>
+
+            <hr class="loom-divider" />
+            <button id="convertBtn" class="loom-btn loom-btn--export">Export Pattern</button>
+            <button id="savePattern" class="loom-btn loom-btn--save">Save to Learning Library</button>
+        `;
+        document.getElementById("weaving-studio").appendChild(gui);
+
+        const panelHeader = gui.querySelector('.loom-panel__header');
+        panelHeader.addEventListener('click', (e) => {
+            if (e.target.closest('.loom-btn-back')) return;
+            gui.classList.toggle('collapsed');
+        });
+        if (window.innerWidth <= 600) gui.classList.add('collapsed');
+
+        // ── Weft Strategy Logic ──
+        const strategySelect = document.getElementById("weftStrategySelect");
+        const manualBox = document.getElementById("manual-weft-box");
+        const rangeBox = document.getElementById("range-weft-box");
+        const weftRangesContainer = document.getElementById("weft-ranges-container");
+        const addWeftRangeBtn = document.getElementById("addWeftRangeBtn");
+
+        strategySelect.addEventListener("change", (e) => {
+            if (e.target.value === "range") {
+                manualBox.style.display = "none";
+                rangeBox.style.display = "flex";
+                colorMode = "preset";
+                updatePresetWeftColors();
+            } else {
+                manualBox.style.display = "flex";
+                rangeBox.style.display = "none";
+                colorMode = "manual";
+            }
+        });
+
+        function updatePresetWeftColors() {
+            const arr = new Array(2000).fill("#f0eadf");
+            weftRangesContainer.querySelectorAll("div.w-row-item").forEach(row => {
+                const from = Math.max(1, parseInt(row.querySelector(".w-from").value) || 1);
+                const to = Math.min(2000, parseInt(row.querySelector(".w-to").value) || 2000);
+                const col = row.querySelector(".w-color").value || "#f0eadf";
+                for (let i = from - 1; i < to; i++) {
+                    if (i < 2000) arr[i] = col;
+                }
+            });
+            
+            presetWeftColors.length = 0; 
+            arr.forEach(c => presetWeftColors.push(c));
+            
+            if (colorMode === "preset") {
+                const nextColor = presetWeftColors[weftCount] || presetWeftColors[presetWeftColors.length - 1];
+                if (nextColor) shuttleThreadMaterial.color.set(nextColor);
+            }
+        }
+
+        function addWeftControlRow(from, to, color) {
+            const div = document.createElement("div");
+            div.className = "w-row-item";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.style.background = "rgba(255,255,255,0.03)";
+            div.style.padding = "6px 8px";
+            div.style.borderRadius = "6px";
+            div.style.border = "1px solid rgba(255,255,255,0.08)";
+            
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="color:#777; font-size:9px; font-weight:600; text-transform:uppercase;">Picks</span>
+                    <input type="number" class="w-from" value="${from}" min="1" style="width:38px; background:rgba(0,0,0,0.4); border:1px solid #444; color:#fff; font-size:10px; border-radius:4px; padding:3px; text-align:center;">
+                    <span style="color:#555;">-</span>
+                    <input type="number" class="w-to" value="${to}" min="1" style="width:38px; background:rgba(0,0,0,0.4); border:1px solid #444; color:#fff; font-size:10px; border-radius:4px; padding:3px; text-align:center;">
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" class="w-color" value="${color}" style="width:28px; height:22px; border:1px solid #444; border-radius:6px; background:#111; padding:2px; cursor:pointer;">
+                    <button class="w-del" style="background:rgba(217,48,37,0.15); border:1px solid rgba(217,48,37,0.3); color:#e06060; border-radius:4px; cursor:pointer; font-size:10px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; transition:0.2s;">✕</button>
+                </div>
+            `;
+            div.querySelector(".w-del").addEventListener("click", () => {
+                div.remove();
+                updatePresetWeftColors();
+            });
+            div.querySelectorAll("input").forEach(inp => inp.addEventListener("input", updatePresetWeftColors));
+            weftRangesContainer.appendChild(div);
+            updatePresetWeftColors();
+        }
+
+        addWeftRangeBtn.addEventListener("click", () => {
+            const rows = weftRangesContainer.children;
+            let nextFrom = 1;
+            if (rows.length > 0) {
+                const lastTo = parseInt(rows[rows.length - 1].querySelector(".w-to").value);
+                if (!isNaN(lastTo)) nextFrom = lastTo + 1;
+            }
+            addWeftControlRow(nextFrom, nextFrom + 50, "#c0392b");
+        });
+
+        if (presetWeftColors.length === 0) addWeftControlRow(1, 200, "#f0eadf");
+        
+        if (colorMode === "preset") {
+            strategySelect.value = "range";
+            strategySelect.dispatchEvent(new Event("change"));
+        }
+
+        // ── Measurement Panel ──
+        const measurePanel = document.createElement("div");
+        measurePanel.className = "loom-measure-panel";
+        measurePanel.innerHTML = `
+            <div class="loom-measure-panel__title">Live Measurements</div>
+            <div class="measure-row"><span class="measure-label">Width</span><span class="measure-value" id="measure-width">${PHYSICAL_WIDTH_CM}<span> cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Est. Height</span><span class="measure-value" id="measure-height">0.0<span> cm</span></span></div>
+            <hr class="measure-divider" />
+            <div class="measure-row"><span class="measure-label">Ends/cm</span><span class="measure-value" id="measure-epc">${(THREADS_PER_CM).toFixed(1)}<span> e/cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Weft Count</span><span class="measure-value" id="measure-weft">${weftCount}<span> picks</span></span></div>
+            <hr class="measure-divider" />
+            <div class="measure-label" style="margin-bottom:4px;">Warp Color Preview</div>
+            <canvas id="warp-color-preview" style="width:100%;height:14px;border-radius:4px;display:block;image-rendering:pixelated;"></canvas>
+        `;
+        document.getElementById("weaving-studio").appendChild(measurePanel);
+
+        // Draw warp color preview strip
+        (function drawWarpPreview() {
+            const previewCanvas = document.getElementById("warp-color-preview");
+            if (!previewCanvas) return;
+            const total = TOTAL_THREADS;
+            previewCanvas.width = total;
+            previewCanvas.height = 1;
+            const ctx = previewCanvas.getContext("2d");
+            for (let i = 0; i < total; i++) {
+                const color = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[i] || "#ffffff")
+                    : (warpColors[threading[i] !== undefined ? threading[i] : (i % 4)] || "#ffffff");
+                ctx.fillStyle = color;
+                ctx.fillRect(i, 0, 1, 1);
+            }
+        })();
+
+        // ── 2D Pattern Panel ──
+        const patternPanel = document.createElement("div");
+        patternPanel.className = "loom-pattern-panel";
+        patternPanel.innerHTML = `
+            <div class="loom-pattern-panel__title">Live 2D Pattern</div>
+            <div id="patternContainer" class="loom-pattern-panel__scroll">
+                <canvas id="patternCanvas"></canvas>
+            </div>
+        `;
+        document.getElementById("weaving-studio").appendChild(patternPanel);
+
+        render2DPattern();
+
+        // ── Listeners ──
+        document.getElementById('shuttleColor').addEventListener('input', (e) => {
+            shuttleThreadMaterial.color.set(e.target.value);
+            colorMode = "manual";
+            
+            // Instantly change the color of the thread sitting in the shed!
+            if (activeWeft && !activeWeft.isBeaten) {
+                activeWeft.capturedColor = e.target.value;
+                activeWeft.line.material.color.set(e.target.value);
+            }
+            render2DPattern(); // Live update instantly!
+        });
+
+        const shuttleInput = document.getElementById('shuttleColor');
+        if (shuttleInput) {
+            const initialColor = loomConfig.weftColor || (presetWeftColors.length > 0 ? presetWeftColors[weftCount] : null) || "#f0eadf";
+            shuttleInput.value = initialColor;
+            shuttleThreadMaterial.color.set(initialColor);
+        }
+
+        document.getElementById('convertBtn').addEventListener('click', exportPatternImage);
+        document.getElementById('bleConnect').addEventListener('click', connectBLE);
+        document.getElementById('backToMenuBtn').addEventListener('click', () => { window.location.href = 'dashboard.html'; });
+
+        document.getElementById("savePattern").addEventListener("click", async () => {
+            const initialCount = (loomConfig.resumeHistory && Array.isArray(loomConfig.resumeHistory)) 
+                ? loomConfig.resumeHistory.length 
+                : 0;
+
+            const currentCount = patternHistory.length;
+            const newRowsAdded = currentCount - initialCount;
+            const isImported = loomConfig.isImported === true;
+
+            if (isImported) {
+                if (newRowsAdded < 20) {
+                    alert(`ACCESS DENIED: This is an imported pattern.\n\nYou must add at least 20 new rows of your own weaving to save this to your library.\n\nProgress: ${newRowsAdded}/20 rows added.`);
+                    return; 
+                }
+            } else {
+                if (currentCount < 20) {
+                    alert(`NOT ENOUGH DATA: Please weave at least 20 rows before saving a new design.\n\nCurrent: ${currentCount}/20 rows.`);
+                    return;
+                }
+            }
+
+            console.log("Validation passed. Saving...");
+            
+            const shuttleColorEl = document.getElementById("shuttleColor");
+            const weftColor = shuttleColorEl ? shuttleColorEl.value : "#" + shuttleThreadMaterial.color.getHexString();
+            const currentUser = window.windowCurrentUserObj || { name: "Unknown" };
+            const measurements = computeMeasurements();
+
+            const data = {
+                name: loomConfig.patternName || "Untitled",
+                name: loomConfig.patternName || "Untitled",
+                type: loomConfig.patternType,
+                loom: loomConfig.loomType,
+                steps: recordedSteps,
+                patternRows: patternHistory,
+                rowColors: weftColorHistory,
+                weftColor: weftColor,
+                created: loomConfig.created || Date.now(),
+                warpColors: warpColors,
+                totalThreads: loomConfig.totalThreads,
+                threadingMap: loomConfig.customThreadingMap,
+                creator: currentUser.name,
+                isImported: false,
+                isPrivate: loomConfig.isPrivate !== undefined ? loomConfig.isPrivate : true, // Sets to private by default
+                measurements: {
+                    physicalWidthCm: measurements.widthCm,
+                    estimatedHeightCm: parseFloat(measurements.heightCm),
+                    endsPerCm: parseFloat(measurements.endPerCm),
+                    weftCount: measurements.count,
+                    expectedPicksPerCm: EXPECTED_WEFT_PER_CM
+                }
+            };
+
+            try {
+                if (loomConfig.patternId) await fetch(`/api/patterns/${loomConfig.patternId}`, { method: "DELETE" });
+                const res = await fetch("/api/patterns/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    const savedData = await res.json().catch(() => ({}));
+                    if (savedData && savedData._id) loomConfig.patternId = savedData._id;
+                    hasUnsavedChanges = false;
+                    alert("Pattern saved and updated successfully!");
+                } else {
+                    alert("Save failed. Check server logs.");
+                }
+            } catch (err) {
+                alert("Could not connect to the server.");
+            }
+        });
+    }
+
+
+    //----------------------------------------------
+    // 2D PATTERN RENDERER — Pixel Block Format
+    //----------------------------------------------
+    function render2DPattern() {
+        const patternCanvas = document.getElementById("patternCanvas");
+        if (!patternCanvas) return;
+        const ctx = patternCanvas.getContext("2d");
+        
+        const baseWarpCount = (patternHistory.length > 0) ? patternHistory[0].length : (loomConfig.totalThreads || 120);
+        const rowCount = patternHistory.length;
+
+        if (rowCount === 0 && (!activeWeft)) {
+            patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
+            patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
+            ctx.fillStyle = "#111"; 
+            ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
+            return;
+        }
+        
+        const container = patternCanvas.parentElement;
+        // Calculation to fill the horizontal width of the panel with solid pixel blocks
+        const cellSize = Math.max(2, (container.clientWidth - 16) / TOTAL_PHYSICAL_THREADS);
+
+        patternCanvas.width = TOTAL_PHYSICAL_THREADS * cellSize;
+        patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
+        
+        // 1. Draw the locked rows (Pattern History)
+        patternHistory.forEach((rowStates, rowIndex) => {
+            // Stack logic: newest row at the top
+            const y = (rowCount - 1 - rowIndex + (activeWeft ? 1 : 0)) * cellSize;
+            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
+            const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
+            
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount;
+                const isWarpUp = rowStates[baseIndex];
+                const x = ti * cellSize;
+                const shaft = threading[baseIndex % threading.length] || 0;
+                
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[baseIndex] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
+
+                // --- PIXEL FORMATTING ---
+                // If warp is UP, use warp color. If DOWN, use weft color.
+                // Fill the ENTIRE square cell to create the pixel look.
+                ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
+                ctx.fillRect(x, y, cellSize, cellSize);
+
+                // Subtle grid line (set to 0.1 opacity so it's barely visible, just like pixels)
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+            }
+        });
+
+        // 2. Draw the live "unbeaten" row (The Active Throw)
+        if (activeWeft && activeWeft.live) {
+            const y = 0; 
+            const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
+            
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount;
+                const isWarpUp = activeWeft.warpPattern[baseIndex];
+                const x = ti * cellSize;
+                const shaft = threading[baseIndex % threading.length] || 0;
+                
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[baseIndex] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
+
+                ctx.fillStyle = isWarpUp ? warpCol : liveColor;
+                ctx.fillRect(x, y, cellSize, cellSize);
+
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+            }
+        }
+        
+        // Auto-scroll to show the newest row at the top
+        patternCanvas.parentElement.scrollTop = 0; 
+    }
+
+//----------------------------------------------
+    // PATTERN EXPORT (Block-Grid with Physical Multiplier)
+    //----------------------------------------------
+    function exportPatternImage() {
+        if (patternHistory.length === 0) {
+            alert("Weave some rows first!");
+            return;
+        }
+
+        const baseWarpCount = patternHistory[0].length;
+        const rowCount = patternHistory.length;
+        
+        // Block-grid settings
+        const CELL_PX = 10; 
+        const PADDING = 60;
+        const FOOTER_H = 140; 
+
+        // Multiplier Logic: Using TOTAL_PHYSICAL_THREADS instead of DISPLAY_THREADS
+        const patternW = Math.round(TOTAL_PHYSICAL_THREADS * CELL_PX);
+        const patternH = rowCount * CELL_PX;
+
+        const canvasW = Math.max(patternW + (PADDING * 2), 800); 
+        const canvasH = patternH + (PADDING * 2) + FOOTER_H;
+
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = canvasW;
+        exportCanvas.height = canvasH;
+        const ctx = exportCanvas.getContext('2d');
+
+        // White background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvasW, canvasH);
+
+        const offsetX = (canvasW - patternW) / 2;
+        const offsetY = PADDING;
+
+        // --- THE BLOCK DRAWING LOOP WITH MULTIPLIER ---
+        patternHistory.forEach((rowStates, ri) => {
+            // Newest row at top
+            const y = (rowCount - 1 - ri) * CELL_PX;
+            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
+            const currentRowColor = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : fallbackWeft;
+
+            // ti loops through the full physical width (e.g., 240 threads)
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount; // Loops the pattern logic across the width
+                const isWarpUp = rowStates[baseIndex];
+                const x = ti * CELL_PX;
+                const shaft = threading[baseIndex % threading.length] || 0;
+                
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[baseIndex] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
+
+                // Logic from Code 1: Fill the whole cell (Block style)
+                ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
+                ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
+
+                // Subtle grid lines
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
+            }
+        });
+
+        // --- FOOTER SECTION (Code 1 Style) ---
+        const footerTop = offsetY + patternH + 30;
+        ctx.strokeStyle = "#e0e0e0";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(PADDING, footerTop);
+        ctx.lineTo(canvasW - PADDING, footerTop);
+        ctx.stroke();
+
+        ctx.fillStyle = "#1a1a1a";
+        ctx.font = "bold 24px 'Plus Jakarta Sans', sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(loomConfig.patternName || "HABI-LIN Draft", PADDING, footerTop + 40);
+
+        ctx.font = "14px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillStyle = "#666666";
+        const estHeight = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
+        
+        // Meta text using the physical multiplier variables
+        ctx.fillText(`Physical Size: ${PHYSICAL_WIDTH_CM}cm (W) × ${estHeight}cm (L)`, PADDING, footerTop + 65);
+        ctx.fillText(`Structure: ${TOTAL_PHYSICAL_THREADS} warp ends (${THREADS_PER_CM} ends/cm) · ${rowCount} weft picks (${EXPECTED_WEFT_PER_CM} picks/cm)`, PADDING, footerTop + 85);
+
+        // Download
+        const link = document.createElement('a');
+        const safeName = (loomConfig.patternName || 'pattern').replace(/\s+/g, '_').toLowerCase();
+        link.download = `${safeName}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    //----------------------------------------------
+    // ANIMATION HELPERS
+    //----------------------------------------------
+    function isShedOpenEnough() {
+        if (currentPressedPedals.size === 0) return false;
+        let allLow = true;
+        currentPressedPedals.forEach(idx => {
+            if (heddleFrames[idx] && Math.abs(heddleFrames[idx].position.y - SHED_CLOSED_Y) > 0.3) allLow = false;
+        });
+        return allLow;
+    }
+
+    function updateShafts() {
+        for (let i = 0; i < SHAFT_COUNT; i++) {
+            const isPressed = currentPressedPedals.has(i);
+            const targetHeddleY = isPressed ? SHED_CLOSED_Y : SHED_OPEN_Y;
+            const targetAngle = isPressed ? 3 * (Math.PI / 180) : 13 * (Math.PI / 180);
+            if (pedalPivotGroups[i]) pedalPivotGroups[i].rotation.x += (targetAngle - pedalPivotGroups[i].rotation.x) * 0.4;
+            if (heddleFrames[i]) heddleFrames[i].position.y += (targetHeddleY - heddleFrames[i].position.y) * 0.4;
+            if (warpGroups[i]) {
+                warpGroups[i].forEach(thread => {
+                    const pos = thread.geometry.attributes.position;
+                    pos.setY(2, heddleFrames[i].position.y);
+                    if (pos.getZ(1) >= fellZ) pos.setY(1, BREAST_BEAM_Y + 0.05);
+                    pos.needsUpdate = true;
+                });
+            }
+        }
+    }
+
+    function updateActiveWeftShape() {
+        if (!activeWeft || !activeWeft.live) return;
+        const pos = activeWeft.line.geometry.attributes.position;
+        for (let j = 0; j < pos.count; j++) {
+            const shaft = threading[j % threading.length];
+            if (shuttleGroup.position.z < fellZ + 0.02) {
+                const isUp = !currentPressedPedals.has(shaft);
+                const targetY = (BREAST_BEAM_Y + 0.05) + (isUp ? 0.18 : -0.18);
+                pos.setY(j, THREE.MathUtils.lerp(pos.getY(j), targetY, 0.4));
+            } else {
+                const lockedUp = activeWeft.warpPattern[j];
+                const targetY = (BREAST_BEAM_Y + 0.05) + (lockedUp ? 0.18 : -0.18);
+                pos.setY(j, targetY);
+            }
+        }
+        pos.needsUpdate = true;
+    }
+
+    function updateClothTakeup() {
+        if (rowCounter < MAX_ROWS_BEFORE_TAKEUP) return;
+        clothRoller.rotation.x += 0.5;
+        const shiftAmount = MAX_ROWS_BEFORE_TAKEUP * ROW_SPACING;
+        weftThreads.forEach(t => {
+            const pos = t.line.geometry.attributes.position;
+            for (let j = 0; j < pos.count; j++) {
+                let nextZ = pos.getZ(j) + shiftAmount;
+                if (nextZ > BASE_FRONT) {
+                    pos.setY(j, THREE.MathUtils.lerp(BREAST_BEAM_Y, CLOTH_BEAM_Y, (nextZ - BASE_FRONT) / 1.5));
+                    pos.setZ(j, THREE.MathUtils.lerp(BASE_FRONT, CLOTH_BEAM_Z, (nextZ - BASE_FRONT) / 1.5));
+                } else {
+                    pos.setZ(j, nextZ);
+                }
+            }
+            pos.needsUpdate = true;
+        });
+        rowCounter = 0;
+    }
+
+    function checkWeftInsertion() {
+        if (!shuttleArmed || shuttleInserted || !isShedOpenEnough()) return;
+        const crossingFromLeft = shuttleStartSide === -1 && shuttleGroup.position.x > 0;
+        const crossingFromRight = shuttleStartSide === 1 && shuttleGroup.position.x < 0;
+        
+        if (crossingFromLeft || crossingFromRight) {
+            if (weftThreads.length > 0 && !activeWeft) {
+                const lastWeft = weftThreads[weftThreads.length - 1];
+                let isUndo = true;
+                for (let i = 0; i < SHAFT_COUNT; i++) {
+                    const isUp = !currentPressedPedals.has(i);
+                    if (lastWeft.capturedShed[i] !== isUp) { isUndo = false; break; }
+                }
+                
+                // --- UNDO HAPPENS HERE ---
+                if (isUndo) {
+                    scene.remove(lastWeft.line);
+                    lastWeft.line.geometry.dispose();
+                    lastWeft.line.material.dispose();
+                    weftThreads.pop();
+                    patternHistory.pop();
+                    
+                    if (lastWeft.isBeaten) {
+                        weftCount = Math.max(0, weftCount - 1);
+                        weftColorHistory.pop();
+                        rowCounter = Math.max(0, rowCounter - 1);
+                        
+                        if (colorMode === "preset" && presetWeftColors.length > 0) {
+                            const prevColor = presetWeftColors[weftCount] || presetWeftColors[0];
+                            if (prevColor) {
+                                shuttleThreadMaterial.color.set(prevColor);
+                                const shuttleColorInput = document.getElementById("shuttleColor");
+                                if (shuttleColorInput) shuttleColorInput.value = prevColor;
+                            }
+                        }
+                    }
+                    
+                    fellZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
+                    shuttleInserted = true;
+                    
+                    updateMeasurePanel(); // Instant math update
+                    render2DPattern();    // Instant visual update
+                    return;
+                }
+            }
+            addWeftThread();
+            shuttleInserted = true;
+        }
+    }
+
+    function checkDirectionChanges() {
+        if (!activeWeft || activeWeft.isBeaten || !shuttleInserted) return;
+        const reachedRight = shuttleStartSide === -1 && shuttleGroup.position.x > SHUTTLE_LIMIT * 0.9;
+        const reachedLeft = shuttleStartSide === 1 && shuttleGroup.position.x < -SHUTTLE_LIMIT * 0.9;
+        if (activeWeft && (reachedRight || reachedLeft)) weftReadyToBeat = true;
+        const currentX = shuttleGroup.position.x;
+        const delta = currentX - lastShuttleX;
+        if (Math.abs(delta) > 0.01) {
+            const movingPositive = delta > 0;
+            if (shuttleMovingPositive === null) {
+                shuttleMovingPositive = movingPositive;
+            } else if (movingPositive !== shuttleMovingPositive) {
+                shuttleDirectionChanges++;
+                if (shuttleDirectionChanges % 2 !== 0) { voidActiveWeft(); return; }
+            }
+        }
+        lastShuttleX = currentX;
+    }
+
+    function processBeat(currentHitZ) {
+        if (!activeWeft || !weftReadyToBeat) return;
+        const pos = activeWeft.line.geometry.attributes.position;
+        for (let j = 0; j < pos.count; j++) {
+            pos.setZ(j, currentHitZ);
+            pos.setY(j, BREAST_BEAM_Y + 0.05 + (j % 2 === 0 ? 0.04 : -0.04));
+        }
+        pos.needsUpdate = true;
+        activeWeft.isBeaten = true;
+        activeWeft.live = false;
+        rowCounter++;
+
+        const committedColor = activeWeft.capturedColor
+            || "#" + shuttleThreadMaterial.color.getHexString();
+        weftColorHistory.push(committedColor);
+
+        if (activeWeft.line && activeWeft.line.material) {
+            activeWeft.line.material.color.set(committedColor);
+        }
+
+        fellZ = currentHitZ;
+        activeWeft = null;
+        weftReadyToBeat = false;
+        shuttleDirectionChanges = 0;
+        shuttleMovingPositive = null;
+        recordedSteps.push({ action: "beat" });
+
+        weftCount++;
+
+        if (colorMode === "preset" && presetWeftColors.length > 0) {
+            const nextColor = presetWeftColors[weftCount] || presetWeftColors[presetWeftColors.length - 1];
+            if (nextColor) {
+                shuttleThreadMaterial.color.set(nextColor);
+                const shuttleColorInput = document.getElementById("shuttleColor");
+                if (shuttleColorInput) shuttleColorInput.value = nextColor;
+            }
+        }
+
+        render2DPattern();
+        updateMeasurePanel();
+    }
+
+    function reconstructSavedWeave() {
+        if (!loomConfig.resumeHistory || loomConfig.resumeHistory.length === 0) return;
+        loomConfig.resumeHistory.forEach((rowStates, index) => {
+            const currentHitZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
+            const points = [];
+            for (let j = 0; j < TOTAL_THREADS; j++) {
+                const x = (j / (TOTAL_THREADS - 1)) * HEDDLE_WIDTH - HEDDLE_WIDTH / 2;
+                const y = BREAST_BEAM_Y + 0.05 + (j % 2 === 0 ? 0.04 : -0.04);
+                points.push(new THREE.Vector3(x, y, currentHitZ));
+            }
+            const rowColor = (weftColorHistory && weftColorHistory[index]) ? weftColorHistory[index] : (loomConfig.weftColor || "#f0eadf");
+            const line = new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(points),
+                new THREE.LineBasicMaterial({ color: rowColor })
+            );
+            scene.add(line);
+            weftThreads.push({ line, isBeaten: true, live: false, capturedShed: [], warpPattern: rowStates });
+            rowCounter++;
+            fellZ = currentHitZ;
+            if (rowCounter >= MAX_ROWS_BEFORE_TAKEUP) updateClothTakeup();
+        });
+    }
+
+    if (loomConfig.resumeHistory && loomConfig.resumeHistory.length > 0) {
+        reconstructSavedWeave();
+    }
+
+    //----------------------------------------------
+    // MAIN ANIMATION LOOP
+    //----------------------------------------------
+    function animate() {
+        requestAnimationFrame(animate);
+        updateShafts();
+        updateActiveWeftShape();
+        const targetX = shuttleCurrentSide * SHUTTLE_LIMIT;
+        shuttleGroup.position.x += (targetX - shuttleGroup.position.x) * 0.35;
+        updateClothTakeup();
+        const currentHitZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
+        const targetBeaterZ = isBeaterPulled ? currentHitZ : BEATER_REST_Z;
+        const lerpSpeed = isBeaterPulled ? 0.6 : 0.35;
+        beaterGroup.position.z += (targetBeaterZ - beaterGroup.position.z) * lerpSpeed;
+        checkWeftInsertion();
+        checkDirectionChanges();
+        if (isBeaterPulled && !hasProcessedCurrentBeat && weftReadyToBeat) {
+            processBeat(currentHitZ);
+            hasProcessedCurrentBeat = true;
+        }
+        shuttleGroup.position.y = beaterGroup.position.y - 0.35;
+        shuttleGroup.position.z = beaterGroup.position.z + 0.18;
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    createUI();
+    updateMeasurePanel(); 
+    animate();
+}
+
+//////////////////////////////////////////////////
+// EXPORT
+//////////////////////////////////////////////////
+export async function startLoom() {
+    console.log("Initializing Loom Studio...");
+    await new Promise(resolve => setTimeout(resolve, 50));
+    attachStartButton();
+}
+
+export async function resumeLoom(data) {
+    console.log("Resuming saved pattern:", data);
+    if (!data) return;
+
+    const isTrad = data.loom === "traditional";
+    const shaftCount = isTrad ? 2 : 4;
+    const defaultMap = isTrad ? [0, 1] : [0, 1, 2, 3];
+    const defaultColors = isTrad ? ["#ffffff", "#ffffff"] : ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+
+    let history = data.patternRows || [];
+    if (history.length === 0 && data.steps) {
+        const warpCount = data.totalThreads || 60;
+        let pressedPedals = new Set();
+        const map = data.threadingMap || defaultMap;
+        for (const step of data.steps) {
+            if (step.action === "pedal") pressedPedals.add(step.value);
+            else if (step.action === "pedals") pressedPedals = new Set(step.value);
+            else if (step.action === "beat") {
+                const shed = [];
+                for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
+                const rowStates = [];
+                for (let i = 0; i < warpCount; i++) {
+                    const shaft = map[i % map.length] || (i % shaftCount);
+                    rowStates.push(shed[shaft]);
+                }
+                history.push(rowStates);
+            }
+        }
+    }
+
+    let rColors = data.rowColors || [];
+    if (rColors.length === 0 && history.length > 0) {
+        const fallback = data.weftColor || "#f0eadf";
+        rColors = new Array(history.length).fill(fallback);
+    }
+
+    loomConfig = {
+        patternId: data._id,
+        patternName: data.name,
+        isImported: data.isImported || false,
+        loomType: data.loom,
+        patternType: data.type || "plain",
+        totalThreads: data.totalThreads || 60,
+        patternSize: data.threadingMap ? data.threadingMap.length : defaultMap.length,
+        customThreadingMap: data.threadingMap || defaultMap,
+        resumeHistory: history,
+        rowColors: rColors,
+        weftColor: data.weftColor || "#f0eadf",
+        creator: data.creator,
+        created: data.created,
+        width: (data.measurements && data.measurements.physicalWidthCm) ? data.measurements.physicalWidthCm : 30
+    };
+
+    warpColors = data.warpColors || defaultColors;
+    recordedSteps = data.steps || [];
+
+    initLoom();
+}
