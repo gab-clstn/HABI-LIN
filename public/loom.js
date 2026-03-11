@@ -1557,17 +1557,35 @@ function initLoom() {
         document.getElementById('backToMenuBtn').addEventListener('click', () => { window.location.href = 'dashboard.html'; });
 
         document.getElementById("savePattern").addEventListener("click", async () => {
-            if (patternHistory.length === 0) {
-                alert("Weave and beat at least one row before saving!");
-                return;
+            const initialCount = (loomConfig.resumeHistory && Array.isArray(loomConfig.resumeHistory)) 
+                ? loomConfig.resumeHistory.length 
+                : 0;
+
+            const currentCount = patternHistory.length;
+            const newRowsAdded = currentCount - initialCount;
+            const isImported = loomConfig.isImported === true;
+
+            if (isImported) {
+                if (newRowsAdded < 20) {
+                    alert(`ACCESS DENIED: This is an imported pattern.\n\nYou must add at least 20 new rows of your own weaving to save this to your library.\n\nProgress: ${newRowsAdded}/20 rows added.`);
+                    return; 
+                }
+            } else {
+                if (currentCount < 20) {
+                    alert(`NOT ENOUGH DATA: Please weave at least 20 rows before saving a new design.\n\nCurrent: ${currentCount}/20 rows.`);
+                    return;
+                }
             }
 
+            console.log("Validation passed. Saving...");
+            
             const shuttleColorEl = document.getElementById("shuttleColor");
             const weftColor = shuttleColorEl ? shuttleColorEl.value : "#" + shuttleThreadMaterial.color.getHexString();
             const currentUser = window.windowCurrentUserObj || { name: "Unknown" };
             const measurements = computeMeasurements();
 
             const data = {
+                name: loomConfig.patternName || "Untitled",
                 name: loomConfig.patternName || "Untitled",
                 type: loomConfig.patternType,
                 loom: loomConfig.loomType,
@@ -2084,6 +2102,7 @@ export async function resumeLoom(data) {
     loomConfig = {
         patternId: data._id,
         patternName: data.name,
+        isImported: data.isImported || false,
         loomType: data.loom,
         patternType: data.type || "plain",
         totalThreads: data.totalThreads || 60,
