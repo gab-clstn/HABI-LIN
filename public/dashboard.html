@@ -2,27 +2,31 @@
 <html lang="en">
 
 <head>
+  <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#2b0303" />
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js");
+    }
+  </script>
+  <script src="global.js"></script><!-- ✅ Only once -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <script src="global.js"></script>
-
   <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-          "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
-        }
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
       }
-    </script>
+    }
+  </script>
   <title>HABI-LIN | Dashboard</title>
-  <link rel="icon" type="image/png" href="logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
   <style>
-    /* ── ORIGINAL CSS ── */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -43,6 +47,55 @@
       height: 100%;
     }
 
+    /* ── CSS VARIABLES ── */
+    :root {
+      --nav-height: 70px;
+      --brand: #2b0303;
+      --brand-mid: #4a0606;
+      --brand-light: #fdf2f2;
+      --bg: #fcfcfb;
+      --surface: #ffffff;
+      --border: #f0f0f0;
+      --border-color: #eee;
+      --text: #1a1a1a;
+      --muted: #888;
+      --danger: #d93025;
+      --content-px: clamp(20px, 5vw, 80px);
+      --card-radius: 20px;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── ICONS ── */
+    .icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      vertical-align: -0.125em;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .icon-sm {
+      width: 0.85em;
+      height: 0.85em;
+    }
+
+    .icon-lg {
+      width: 1.25em;
+      height: 1.25em;
+    }
+
+    .icon-xl {
+      width: 1.6em;
+      height: 1.6em;
+    }
+
+    .icon-2xl {
+      width: 2em;
+      height: 2em;
+    }
+
+    /* ── SIDEBAR / NAV ── */
     .sidebar {
       width: 100%;
       height: var(--nav-height);
@@ -52,7 +105,9 @@
       align-items: center;
       padding: 0 var(--content-px);
       position: fixed;
-      top: 0; left: 0; z-index: 1000;
+      top: 0;
+      left: 0;
+      z-index: 1000;
       gap: 8px;
     }
 
@@ -71,7 +126,7 @@
       align-items: center;
       flex: 1;
       gap: 0;
-      margin-left: 0; 
+      margin-left: 0;
     }
 
     .nav-item {
@@ -125,6 +180,7 @@
       margin-left: 10px;
     }
 
+    /* ── MAIN ── */
     .main-container {
       flex: 1;
       display: flex;
@@ -200,6 +256,7 @@
       padding: 0 40px 40px;
     }
 
+    /* ── WELCOME BANNER ── */
     .welcome-banner {
       background: #2b0303;
       background-image: linear-gradient(45deg, #2b0303 0%, #4a0606 100%);
@@ -232,6 +289,7 @@
       letter-spacing: 1.5px;
     }
 
+    /* ── CARDS ── */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -315,6 +373,7 @@
       color: #2b0303;
     }
 
+    /* ── OVERLAYS ── */
     .overlay-card,
     .setup-card {
       background: #1e1e21;
@@ -413,10 +472,11 @@
       margin-top: 10px;
     }
 
+    /* ── WEAVING STUDIO ── */
     #weaving-studio {
       position: relative;
       width: 100%;
-      height: 75vh !important;
+      height: 75vh;
       min-height: 600px;
     }
 
@@ -428,6 +488,26 @@
       height: 100%;
     }
 
+    /* ── LEARN OVERLAY SCROLL FIX ── */
+    #learnSelectOverlay {
+      overflow-y: auto;
+      align-items: flex-start !important;
+      padding: 40px 0;
+    }
+
+    #learnSelectOverlay>div {
+      display: flex;
+      flex-direction: column;
+      margin: auto 0;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    #learnSelectOverlay>div::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ── ANIMATIONS ── */
     #overview-section,
     #weaving-studio,
     #collection-section {
@@ -446,7 +526,13 @@
       }
     }
 
-    /* ---- COLLECTION STYLES ---- */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── COLLECTION STYLES ── */
     .collection-header {
       display: flex;
       justify-content: space-between;
@@ -474,7 +560,6 @@
       gap: 30px;
     }
 
-    /* Pattern card */
     .pattern-card {
       background: white;
       border-radius: 20px;
@@ -492,7 +577,6 @@
       border-color: #2b0303;
     }
 
-    /* Canvas-based preview */
     .pattern-preview {
       height: 180px;
       background: #f9f9f9;
@@ -564,7 +648,6 @@
       box-shadow: 0 4px 15px rgba(43, 3, 3, 0.2);
     }
 
-    /* Empty state */
     .empty-state {
       grid-column: 1 / -1;
       text-align: center;
@@ -589,7 +672,6 @@
       font-size: 0.9rem;
     }
 
-    /* Loading spinner */
     .loading-state {
       grid-column: 1 / -1;
       display: flex;
@@ -610,31 +692,6 @@
       animation: spin 0.7s linear infinite;
     }
 
-    #learnSelectOverlay > div {
-        display: flex;
-        flex-direction: column;
-        margin: auto 0; 
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    #learnSelectOverlay > div::-webkit-scrollbar { 
-        display: none; 
-    }
-
-    #learnSelectOverlay {
-        overflow-y: auto;
-        align-items: flex-start !important;
-        padding: 40px 0;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Delete button on card */
     .pattern-card .delete-btn {
       opacity: 0;
       position: absolute;
@@ -655,39 +712,7 @@
       opacity: 1;
     }
 
-
-    /* ── ADDED CSS FOR NEW FEATURES (Mobile Drawer, Hamburger, Variables) ── */
-    :root {
-      --nav-height: 70px;
-      --brand: #2b0303;
-      --brand-mid: #4a0606;
-      --brand-light: #fdf2f2;
-      --bg: #fcfcfb;
-      --surface: #ffffff;
-      --border: #f0f0f0;
-      --border-color: #eee;
-      --text: #1a1a1a;
-      --muted: #888;
-      --danger: #d93025;
-      --content-px: clamp(20px, 5vw, 80px);
-      --card-radius: 20px;
-      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .icon {
-      display: inline-block;
-      width: 1em;
-      height: 1em;
-      vertical-align: -0.125em;
-      fill: currentColor;
-      flex-shrink: 0;
-    }
-
-    .icon-sm { width: 0.85em; height: 0.85em; }
-    .icon-lg { width: 1.25em; height: 1.25em; }
-    .icon-xl { width: 1.6em; height: 1.6em; }
-    .icon-2xl { width: 2em; height: 2em; }
-
+    /* ── HAMBURGER ── */
     .hamburger {
       display: none;
       background: none;
@@ -705,6 +730,7 @@
       background: var(--brand-light);
     }
 
+    /* ── MOBILE DRAWER ── */
     .mobile-drawer {
       display: none;
       position: fixed;
@@ -759,49 +785,160 @@
       font-size: 0.9rem;
     }
 
+    /* ── PWA FAB ── */
+    #pwa-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    #pwa-tooltip {
+      background: #1a1a1a;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+      display: none;
+      position: relative;
+    }
+
+    #pwa-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      right: 18px;
+      width: 12px;
+      height: 12px;
+      background: #1a1a1a;
+      transform: rotate(45deg);
+      border-radius: 2px;
+    }
+
+    #pwa-install-fab {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(43, 3, 3, .35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #pwa-install-fab:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(43, 3, 3, .45);
+    }
+
+    #pwa-toast {
+      position: fixed;
+      bottom: 100px;
+      right: 28px;
+      background: #1a1a1a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      z-index: 9999;
+      display: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
+      max-width: 220px;
+      line-height: 1.4;
+      transition: opacity 0.3s;
+    }
+
+    /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
-      .sidebar-nav { margin-left: 12px; gap: 0; }
-      .nav-item { padding: 8px 8px; font-size: clamp(0.8rem, 1.4vw, 0.9rem); }
+      .sidebar-nav {
+        margin-left: 12px;
+        gap: 0;
+      }
+
+      .nav-item {
+        padding: 8px 8px;
+        font-size: clamp(0.8rem, 1.4vw, 0.9rem);
+      }
     }
 
     @media (max-width: 768px) {
-      .sidebar { 
-        padding: 0 16px; 
-        justify-content: space-between; 
+      .sidebar {
+        padding: 0 16px;
+        justify-content: space-between;
       }
-      
-      .sidebar-header h2 { margin-right: 0; }
-      
-      .user-info { 
-        margin-left: 0 !important; 
-        position: absolute; 
-        left: 50%; 
-        transform: translateX(-50%); 
+
+      .sidebar-header h2 {
+        margin-right: 0;
       }
-      
-      .user-text { display: none; }
-      
+
+      .user-info {
+        margin-left: 0 !important;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .user-text {
+        display: none;
+      }
+
       .hamburger {
         display: flex;
         align-items: center;
         justify-content: center;
         margin-left: 0;
       }
-      
-      .sidebar-nav { display: none; }
-      .dashboard-content { padding: 0 16px 48px; }
-      .top-header { padding: 16px 16px 8px; }
-      .user-text { display: none; }
-      
+
+      .sidebar-nav {
+        display: none;
+      }
+
+      .dashboard-content {
+        padding: 0 16px 48px;
+      }
+
+      .top-header {
+        padding: 16px 16px 8px;
+      }
+
       .welcome-banner {
         padding: 26px 22px;
         border-radius: 14px;
         margin-bottom: 24px;
       }
-      .card-grid { grid-template-columns: 1fr; gap: 16px; }
-      .action-card { padding: 22px; border-radius: 14px; }
-      .overlay-btns { flex-direction: column; }
-      .btn-primary, .btn-secondary { min-width: unset; }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .action-card {
+        padding: 22px;
+        border-radius: 14px;
+      }
+
+      .overlay-btns {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        min-width: unset;
+      }
+
       #weaving-studio {
         height: calc(100svh - var(--nav-height) - 60px);
         min-height: 350px;
@@ -810,39 +947,66 @@
     }
 
     @media (max-width: 420px) {
-      :root { --nav-height: 56px; }
-      .sidebar-header h2 { font-size: 1rem; }
-      .profile-circle { width: 34px; height: 34px; font-size: 0.8rem; }
-      .card-visual { width: 44px; height: 44px; font-size: 1rem; border-radius: 11px; }
-      .welcome-banner h1 { font-size: 1.4rem; }
-    }
+      :root {
+        --nav-height: 56px;
+      }
 
+      .sidebar-header h2 {
+        font-size: 1rem;
+      }
+
+      .profile-circle {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+      }
+
+      .card-visual {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+        border-radius: 11px;
+      }
+
+      .welcome-banner h1 {
+        font-size: 1.4rem;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <!-- ── SVG SPRITE ── -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
     <symbol id="icon-magnifying-glass" viewBox="0 0 512 512">
-      <path d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
+      <path
+        d="M416 208c0 114.9-93.1 208-208 208S0 322.9 0 208 93.1 0 208 0s208 93.1 208 208zM188 352c-79.5 0-144-64.5-144-144S108.5 64 188 64s144 64.5 144 144-64.5 144-144 144zm236.4 56.4l-90.5-90.5c18.5-26.6 29.4-58.7 29.4-93.4 0-88.4-71.6-160-160-160S43 136.1 43 224.5 114.6 384 202 384c34.7 0 66.8-10.9 93.4-29.4l90.5 90.5c12.5 12.5 32.8 12.5 45.3 0l.6-.6c12.5-12.5 12.5-32.7-.3-45.1z" />
     </symbol>
     <symbol id="icon-user" viewBox="0 0 448 512">
-      <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
+      <path
+        d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
     </symbol>
     <symbol id="icon-bars" viewBox="0 0 448 512">
-      <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
+      <path
+        d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z" />
     </symbol>
     <symbol id="icon-xmark" viewBox="0 0 384 512">
-      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+      <path
+        d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
     </symbol>
     <symbol id="icon-plus" viewBox="0 0 448 512">
-      <path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
+      <path
+        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
     </symbol>
     <symbol id="icon-book-open" viewBox="0 0 576 512">
-      <path d="M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5l0-377.4c0-7.1-4.7-13.3-11.5-15.1C222.4 52.7 192.2 48 160 48C129.2 48 100.9 51.8 75.2 58.4C56.7 63 48 79.8 48 98L48 432c0 17.5 16.4 29.6 33.2 25C106.6 450.4 132.5 448 160 448c45 0 87.1 8 129.6 23.5zm76.8 0C368.9 456 411 448 456 448c27.5 0 53.4 2.4 78.8 9c16.8 4.6 33.2-7.5 33.2-25L568 98c0-18.2-8.7-35-27.2-39.6C515.1 51.8 486.8 48 456 48c-32.2 0-62.4 4.7-100.5 15.5c-6.8 1.8-11.5 8-11.5 15.1l0 377.4c0 11.4 11.6 19.3 22.4 15.5z" />
+      <path
+        d="M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5l0-377.4c0-7.1-4.7-13.3-11.5-15.1C222.4 52.7 192.2 48 160 48C129.2 48 100.9 51.8 75.2 58.4C56.7 63 48 79.8 48 98L48 432c0 17.5 16.4 29.6 33.2 25C106.6 450.4 132.5 448 160 448c45 0 87.1 8 129.6 23.5zm76.8 0C368.9 456 411 448 456 448c27.5 0 53.4 2.4 78.8 9c16.8 4.6 33.2-7.5 33.2-25L568 98c0-18.2-8.7-35-27.2-39.6C515.1 51.8 486.8 48 456 48c-32.2 0-62.4 4.7-100.5 15.5c-6.8 1.8-11.5 8-11.5 15.1l0 377.4c0 11.4 11.6 19.3 22.4 15.5z" />
     </symbol>
   </svg>
 
   <div class="dashboard-wrapper">
+
+    <!-- ── TOP NAV ── -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <a href="dashboard.html" class="logo-link">
@@ -850,15 +1014,15 @@
         </a>
       </div>
 
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item active" id="home-link">Home</a>
-      <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
-      <a href="about.html" class="nav-item" id="about-link">About</a>
-      
-      <div class="nav-spacer" style="margin-left: auto;"></div> <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
-      <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
-    </nav>
-      
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active" id="home-link">Home</a>
+        <a href="collection.html" class="nav-item" id="collection-link">Collection</a>
+        <a href="about.html" class="nav-item" id="about-link">About</a>
+        <div class="nav-spacer" style="margin-left:auto;"></div>
+        <a href="settings.html" class="nav-item" id="settings-link">Settings</a>
+        <a href="/auth/logout" class="nav-item logout" id="logout-link">Logout</a>
+      </nav>
+
       <div class="user-info" style="margin-left:auto;">
         <div class="user-text">
           <span class="greeting">Hello,</span>
@@ -876,16 +1040,15 @@
           <use href="#icon-bars" />
         </svg>
       </button>
-
     </aside>
 
+    <!-- ── MOBILE DRAWER ── -->
     <div class="mobile-drawer" id="mobile-drawer" role="navigation">
       <a href="dashboard.html" class="nav-item">Home</a>
       <a href="collection.html" class="nav-item">Collection</a>
       <a href="about.html" class="nav-item">About</a>
       <a href="settings.html" class="nav-item">Settings</a>
       <a href="/auth/logout" class="nav-item logout">Logout</a>
-      
       <div class="mobile-search">
         <input type="text" id="mobile-search-input" placeholder="Search patterns…" />
         <svg class="icon" style="color:#aaa;margin-left:8px;flex-shrink:0;" aria-hidden="true">
@@ -894,20 +1057,24 @@
       </div>
     </div>
 
+    <!-- ── MAIN ── -->
     <main class="main-container">
       <header class="top-header">
         <div class="header-breadcrumb">
           <span>Dashboard</span> / <span class="active-crumb">Overview</span>
         </div>
-        </header>
+      </header>
 
       <section class="dashboard-content">
+
+        <!-- ── WEAVING STUDIO ── (single instance) -->
         <div id="weaving-studio"
           style="display:none;height:calc(100vh - 180px);position:relative;background:#121214;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.2);">
           <canvas id="bg" style="width:100%;height:100%;display:block;"></canvas>
 
-          <div id="modeSelectionOverlay"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,0.95);display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
+          <!-- Mode Selection -->
+          <div id="modeSelectionOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(18,18,20,.95);
+                   display:flex;justify-content:center;align-items:center;z-index:20;backdrop-filter:blur(10px);">
             <div class="overlay-card">
               <h2>Handloom Weaving</h2>
               <p>Select your preferred creative mode</p>
@@ -918,17 +1085,23 @@
             </div>
           </div>
 
-          <div id="setupOverlay"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;display:none;justify-content:center;align-items:center;z-index:15;">
+          <!-- Setup Overlay -->
+          <div id="setupOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
+                   display:none;justify-content:center;align-items:center;z-index:15;overflow-y:auto;padding:20px;">
             <div class="setup-card">
               <h2>Weaving Setup</h2>
               <div class="form-group-grid">
-                <div class="input-wrap"><label>Pattern Name</label><input type="text" id="patternName"
-                    placeholder="Ex: Plain Weave Practice" /></div>
-                <div class="input-wrap"><label>Handloom Equipment</label><select id="loomType">
+                <div class="input-wrap">
+                  <label>Pattern Name</label>
+                  <input type="text" id="patternName" placeholder="Ex: Plain Weave Practice" />
+                </div>
+                <div class="input-wrap">
+                  <label>Handloom Equipment</label>
+                  <select id="loomType">
                     <option value="standard">Modern (4 Pedals)</option>
                     <option value="traditional">Traditional (2 Pedals)</option>
-                  </select></div>
+                  </select>
+                </div>
                 <input type="hidden" id="patternType" value="plain" />
                 <div class="input-wrap">
                   <label>Textile Width (cm)</label>
@@ -940,16 +1113,16 @@
             </div>
           </div>
 
-                    <div id="heddlesOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;display:none;justify-content:center;align-items:center;z-index:15;">
-            <div class="setup-card" style="max-height: 90vh; overflow-y: auto;">
+          <!-- Heddles Overlay -->
+          <div id="heddlesOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#121214;
+                   display:none;justify-content:center;align-items:center;z-index:15;">
+            <div class="setup-card" style="max-height:90vh;overflow-y:auto;">
               <h2>Heddles Customization</h2>
               <div class="form-group-grid">
-                
                 <div class="input-wrap">
                   <label>Threads per Pattern Repeat (Max 120)</label>
                   <input type="number" id="patternSize" placeholder="e.g., 30" max="120" min="1" value="30" />
                 </div>
-                
                 <div class="input-wrap">
                   <label>Heddle 1 (Comma-separated thread numbers)</label>
                   <input type="text" id="heddle1" placeholder="e.g., 1, 5, 9, 13" />
@@ -958,7 +1131,6 @@
                   <label>Heddle 2</label>
                   <input type="text" id="heddle2" placeholder="e.g., 2, 6, 10, 14" />
                 </div>
-
                 <div class="input-wrap" id="wrap-heddle3">
                   <label>Heddle 3</label>
                   <input type="text" id="heddle3" placeholder="e.g., 3, 7, 11, 15" />
@@ -967,55 +1139,60 @@
                   <label>Heddle 4</label>
                   <input type="text" id="heddle4" placeholder="e.g., 4, 8, 12, 16" />
                 </div>
-
-                                <div class="input-wrap">
-                <label>Warp Colors</label>
-                <div style="display: flex; gap: 15px; justify-content: space-between;">
-                  <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                    1 <input type="color" id="warp1" value="#ffffff" style="border:none; width:30px; height:20px; background:none; padding:0; margin:0;">
-                  </label>
-                  <label style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                    2 <input type="color" id="warp2" value="#ffffff" style="border:none; width:30px; height:20px; background:none; padding:0; margin:0;">
-                  </label>
-                  <label id="wrap-warpColor3" style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                    3 <input type="color" id="warp3" value="#ffffff" style="border:none; width:30px; height:20px; background:none; padding:0; margin:0;">
-                  </label>
-                  <label id="wrap-warpColor4" style="display:flex; align-items:center; gap:5px; margin:0; cursor:pointer;">
-                    4 <input type="color" id="warp4" value="#ffffff" style="border:none; width:30px; height:20px; background:none; padding:0; margin:0;">
-                  </label>
+                <div class="input-wrap">
+                  <label>Warp Colors</label>
+                  <div style="display:flex;gap:15px;justify-content:space-between;">
+                    <label style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
+                      1 <input type="color" id="warp1" value="#ffffff"
+                        style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
+                    </label>
+                    <label style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
+                      2 <input type="color" id="warp2" value="#ffffff"
+                        style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
+                    </label>
+                    <label id="wrap-warpColor3"
+                      style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
+                      3 <input type="color" id="warp3" value="#ffffff"
+                        style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
+                    </label>
+                    <label id="wrap-warpColor4"
+                      style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer;">
+                      4 <input type="color" id="warp4" value="#ffffff"
+                        style="border:none;width:30px;height:20px;background:none;padding:0;margin:0;">
+                    </label>
+                  </div>
                 </div>
-              </div>
-
                 <button id="startWeavingFromHeddles" class="btn-primary full-width">Start Weaving</button>
                 <button id="backToSetup2" onclick="backToSetupFromHeddles()" class="btn-ghost">Back</button>
-                
               </div>
             </div>
           </div>
 
-            <div id="learnSelectOverlay"
-  style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;display:none;justify-content:center;z-index:18;overflow-y:auto;box-sizing:border-box;padding:40px 20px;">
-  
-          <div style="width:100%; max-width:600px; background:transparent; display:flex; flex-direction:column; gap:0;">
-            
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; flex-shrink:0;">
-              <div>
-                <h2 style="color:white; font-size:1.5rem; font-weight:700; margin-bottom:4px;">Learn a Pattern</h2>
-                <p style="color:#666; font-size:0.85rem;">Select a saved pattern to practice on the 3D loom</p>
+          <!-- Learn Select Overlay -->
+          <div id="learnSelectOverlay"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;background:#0d0d10;
+                   display:none;justify-content:center;z-index:18;overflow-y:auto;box-sizing:border-box;padding:40px 20px;">
+            <div style="width:100%;max-width:600px;background:transparent;display:flex;flex-direction:column;gap:0;">
+              <div
+                style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-shrink:0;">
+                <div>
+                  <h2 style="color:white;font-size:1.5rem;font-weight:700;margin-bottom:4px;">Learn a Pattern</h2>
+                  <p style="color:#666;font-size:0.85rem;">Select a saved pattern to practice on the 3D loom</p>
+                </div>
+                <button onclick="backToMenu()"
+                  style="background:none;border:1px solid #333;color:#888;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.8rem;white-space:nowrap;margin-left:10px;">
+                  &larr; Back
+                </button>
               </div>
-              <button onclick="backToMenu()"
-                style="background:none; border:1px solid #333; color:#888; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:0.8rem; white-space:nowrap; margin-left:10px;">
-                &larr; Back
-              </button>
+              <div id="learnPatternList" style="display:flex;flex-direction:column;gap:24px;">
+                <div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns&hellip;</div>
+              </div>
             </div>
-
-            <div id="learnPatternList" style="display:flex; flex-direction:column; gap:24px;">
-              <div style="color:#555; font-size:0.9rem; text-align:center; padding:40px;">Loading patterns&hellip;</div>
-            </div>
-            
           </div>
-        </div>
-        </div>
+
+        </div><!-- /#weaving-studio -->
+
+        <!-- ── OVERVIEW ── -->
         <div id="overview-section">
           <div class="welcome-banner">
             <div class="banner-content">
@@ -1035,17 +1212,18 @@
                 <button class="card-btn" onclick="showLoom()" id="dash-create-btn">Get Started</button>
               </div>
             </div>
-                      <div class="action-card secondary" onclick="window.location.href='collection.html'" style="cursor: pointer;">
-            <div class="card-visual"><i class="fa-solid fa-book-open"></i></div>
-            <div class="card-info">
-              <h4 id="dash-lib-h">Pattern Library</h4>
-              <p id="dash-lib-p">Browse through your saved collection and community favorites.</p>
-              <button class="card-btn-outline" id="dash-lib-btn">Open Library</button>
+            <div class="action-card secondary" onclick="window.location.href='collection.html'" style="cursor:pointer;">
+              <div class="card-visual"><i class="fa-solid fa-book-open"></i></div>
+              <div class="card-info">
+                <h4 id="dash-lib-h">Pattern Library</h4>
+                <p id="dash-lib-p">Browse through your saved collection and community favorites.</p>
+                <button class="card-btn-outline" id="dash-lib-btn">Open Library</button>
+              </div>
             </div>
-          </div>
           </div>
         </div>
 
+        <!-- ── COLLECTION (in-dashboard view) ── -->
         <div id="collection-section" style="display:none;">
           <div class="collection-header">
             <div class="header-text">
@@ -1056,15 +1234,22 @@
               <i class="fa-solid fa-plus"></i> New Design
             </button>
           </div>
-          <div class="pattern-grid" id="pattern-grid">
-            </div>
+          <div class="pattern-grid" id="pattern-grid"></div>
         </div>
+
       </section>
     </main>
+  </div><!-- /.dashboard-wrapper -->
+
+  <!-- ── PWA FAB ── -->
+  <div id="pwa-fab">
+    <div id="pwa-tooltip">Install HABI-LIN as an app!</div>
+    <button id="pwa-install-fab" onclick="installPWA()" title="Install HABI-LIN App">⬇️</button>
   </div>
+  <div id="pwa-toast"></div>
 
   <script>
-    /* ── HAMBURGER SCRIPT (Added) ── */
+    /* ── HAMBURGER ── */
     const hamburgerBtn = document.getElementById("hamburger-btn");
     const mobileDrawer = document.getElementById("mobile-drawer");
 
@@ -1072,13 +1257,15 @@
       hamburgerBtn.addEventListener("click", () => {
         const isOpen = mobileDrawer.classList.toggle("open");
         hamburgerBtn.setAttribute("aria-expanded", isOpen);
-        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
+        document.getElementById("hamburger-icon").querySelector("use")
+          .setAttribute("href", isOpen ? "#icon-xmark" : "#icon-bars");
       });
 
       function closeDrawer() {
         mobileDrawer.classList.remove("open");
         hamburgerBtn.setAttribute("aria-expanded", "false");
-        document.getElementById("hamburger-icon").querySelector("use").setAttribute("href", "#icon-bars");
+        document.getElementById("hamburger-icon").querySelector("use")
+          .setAttribute("href", "#icon-bars");
       }
 
       document.addEventListener("click", (e) => {
@@ -1092,37 +1279,27 @@
       mobileSearchInput.addEventListener("input", (e) => {
         mainSearchInput.value = e.target.value;
       });
-
     }
+
+    /* ── USER SESSION ── */
     document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Get the current logged-in user to find their ID
-    const userRes = await fetch("/auth/user");
-    const user = await userRes.json();
-    
-    if (user) {
-        const currentUserId = user._id;
-
-        // 2. Fetch all patterns
-        const response = await fetch('/api/patterns');
-        const allPatterns = await response.json();
-
-        // 3. Filter: Only patterns owned by me AND NOT imported
-        const myPatterns = allPatterns.filter(p => 
-            (p.userId === currentUserId) && p.isImported !== true
-        );
-
-        // 4. Display the count
-        const countElement = document.getElementById("pattern-count-element");
-        if (countElement) {
-            countElement.textContent = myPatterns.length;
+      // Pattern count badge
+      try {
+        const userRes = await fetch("/auth/user");
+        const user = await userRes.json();
+        if (user) {
+          const currentUserId = user._id;
+          const response = await fetch('/api/patterns');
+          const allPatterns = await response.json();
+          const myPatterns = allPatterns.filter(p =>
+            p.userId === currentUserId && p.isImported !== true
+          );
+          const countElement = document.getElementById("pattern-count-element");
+          if (countElement) countElement.textContent = myPatterns.length;
         }
-    }
-  });
+      } catch (e) { /* silently skip */ }
 
-    /* ───────────────────────────────────────────
-       USER SESSION
-    ─────────────────────────────────────────── */
-    document.addEventListener("DOMContentLoaded", async () => {
+      // Session display
       try {
         const res = await fetch("/auth/user");
         if (!res.ok) throw new Error("No session");
@@ -1139,13 +1316,13 @@
         }
       } catch (e) { console.log("Session not ready."); }
 
-    const urlParams = new URLSearchParams(window.location.search);
+      // URL action routing
+      const urlParams = new URLSearchParams(window.location.search);
       const action = urlParams.get('action');
-
       if (action === 'new') {
-        showLoom(); // This opens the studio immediately
+        showLoom();
       } else if (action === 'resume') {
-        startResumeProcess(); // This runs the resume logic from localstorage
+        startResumeProcess();
       }
     });
 
@@ -1154,38 +1331,28 @@
       document.getElementById("collection-section").style.display = "none";
       document.getElementById("weaving-studio").style.display = "block";
       document.querySelector(".active-crumb").textContent = "Weaving Studio";
-      
       document.getElementById("modeSelectionOverlay").style.display = "none";
       document.getElementById("setupOverlay").style.display = "none";
       document.getElementById("heddlesOverlay").style.display = "none";
-
       window.loomStarted = true;
       const patternData = JSON.parse(localStorage.getItem("resumePattern"));
-      
       const m = await import("./loom.js");
       if (m.resumeLoom) m.resumeLoom(patternData);
     }
 
-    /* ───────────────────────────────────────────
-       NAVIGATION
-    ─────────────────────────────────────────── */
-    function showDashboard() {
-      // 1. The Alert Check!
-      // Global listener for ALL other links (Collection, Settings, etc.)
-    document.addEventListener('click', function(e) {
+    /* ── NAVIGATION ── */
+
+    // Unsaved-changes guard for all outbound links
+    document.addEventListener('click', function (e) {
       const link = e.target.closest('a');
       if (!link) return;
-      
-      // If it is a real link leaving the page (not our Home/Logo '#' links)
       if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
-        
         if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
-          const msg = window.learnIsActive 
-              ? "Exit Learn Mode? Your progress will be lost." 
-              : "You have unsaved changes in the Loom Studio. Leave anyway?";
-          
+          const msg = window.learnIsActive
+            ? "Exit Learn Mode? Your progress will be lost."
+            : "You have unsaved changes in the Loom Studio. Leave anyway?";
           if (!confirm(msg)) {
-            e.preventDefault(); // Cancels the link navigation!
+            e.preventDefault();
           } else {
             window.hasUnsavedChangesInLoom = false;
             window.learnIsActive = false;
@@ -1194,13 +1361,12 @@
       }
     });
 
-      // 2. Proceed with showing the dashboard
+    function showDashboard() {
       document.getElementById("overview-section").style.display = "block";
       document.getElementById("weaving-studio").style.display = "none";
       document.getElementById("collection-section").style.display = "none";
       document.querySelector(".active-crumb").textContent = "Overview";
       updateActiveLink("home-link");
-      
       if (typeof closeDrawer === 'function') closeDrawer();
     }
 
@@ -1244,19 +1410,29 @@
       document.getElementById("learnSelectOverlay").style.display = "none";
     }
 
-      function goToHeddles() {
-        document.getElementById("setupOverlay").style.display = "none";
-        document.getElementById("heddlesOverlay").style.display = "flex";
+    function goToHeddles() {
+      document.getElementById("setupOverlay").style.display = "none";
+      document.getElementById("heddlesOverlay").style.display = "flex";
     }
 
     function backToSetupFromHeddles() {
-        document.getElementById("heddlesOverlay").style.display = "none";
-        document.getElementById("setupOverlay").style.display = "flex";
+      document.getElementById("heddlesOverlay").style.display = "none";
+      document.getElementById("setupOverlay").style.display = "flex";
     }
-    
-    /* ───────────────────────────────────────────
-       LEARN MODE - CATEGORY SELECTION
-    ─────────────────────────────────────────── */
+
+    function safeNavigate(destinationFunc) {
+      if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
+        const msg = window.learnIsActive
+          ? "Exit Learn Mode? Your progress will be lost."
+          : "You have unsaved changes in the Loom Studio. Leave anyway?";
+        if (!confirm(msg)) return;
+        window.hasUnsavedChangesInLoom = false;
+        window.learnIsActive = false;
+      }
+      destinationFunc();
+    }
+
+    /* ── LEARN MODE ── */
     async function goToLearnSelect() {
       document.getElementById("overview-section").style.display = "none";
       document.getElementById("collection-section").style.display = "none";
@@ -1266,31 +1442,28 @@
       document.getElementById("learnSelectOverlay").style.display = "flex";
 
       const list = document.getElementById("learnPatternList");
-      
       list.innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:15px; margin-top:10px;">
-          <button onclick="showLearnCategory('mine')" class="action-card" style="width:100%; cursor:pointer; text-align:left; background:#161620; border: 1px solid #333;">
-            <div class="card-visual" style="background:#1a1a2e; color:#00e5ff;"><i class="fa-solid fa-user"></i></div>
+        <div style="display:flex;flex-direction:column;gap:15px;margin-top:10px;">
+          <button onclick="showLearnCategory('mine')" class="action-card"
+            style="width:100%;cursor:pointer;text-align:left;background:#161620;border:1px solid #333;">
+            <div class="card-visual" style="background:#1a1a2e;color:#00e5ff;"><i class="fa-solid fa-user"></i></div>
             <div class="card-info">
-              <h4 style="color:white; margin:0;">My Patterns</h4>
-              <p style="margin:0; font-size:0.8rem; color:#666;">Patterns you created from scratch.</p>
+              <h4 style="color:white;margin:0;">My Patterns</h4>
+              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns you created from scratch.</p>
             </div>
           </button>
-
-          <button onclick="showLearnCategory('community')" class="action-card" style="width:100%; cursor:pointer; text-align:left; background:#161620; border: 1px solid #333;">
-            <div class="card-visual" style="background:#2b0303; color:#ff4d4d;"><i class="fa-solid fa-users"></i></div>
+          <button onclick="showLearnCategory('community')" class="action-card"
+            style="width:100%;cursor:pointer;text-align:left;background:#161620;border:1px solid #333;">
+            <div class="card-visual" style="background:#2b0303;color:#ff4d4d;"><i class="fa-solid fa-users"></i></div>
             <div class="card-info">
-              <h4 style="color:white; margin:0;">All / Community Patterns</h4>
-              <p style="margin:0; font-size:0.8rem; color:#666;">Patterns from the community and imports.</p>
+              <h4 style="color:white;margin:0;">All / Community Patterns</h4>
+              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns from the community and imports.</p>
             </div>
           </button>
-        </div>
-      `;
+        </div>`;
     }
 
-    /* ───────────────────────────────────────────
-       SHOW SPECIFIC CATEGORY LIST
-    ─────────────────────────────────────────── */
+    /* ── showLearnCategory ── (single, best version with name+ID fallback) */
     async function showLearnCategory(type) {
       const list = document.getElementById("learnPatternList");
       list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
@@ -1298,94 +1471,7 @@
       try {
         const userRes = await fetch("/auth/user");
         const currentUser = await userRes.json();
-        const currentUserId = currentUser?._id ? currentUser._id.toString() : null;
-
-        const res = await fetch("/api/patterns");
-        if (!res.ok) throw new Error("fetch failed");
-        const allPatterns = await res.json();
-
-        let filtered = [];
-        let categoryTitle = "";
-
-        if (type === 'mine') {
-          categoryTitle = "My Patterns";
-          // Logic: Must be your ID AND must NOT be marked as imported
-          filtered = allPatterns.filter(p => {
-             const pUserId = p.userId ? p.userId.toString() : '';
-             return pUserId === currentUserId && p.isImported !== true;
-          });
-        } else {
-          categoryTitle = "All / Community Patterns";
-          // Logic: Anyone else's pattern OR any pattern marked as imported
-          filtered = allPatterns.filter(p => {
-             const pUserId = p.userId ? p.userId.toString() : '';
-             return pUserId !== currentUserId || p.isImported === true;
-          });
-        }
-
-        list.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-            <button onclick="goToLearnSelect()" style="background:none; border:1px solid #444; color:#888; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:0.75rem;">&larr; Back</button>
-            <span style="color:#fff; font-size:0.9rem; font-weight:700;">${categoryTitle}</span>
-          </div>
-        `;
-
-        if (filtered.length === 0) {
-          list.innerHTML += `<div style="color:#555; text-align:center; padding:40px;">No patterns found in this category.</div>`;
-          return;
-        }
-
-        filtered.forEach(pattern => {
-          const shaftCount = pattern.loom === "traditional" ? 2 : 4;
-          const rowCount = (pattern.patternRows && pattern.patternRows.length) || 0;
-          const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-          const isImported = pattern.isImported === true;
-          const creatorName = pattern.creator || "Unknown Weaver";
-
-          const card = document.createElement("div");
-          card.style.cssText = `
-              background:#161620; border:1px solid #2a2a35; border-radius:14px;
-              padding:18px 22px; display:flex; justify-content:space-between;
-              align-items:center; cursor:pointer; transition:all 0.2s; gap:16px; margin-bottom:10px;
-            `;
-          card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
-          card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
-
-          card.innerHTML = `
-              <div style="flex:1;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
-                  ${isImported ? `<span style="font-size:0.6rem; background:#2b0303; color:#ff4d4d; padding:2px 6px; border-radius:4px; font-weight:800; text-transform:uppercase;">Imported</span>` : ''}
-                </div>
-                <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
-                <div style="font-size:0.72rem; color:#444; margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
-              </div>
-              <div style="display:flex;align-items:center;">
-                <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
-              </div>`;
-
-          card.addEventListener("click", () => startLearnMode(pattern));
-          list.appendChild(card);
-        });
-
-      } catch (err) {
-        console.error(err);
-        list.innerHTML = `<div style="color:#d93025;text-align:center;padding:30px;">Error loading patterns.</div>`;
-      }
-    }
-
-    /* ───────────────────────────────────────────
-       SHOW SPECIFIC CATEGORY LIST (With Name Fallback)
-    ─────────────────────────────────────────── */
-    async function showLearnCategory(type) {
-      const list = document.getElementById("learnPatternList");
-      list.innerHTML = `<div style="color:#555;font-size:0.9rem;text-align:center;padding:40px;">Loading patterns…</div>`;
-
-      try {
-        const userRes = await fetch("/auth/user");
-        const currentUser = await userRes.json();
-        
-        const currentUserId = currentUser?._id ? currentUser._id.toString() : null;
+        const currentUserId = currentUser?._id ? currentUser._id.trim() : null;
         const currentUserName = currentUser?.name ? currentUser.name.trim() : null;
 
         const res = await fetch("/api/patterns");
@@ -1397,36 +1483,32 @@
 
         if (type === 'mine') {
           categoryTitle = "My Patterns";
-          // Check BOTH ID and Name to be safe
           filtered = allPatterns.filter(p => {
-             const pUserId = p.userId ? p.userId.toString() : '';
-             const pCreator = p.creator ? p.creator.trim() : '';
-             
-             const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
-             return isOwner && p.isImported !== true;
+            const pUserId = p.userId ? p.userId.toString().trim() : '';
+            const pCreator = p.creator ? p.creator.trim() : '';
+            const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
+            return isOwner && p.isImported !== true;
           });
         } else {
           categoryTitle = "All / Community Patterns";
-          // If it's NOT mine OR it IS imported
           filtered = allPatterns.filter(p => {
-             const pUserId = p.userId ? p.userId.toString() : '';
-             const pCreator = p.creator ? p.creator.trim() : '';
-             
-             const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
-             return !isOwner || p.isImported === true;
+            const pUserId = p.userId ? p.userId.toString().trim() : '';
+            const pCreator = p.creator ? p.creator.trim() : '';
+            const isOwner = (pUserId === currentUserId) || (pCreator === currentUserName);
+            return !isOwner || p.isImported === true;
           });
         }
 
         list.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px; padding:0 10px;">
-            <button onclick="goToLearnSelect()" style="background:none; border:1px solid #444; color:#888; border-radius:6px; padding:5px 12px; cursor:pointer; font-size:0.75rem;">&larr; Back</button>
-            <span style="color:#fff; font-size:0.9rem; font-weight:700;">${categoryTitle}</span>
-            <span style="margin-left:auto; color:#444; font-size:0.7rem;">${filtered.length} found</span>
-          </div>
-        `;
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:0 10px;">
+            <button onclick="goToLearnSelect()"
+              style="background:none;border:1px solid #444;color:#888;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:0.75rem;">&larr; Back</button>
+            <span style="color:#fff;font-size:0.9rem;font-weight:700;">${categoryTitle}</span>
+            <span style="margin-left:auto;color:#444;font-size:0.7rem;">${filtered.length} found</span>
+          </div>`;
 
         if (filtered.length === 0) {
-          list.innerHTML += `<div style="color:#555; text-align:center; padding:40px; border:1px dashed #222; border-radius:14px; margin:0 10px;">No patterns in this category.</div>`;
+          list.innerHTML += `<div style="color:#555;text-align:center;padding:40px;border:1px dashed #222;border-radius:14px;margin:0 10px;">No patterns in this category.</div>`;
           return;
         }
 
@@ -1438,26 +1520,24 @@
           const creatorName = pattern.creator || "Unknown Weaver";
 
           const card = document.createElement("div");
-          card.style.cssText = `
-              background:#161620; border:1px solid #2a2a35; border-radius:14px;
-              padding:18px 22px; display:flex; justify-content:space-between;
-              align-items:center; cursor:pointer; transition:all 0.2s; gap:16px; margin-bottom:10px;
-            `;
+          card.style.cssText = `background:#161620;border:1px solid #2a2a35;border-radius:14px;
+            padding:18px 22px;display:flex;justify-content:space-between;
+            align-items:center;cursor:pointer;transition:all 0.2s;gap:16px;margin-bottom:10px;`;
           card.onmouseenter = () => { card.style.borderColor = "#00e5ff"; card.style.background = "#111a1f"; };
           card.onmouseleave = () => { card.style.borderColor = "#2a2a35"; card.style.background = "#161620"; };
 
           card.innerHTML = `
-              <div style="flex:1;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
-                  ${isImported ? `<span style="font-size:0.6rem; background:#2b0303; color:#ff4d4d; padding:2px 6px; border-radius:4px; font-weight:800; text-transform:uppercase;">Imported</span>` : ''}
-                </div>
-                <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
-                <div style="font-size:0.72rem; color:#444; margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="font-weight:700;color:white;font-size:1rem;">${escapeHtml(pattern.name)}</div>
+                ${isImported ? `<span style="font-size:0.6rem;background:#2b0303;color:#ff4d4d;padding:2px 6px;border-radius:4px;font-weight:800;text-transform:uppercase;">Imported</span>` : ''}
               </div>
-              <div style="display:flex;align-items:center;">
-                <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
-              </div>`;
+              <div style="font-size:0.78rem;color:#666;">${typeLabel} · ${shaftCount}-shaft · ${rowCount} rows</div>
+              <div style="font-size:0.72rem;color:#444;margin-top:4px;">By: <span style="color:#888;">${escapeHtml(creatorName)}</span></div>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <span style="background:#0a2a2e;color:#00e5ff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;">Learn</span>
+            </div>`;
 
           card.addEventListener("click", () => startLearnMode(pattern));
           list.appendChild(card);
@@ -1469,113 +1549,65 @@
       }
     }
 
-      async function startLearnMode(pattern) {
-          // 1. Hide ALL overlays so they don't block the 3D canvas
-          document.getElementById("learnSelectOverlay").style.display = "none";
-          document.getElementById("modeSelectionOverlay").style.display = "none";
-          document.getElementById("setupOverlay").style.display = "none";
-          document.getElementById("weaving-studio").style.display = "block";
-
-          // 2. Clean up any old Tutorial HUDs if they exist
-          const oldHud = document.getElementById("tutorial-hud");
-          if (oldHud) oldHud.remove();
-
-          // 3. Import and Boot the Teacher
-          try {
-              const module = await import("./learn.js");
-              if (module.startLearn) 
-              { module.startLearn(pattern); }
-          } catch (err) {
-              console.error("Failed to load learn.js:", err);
-              alert("Tutorial module failed to load.");
-          }
+    async function startLearnMode(pattern) {
+      document.getElementById("learnSelectOverlay").style.display = "none";
+      document.getElementById("modeSelectionOverlay").style.display = "none";
+      document.getElementById("setupOverlay").style.display = "none";
+      document.getElementById("weaving-studio").style.display = "block";
+      const oldHud = document.getElementById("tutorial-hud");
+      if (oldHud) oldHud.remove();
+      try {
+        const module = await import("./learn.js");
+        if (module.startLearn) module.startLearn(pattern);
+      } catch (err) {
+        console.error("Failed to load learn.js:", err);
+        alert("Tutorial module failed to load.");
       }
+    }
 
-    /* ───────────────────────────────────────────
-       PATTERN PREVIEW RENDERER
-       Reconstructs the 2D weave draft from the
-       saved patternHistory steps embedded in the
-       pattern document (steps → weft row states).
-    ─────────────────────────────────────────── */
-
-    /**
-     * Simulate patternHistory from recorded steps.
-     * Each "beat" action finalises a row; the shed
-     * state at that point is captured from the last
-     * pedal press preceding it.
-     *
-     * The saved document now also stores patternRows
-     * (the actual patternHistory array) if available,
-     * which is the preferred source.
-     */
+    /* ── PATTERN RENDERING ── */
     function simulatePatternFromSteps(steps, shaftCount) {
       const history = [];
       const warpCount = 60;
-
-      // Determine threading: alternating shaft assignment
       const threading = [];
-      for (let i = 0; i < warpCount + 1; i++) {
-        threading.push(i % shaftCount);
-      }
-
+      for (let i = 0; i < warpCount + 1; i++) threading.push(i % shaftCount);
       let pressedPedals = new Set();
-
       for (const step of steps) {
-        if (step.action === "pedal") {
-          pressedPedals.add(step.value);
-        } else if (step.action === "pedals") {
-          pressedPedals = new Set(step.value);
-        } else if (step.action === "beat") {
-          // Build shed snapshot
+        if (step.action === "pedal") pressedPedals.add(step.value);
+        else if (step.action === "pedals") pressedPedals = new Set(step.value);
+        else if (step.action === "beat") {
           const shed = [];
-          for (let i = 0; i < shaftCount; i++) {
-            shed.push(!pressedPedals.has(i));
-          }
+          for (let i = 0; i < shaftCount; i++) shed.push(!pressedPedals.has(i));
           const rowStates = [];
-          for (let i = 0; i <= warpCount; i++) {
-            const shaft = threading[i % threading.length];
-            rowStates.push(shed[shaft]);
-          }
+          for (let i = 0; i <= warpCount; i++) rowStates.push(shed[threading[i % threading.length]]);
           history.push(rowStates);
         }
       }
       return history;
     }
 
-    /**
-     * Draw a weave draft onto a canvas element.
-     * warpUp = true  → warp on top  → dark vertical tick  (#111)
-     * warpUp = false → weft on top  → weft colour fill
-     */
     function drawPatternOnCanvas(canvas, patternRows, weftColor = "#c0392b") {
       if (!canvas || !patternRows || patternRows.length === 0) return;
-
       const warpCount = patternRows[0].length;
       const rowCount = patternRows.length;
-
-      // Cell size: fill the 300×180 preview area
-      const cellW = Math.max(1, Math.floor(canvas.width / warpCount));
-      const cellH = Math.max(1, Math.floor(canvas.height / rowCount));
-      const cellSize = Math.min(cellW, cellH, 8); // cap at 8px for clarity
-
+      const cellSize = Math.min(
+        Math.max(1, Math.floor(canvas.width / warpCount)),
+        Math.max(1, Math.floor(canvas.height / rowCount)),
+        8
+      );
       canvas.width = warpCount * cellSize;
       canvas.height = rowCount * cellSize;
-
       const ctx = canvas.getContext("2d");
       ctx.fillStyle = "#f5f0eb";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       patternRows.forEach((rowStates, rowIndex) => {
-        // Draw bottom-to-top (newest row at top)
         const y = (rowCount - 1 - rowIndex) * cellSize;
         rowStates.forEach((isWarpUp, warpIndex) => {
           const x = warpIndex * cellSize;
           if (!isWarpUp) {
-            // weft over warp → fill with weft colour
             ctx.fillStyle = weftColor;
             ctx.fillRect(x, y, cellSize, cellSize);
           } else {
-            // warp over weft → small dark vertical marker
             ctx.fillStyle = "#1a1a1a";
             ctx.fillRect(x + cellSize * 0.75, y, cellSize * 0.25, cellSize);
           }
@@ -1583,15 +1615,12 @@
       });
     }
 
-    /* ───────────────────────────────────────────
-       LOAD PATTERNS FROM MONGODB
-    ─────────────────────────────────────────── */
+    /* ── LOAD PATTERNS ── */
     let allPatterns = [];
 
     async function loadPatterns() {
       const grid = document.getElementById("pattern-grid");
       grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
-
       try {
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("Failed to fetch");
@@ -1601,70 +1630,62 @@
       } catch (err) {
         console.error("Collection fetch error:", err);
         grid.innerHTML = `
-            <div class="empty-state">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-              <h3>Could not load patterns</h3>
-              <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
-            </div>`;
+          <div class="empty-state">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Could not load patterns</h3>
+            <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
+          </div>`;
       }
     }
 
     function renderPatternGrid(patterns) {
       const grid = document.getElementById("pattern-grid");
-
       if (!patterns || patterns.length === 0) {
         grid.innerHTML = `
-            <div class="empty-state">
-              <i class="fa-solid fa-loom" style="font-family:sans-serif;font-style:normal;">🪡</i>
-              <h3>No patterns saved yet</h3>
-              <p>Head to the Weaving Studio and save your first design!</p>
-            </div>`;
+          <div class="empty-state">
+            <span style="font-family:sans-serif;font-style:normal;font-size:3rem;display:block;margin-bottom:20px;">🪡</span>
+            <h3>No patterns saved yet</h3>
+            <p>Head to the Weaving Studio and save your first design!</p>
+          </div>`;
         return;
       }
-
       grid.innerHTML = "";
-
       patterns.forEach(pattern => {
         const shaftCount = pattern.loom === "traditional" ? 2 : 4;
         const weftColor = pattern.weftColor || "#c0392b";
-
         const patternRows = pattern.patternRows && pattern.patternRows.length > 0
           ? pattern.patternRows
           : simulatePatternFromSteps(pattern.steps || [], shaftCount);
-
-        // This is now the "Last Modified / Imported" date
         const lastSaved = pattern.created
           ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
           : "Unknown date";
-
         const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
 
         let creatorText = "";
         if (pattern.creator) {
-            // Pulls the locked original date for the creator
-            const origDate = pattern.originalDate 
-                ? new Date(pattern.originalDate).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) 
-                : lastSaved;
-            creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)} - ${origDate}</strong>`;
+          const origDate = pattern.originalDate
+            ? new Date(pattern.originalDate).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
+            : lastSaved;
+          creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)} - ${origDate}</strong>`;
         }
 
         const card = document.createElement("div");
         card.className = "pattern-card";
         card.innerHTML = `
-            <div class="pattern-preview">
-              <canvas class="pattern-canvas" width="300" height="180"></canvas>
-              <button class="delete-btn" title="Delete pattern">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
+          <div class="pattern-preview">
+            <canvas class="pattern-canvas" width="300" height="180"></canvas>
+            <button class="delete-btn" title="Delete pattern">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+          <div class="pattern-details">
+            <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
+            <p>Saved ${lastSaved} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}${creatorText}</p>
+            <div class="tag-row">
+              <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
+              <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
             </div>
-            <div class="pattern-details">
-              <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
-              <p>Saved ${lastSaved} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}${creatorText}</p>
-              <div class="tag-row">
-                <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
-                <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
-              </div>
-            </div>`;
+          </div>`;
 
         const canvas = card.querySelector(".pattern-canvas");
         requestAnimationFrame(() => drawPatternOnCanvas(canvas, patternRows, weftColor));
@@ -1678,7 +1699,7 @@
               card.style.transition = "opacity 0.3s, transform 0.3s";
               card.style.opacity = "0";
               card.style.transform = "scale(0.95)";
-              setTimeout(() => { card.remove(); }, 300);
+              setTimeout(() => card.remove(), 300);
             } else {
               alert("Could not delete pattern.");
             }
@@ -1692,9 +1713,7 @@
       });
     }
 
-    /* ───────────────────────────────────────────
-       SEARCH / FILTER
-    ─────────────────────────────────────────── */
+    /* ── SEARCH ── */
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("search-input");
       if (searchInput) {
@@ -1711,9 +1730,7 @@
       }
     });
 
-    /* ───────────────────────────────────────────
-       UTILITY
-    ─────────────────────────────────────────── */
+    /* ── UTILITY ── */
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -1721,19 +1738,61 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
     }
+  </script>
 
-    function safeNavigate(destinationFunc) {
-      if (window.hasUnsavedChangesInLoom || window.learnIsActive) {
-          const msg = window.learnIsActive 
-              ? "Exit Learn Mode? Your progress will be lost." 
-              : "You have unsaved changes in the Loom Studio. Leave anyway?";
-          
-          if (!confirm(msg)) return;
-                  window.hasUnsavedChangesInLoom = false;
-          window.learnIsActive = false;
+  <!-- ── PWA INSTALL SCRIPT ── -->
+  <script>
+    let deferredPrompt = null;
+    const fab = document.getElementById("pwa-fab");
+    const tooltip = document.getElementById("pwa-tooltip");
+    const fabBtn = document.getElementById("pwa-install-fab");
+    const toast = document.getElementById("pwa-toast");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      fab.style.display = "flex";
+      setTimeout(() => {
+        tooltip.style.display = "block";
+        setTimeout(() => tooltip.style.display = "none", 4000);
+      }, 2000);
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      fab.style.display = "none";
+      showPwaToast("✅ HABI-LIN installed successfully!");
+    });
+
+    fabBtn.addEventListener("mouseenter", () => tooltip.style.display = "block");
+    fabBtn.addEventListener("mouseleave", () => tooltip.style.display = "none");
+
+    async function installPWA() {
+      if (!deferredPrompt) {
+        showPwaToast("ℹ️ Already installed or not supported.");
+        return;
       }
-      destinationFunc();
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") showPwaToast("🎉 Installing HABI-LIN...");
+      deferredPrompt = null;
+      fab.style.display = "none";
+    }
+
+    function showPwaToast(message) {
+      toast.textContent = message;
+      toast.style.display = "block";
+      toast.style.opacity = "1";
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.style.display = "none", 300);
+      }, 4000);
+    }
+
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      fab.style.display = "none";
     }
   </script>
 </body>
+
 </html>

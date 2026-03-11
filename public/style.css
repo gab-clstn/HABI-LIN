@@ -497,15 +497,17 @@ input {
 }
 
 #heddlesOverlay .setup-card {
-    max-width: 400px;
-    width: 90%;
-    padding: 25px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    background: rgba(30,30,35,0.95);
+    /* constrain the card to viewport — DO NOT let it grow taller */
+    width: min(860px, 96vw);
+    max-width: 96vw;
+    height: min(92vh, 860px);   /* ← THE KEY LINE: fixed height so flex children work */
+    max-height: 92vh;
+    padding: 0 !important;      /* layout-root handles all padding internally */
+    overflow: hidden !important; /* no scroll on the card itself */
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    border-radius: 16px;
 }
 
 /* Buttons like setup page */

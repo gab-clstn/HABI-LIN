@@ -559,6 +559,14 @@
             }
         }
     </style>
+    <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2b0303" />
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/service-worker.js");
+        }
+    </script>
 </head>
 
 <body>
