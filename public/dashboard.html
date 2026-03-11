@@ -472,6 +472,84 @@
       margin-top: 10px;
     }
 
+    /* ── MEASUREMENT EXPAND PANEL (HOVER) ── */
+    .measure-expand {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, #0c1a0f 0%, rgba(12, 26, 15, 0.97) 100%);
+      border-top: 1px solid #1a3320;
+      padding: 14px 20px 18px;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(.4, 0, .2, 1);
+      z-index: 50;
+      border-radius: 0 0 18px 18px;
+    }
+
+    .pattern-card:hover .measure-expand {
+      transform: translateY(0);
+    }
+
+    .measure-expand.no-data {
+      display: none;
+    }
+
+    .measure-expand__title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #3ecf5a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .measure-expand__title::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      background: #3ecf5a;
+      border-radius: 50%;
+    }
+
+    .measure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 14px;
+    }
+
+    .measure-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .measure-cell__label {
+      font-size: 0.6rem;
+      color: #4a7a52;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .measure-cell__value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #b8e8be;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .measure-cell__value em {
+      font-style: normal;
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #4a7a52;
+      margin-left: 2px;
+    }
+
     /* ── WEAVING STUDIO ── */
     #weaving-studio {
       position: relative;
@@ -708,6 +786,47 @@
       z-index: 5;
     }
 
+    .pattern-card .privacy-btn {
+      opacity: 0;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+    }
+
+    .pattern-card:hover .privacy-btn {
+      opacity: 1;
+    }
+
+    .privacy-btn.private {
+      background: rgba(43, 3, 3, 0.85);
+      color: #aaa;
+    }
+    .privacy-btn.private:hover {
+      background: rgba(43, 3, 3, 1);
+      color: white;
+    }
+
+    .privacy-btn.public {
+      background: rgba(0, 229, 255, 0.15);
+      color: #00e5ff;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+    .privacy-btn.public:hover {
+      background: rgba(0, 229, 255, 0.25);
+    }
+
     .pattern-card:hover .delete-btn {
       opacity: 1;
     }
@@ -783,82 +902,6 @@
       background: transparent;
       outline: none;
       font-size: 0.9rem;
-    }
-
-    /* ── PWA FAB ── */
-    #pwa-fab {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      z-index: 9999;
-      display: none;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-    }
-
-    #pwa-tooltip {
-      background: #1a1a1a;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
-      display: none;
-      position: relative;
-    }
-
-    #pwa-tooltip::after {
-      content: '';
-      position: absolute;
-      bottom: -6px;
-      right: 18px;
-      width: 12px;
-      height: 12px;
-      background: #1a1a1a;
-      transform: rotate(45deg);
-      border-radius: 2px;
-    }
-
-    #pwa-install-fab {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--brand);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 1.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 20px rgba(43, 3, 3, .35);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    #pwa-install-fab:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(43, 3, 3, .45);
-    }
-
-    #pwa-toast {
-      position: fixed;
-      bottom: 100px;
-      right: 28px;
-      background: #1a1a1a;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      z-index: 9999;
-      display: none;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
-      max-width: 220px;
-      line-height: 1.4;
-      transition: opacity 0.3s;
     }
 
     /* ── HEDDLES TWO-COLUMN LAYOUT ── */
@@ -1379,13 +1422,6 @@
     </main>
   </div><!-- /.dashboard-wrapper -->
 
-  <!-- ── PWA FAB ── -->
-  <div id="pwa-fab">
-    <div id="pwa-tooltip">Install HABI-LIN as an app!</div>
-    <button id="pwa-install-fab" onclick="installPWA()" title="Install HABI-LIN App">⬇️</button>
-  </div>
-  <div id="pwa-toast"></div>
-
   <script>
     /* ── HAMBURGER ── */
     const hamburgerBtn = document.getElementById("hamburger-btn");
@@ -1443,6 +1479,7 @@
         if (!res.ok) throw new Error("No session");
         const user = await res.json();
         if (user) {
+          window.currentUserId = user._id;
           const firstName = user.name.split(" ")[0];
           document.getElementById("user-firstname").textContent = firstName + "!";
           document.getElementById("user-firstname-display").textContent = firstName;
@@ -1474,7 +1511,7 @@
       document.getElementById("heddlesOverlay").style.display = "none";
       window.loomStarted = true;
       const patternData = JSON.parse(localStorage.getItem("resumePattern"));
-      const m = await import("./loom.js");
+      const m = await import(`./loom.js?v=${Date.now()}`);
       if (m.resumeLoom) m.resumeLoom(patternData);
     }
 
@@ -1529,7 +1566,7 @@
       if (typeof closeDrawer === 'function') closeDrawer();
       if (window.loomStarted) return;
       window.loomStarted = true;
-      await import("./loom.js").then(m => m.startLoom && m.startLoom());
+      await import(`./loom.js?v=${Date.now()}`).then(m => m.startLoom && m.startLoom());
     }
 
     function updateActiveLink(id) {
@@ -1595,7 +1632,7 @@
             <div class="card-visual" style="background:#2b0303;color:#ff4d4d;"><i class="fa-solid fa-users"></i></div>
             <div class="card-info">
               <h4 style="color:white;margin:0;">All / Community Patterns</h4>
-              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns from the community and imports.</p>
+              <p style="margin:0;font-size:0.8rem;color:#666;">Patterns from the community and imports (Excluding your patterns).</p>
             </div>
           </button>
         </div>`;
@@ -1628,7 +1665,7 @@
             return isOwner && p.isImported !== true;
           });
         } else {
-          categoryTitle = "All / Community Patterns";
+          categoryTitle = "Community Patterns";
           filtered = allPatterns.filter(p => {
             const pUserId = p.userId ? p.userId.toString().trim() : '';
             const pCreator = p.creator ? p.creator.trim() : '';
@@ -1695,7 +1732,7 @@
       const oldHud = document.getElementById("tutorial-hud");
       if (oldHud) oldHud.remove();
       try {
-        const module = await import("./learn.js");
+        const module = await import(`./learn.js?v=${Date.now()}`);
         if (module.startLearn) module.startLearn(pattern);
       } catch (err) {
         console.error("Failed to load learn.js:", err);
@@ -1724,33 +1761,89 @@
       return history;
     }
 
-    function drawPatternOnCanvas(canvas, patternRows, weftColor = "#c0392b") {
-      if (!canvas || !patternRows || patternRows.length === 0) return;
+    function drawPatternOnCanvas(canvas, pattern) {
+      const patternRows = pattern.patternRows && pattern.patternRows.length > 0
+        ? pattern.patternRows
+        : simulatePatternFromSteps(pattern.steps || [], pattern.loom === "traditional" ? 2 : 4);
+
+      if (!canvas || patternRows.length === 0) return;
+
+      const ctx = canvas.getContext("2d");
       const warpCount = patternRows[0].length;
       const rowCount = patternRows.length;
-      const cellSize = Math.min(
-        Math.max(1, Math.floor(canvas.width / warpCount)),
-        Math.max(1, Math.floor(canvas.height / rowCount)),
-        8
-      );
-      canvas.width = warpCount * cellSize;
-      canvas.height = rowCount * cellSize;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#f5f0eb";
+
+      // ── PIXEL-GRID THUMBNAIL ──
+      const CELL_PX = 6;          // px per warp/weft cell
+      const MAX_COLS = 48;         // columns (warp threads) shown in the crop
+      const MAX_ROWS = 30;         // rows (weft picks) shown in the crop
+
+      const cropCols = Math.min(warpCount, MAX_COLS);
+      const cropRows = Math.min(rowCount, MAX_ROWS);
+
+      // Centre the crop horizontally; show the most-recently-woven rows at top
+      const startCol = Math.floor((warpCount - cropCols) / 2);
+      const startRow = Math.max(0, rowCount - cropRows);   // newest picks
+
+      canvas.width = cropCols * CELL_PX;
+      canvas.height = cropRows * CELL_PX;
+
+      // Background
+      ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      patternRows.forEach((rowStates, rowIndex) => {
-        const y = (rowCount - 1 - rowIndex) * cellSize;
-        rowStates.forEach((isWarpUp, warpIndex) => {
-          const x = warpIndex * cellSize;
+
+      const safeWarpColors = (pattern.warpColors && pattern.warpColors.length > 0)
+        ? pattern.warpColors
+        : ["#f0eadf", "#f0eadf", "#f0eadf", "#f0eadf"];
+      const isPerThread = safeWarpColors.length > 4;
+      const shaftCount = pattern.loom === "traditional" ? 2 : 4;
+      const map = (pattern.threadingMap && pattern.threadingMap.length > 0)
+        ? pattern.threadingMap
+        : (shaftCount === 2 ? [0, 1] : [0, 1, 2, 3]);
+
+      for (let ci = 0; ci < cropRows; ci++) {
+        // ci=0 is the top of the canvas → newest row; mirror Y so newest = top
+        const rowIndex = startRow + (cropRows - 1 - ci);
+        if (rowIndex < 0 || rowIndex >= rowCount) continue;
+        const rowStates = patternRows[rowIndex];
+        const weftColor = (pattern.rowColors && pattern.rowColors[rowIndex])
+          || pattern.weftColor || "#c0392b";
+
+        for (let cj = 0; cj < cropCols; cj++) {
+          const warpIndex = startCol + cj;
+          if (warpIndex >= warpCount) continue;
+
+          const x = cj * CELL_PX;
+          const y = ci * CELL_PX;
+          const isWarpUp = rowStates[warpIndex];
+
           if (!isWarpUp) {
             ctx.fillStyle = weftColor;
-            ctx.fillRect(x, y, cellSize, cellSize);
+            ctx.fillRect(x, y, CELL_PX, CELL_PX);
           } else {
-            ctx.fillStyle = "#1a1a1a";
-            ctx.fillRect(x + cellSize * 0.75, y, cellSize * 0.25, cellSize);
+            const warpColor = isPerThread
+              ? (safeWarpColors[warpIndex] || "#f0eadf")
+              : (safeWarpColors[map[warpIndex % map.length]] || "#f0eadf");
+            ctx.fillStyle = warpColor;
+            ctx.fillRect(x, y, CELL_PX, CELL_PX);
           }
-        });
-      });
+
+          // Subtle 1px dark grid lines
+          ctx.strokeStyle = "rgba(0,0,0,0.18)";
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(x + 0.25, y + 0.25, CELL_PX - 0.5, CELL_PX - 0.5);
+        }
+      }
+
+      // Crop indicator label
+      if (rowCount > MAX_ROWS) {
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillRect(0, canvas.height - 14, canvas.width, 14);
+        ctx.fillStyle = "#ccc";
+        ctx.font = "bold 9px sans-serif";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.fillText(`${rowCount} picks total`, canvas.width / 2, canvas.height - 7);
+      }
     }
 
     /* ── LOAD PATTERNS ── */
@@ -1760,10 +1853,23 @@
       const grid = document.getElementById("pattern-grid");
       grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
       try {
+        // 1. Fetch user FIRST so we definitely know who is logged in
+        try {
+          const userRes = await fetch("/auth/user");
+          const user = await userRes.json();
+          if (user) {
+            window.currentUserId = user._id;
+            window.currentUserName = user.name;
+          }
+        } catch(e) { console.log("Could not verify user for grid"); }
+
+        // 2. Fetch the patterns
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("Failed to fetch");
         const patterns = await res.json();
         allPatterns = patterns;
+        
+        // 3. Render the grid
         renderPatternGrid(patterns);
       } catch (err) {
         console.error("Collection fetch error:", err);
@@ -1788,12 +1894,13 @@
         return;
       }
       grid.innerHTML = "";
+      
       patterns.forEach(pattern => {
+        // CHECK OWNERSHIP SAFELY
+        const isOwnPattern = (pattern.userId === window.currentUserId) || (pattern.creator === window.currentUserName);
+        
         const shaftCount = pattern.loom === "traditional" ? 2 : 4;
         const weftColor = pattern.weftColor || "#c0392b";
-        const patternRows = pattern.patternRows && pattern.patternRows.length > 0
-          ? pattern.patternRows
-          : simulatePatternFromSteps(pattern.steps || [], shaftCount);
         const lastSaved = pattern.created
           ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
           : "Unknown date";
@@ -1801,50 +1908,140 @@
 
         let creatorText = "";
         if (pattern.creator) {
-          const origDate = pattern.originalDate
-            ? new Date(pattern.originalDate).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
-            : lastSaved;
-          creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)} - ${origDate}</strong>`;
+          creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)}</strong>`;
+        }
+
+        // ── HOVER MEASUREMENTS OVERLAY ──
+        const m = pattern.measurements;
+        let measureExpandHTML = "";
+
+        if (m && typeof m.weftCount === "number") {
+          const hasMeasure = m.physicalWidthCm || m.estimatedHeightCm || m.weftCount;
+          if (hasMeasure) {
+            const heightDisplay = m.estimatedHeightCm ? `${m.estimatedHeightCm.toFixed(1)}` : "—";
+            const widthDisplay = m.physicalWidthCm ? `${m.physicalWidthCm}` : "—";
+            const epcDisplay = m.endsPerCm ? `${parseFloat(m.endsPerCm).toFixed(1)}` : "—";
+
+            measureExpandHTML = `
+              <div class="measure-expand">
+                <div class="measure-expand__title">Physical Measurements</div>
+                <div class="measure-grid">
+                  <div class="measure-cell">
+                    <span class="measure-cell__label">Width</span>
+                    <span class="measure-cell__value">${widthDisplay}<em> cm</em></span>
+                  </div>
+                  <div class="measure-cell">
+                    <span class="measure-cell__label">Est. Height</span>
+                    <span class="measure-cell__value">${heightDisplay}<em> cm</em></span>
+                  </div>
+                  <div class="measure-cell">
+                    <span class="measure-cell__label">Weft Count</span>
+                    <span class="measure-cell__value">${m.weftCount}<em> picks</em></span>
+                  </div>
+                  <div class="measure-cell">
+                    <span class="measure-cell__label">Ends / cm</span>
+                    <span class="measure-cell__value">${epcDisplay}<em> e/cm</em></span>
+                  </div>
+                </div>
+              </div>`;
+          }
         }
 
         const card = document.createElement("div");
         card.className = "pattern-card";
-        card.innerHTML = `
-          <div class="pattern-preview">
-            <canvas class="pattern-canvas" width="300" height="180"></canvas>
-            <button class="delete-btn" title="Delete pattern">
-              <i class="fa-solid fa-trash-can"></i>
+        card.style.position = "relative";
+        card.style.overflow = "hidden";
+
+        // ── PRIVACY BUTTON LOGIC ──
+        const isPrivate = pattern.isPrivate !== false; // defaults to true
+        let privacyBtnHTML = "";
+        
+        if (isOwnPattern) {
+          const pClass = isPrivate ? "private" : "public";
+          const pIcon = isPrivate ? '<i class="fa-solid fa-lock"></i> Private' : '<i class="fa-solid fa-globe"></i> Public';
+          privacyBtnHTML = `
+            <button class="privacy-btn ${pClass}" title="Click to toggle visibility">
+              ${pIcon}
             </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="pattern-preview" style="display:flex; justify-content:center; align-items:center;">
+            ${privacyBtnHTML}
+            <canvas class="pattern-canvas" style="max-width:100%; max-height:100%; object-fit:contain;"></canvas>
+            ${isOwnPattern ? `<button class="delete-btn" title="Delete pattern"><i class="fa-solid fa-trash-can"></i></button>` : ''}
           </div>
           <div class="pattern-details">
             <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
-            <p>Saved ${lastSaved} &nbsp;·&nbsp; ${patternRows.length} row${patternRows.length !== 1 ? "s" : ""}${creatorText}</p>
+            <p>Saved ${lastSaved} ${creatorText}</p>
             <div class="tag-row">
               <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
               <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
             </div>
-          </div>`;
+          </div>
+          ${measureExpandHTML}
+        `;
 
         const canvas = card.querySelector(".pattern-canvas");
-        requestAnimationFrame(() => drawPatternOnCanvas(canvas, patternRows, weftColor));
+        requestAnimationFrame(() => drawPatternOnCanvas(canvas, pattern));
 
-        card.querySelector(".delete-btn").addEventListener("click", async (e) => {
-          e.stopPropagation();
-          if (!confirm(`Delete "${pattern.name}"?`)) return;
-          try {
-            const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
-            if (res.ok) {
-              card.style.transition = "opacity 0.3s, transform 0.3s";
-              card.style.opacity = "0";
-              card.style.transform = "scale(0.95)";
-              setTimeout(() => card.remove(), 300);
-            } else {
-              alert("Could not delete pattern.");
+        // DELETE LOGIC
+        const deleteBtn = card.querySelector(".delete-btn");
+        if (deleteBtn) {
+          deleteBtn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Delete "${pattern.name}"?`)) return;
+            try {
+              const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
+              if (res.ok) {
+                card.style.transition = "opacity 0.3s, transform 0.3s";
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                setTimeout(() => card.remove(), 300);
+              } else {
+                alert("Could not delete pattern.");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Server error while deleting.");
             }
-          } catch (err) {
-            console.error(err);
-            alert("Server error while deleting.");
-          }
+          });
+        }
+
+        // PRIVACY TOGGLE LOGIC
+        const privacyBtn = card.querySelector(".privacy-btn");
+        if (privacyBtn) {
+          privacyBtn.addEventListener("click", async (e) => {
+            e.stopPropagation(); 
+            const newPrivacyState = !pattern.isPrivate;
+            
+            // Optimistically update UI instantly
+            pattern.isPrivate = newPrivacyState;
+            renderPatternGrid(allPatterns); // Re-render to show new color/icon
+
+            try {
+              const res = await fetch(`/api/patterns/${pattern._id}/privacy`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isPrivate: newPrivacyState })
+              });
+              
+              if (!res.ok) throw new Error("Failed to update on server");
+            } catch (err) {
+              console.error(err);
+              alert("Failed to update privacy setting. Make sure your server route is set up!");
+              pattern.isPrivate = !newPrivacyState; // Revert if failed
+              renderPatternGrid(allPatterns);
+            }
+          });
+        }
+
+        // Trigger resume on card click
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".delete-btn") || e.target.closest(".privacy-btn") || e.target.closest(".measure-expand")) return;
+          localStorage.setItem("resumePattern", JSON.stringify(pattern));
+          startResumeProcess();
         });
 
         grid.appendChild(card);
@@ -1878,59 +2075,6 @@
     }
   </script>
 
-  <!-- ── PWA INSTALL SCRIPT ── -->
-  <script>
-    let deferredPrompt = null;
-    const fab = document.getElementById("pwa-fab");
-    const tooltip = document.getElementById("pwa-tooltip");
-    const fabBtn = document.getElementById("pwa-install-fab");
-    const toast = document.getElementById("pwa-toast");
-
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      fab.style.display = "flex";
-      setTimeout(() => {
-        tooltip.style.display = "block";
-        setTimeout(() => tooltip.style.display = "none", 4000);
-      }, 2000);
-    });
-
-    window.addEventListener("appinstalled", () => {
-      deferredPrompt = null;
-      fab.style.display = "none";
-      showPwaToast("✅ HABI-LIN installed successfully!");
-    });
-
-    fabBtn.addEventListener("mouseenter", () => tooltip.style.display = "block");
-    fabBtn.addEventListener("mouseleave", () => tooltip.style.display = "none");
-
-    async function installPWA() {
-      if (!deferredPrompt) {
-        showPwaToast("ℹ️ Already installed or not supported.");
-        return;
-      }
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") showPwaToast("🎉 Installing HABI-LIN...");
-      deferredPrompt = null;
-      fab.style.display = "none";
-    }
-
-    function showPwaToast(message) {
-      toast.textContent = message;
-      toast.style.display = "block";
-      toast.style.opacity = "1";
-      setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => toast.style.display = "none", 300);
-      }, 4000);
-    }
-
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      fab.style.display = "none";
-    }
-  </script>
 </body>
 
 </html>
