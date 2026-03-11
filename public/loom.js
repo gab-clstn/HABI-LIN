@@ -1628,8 +1628,8 @@ function initLoom() {
         patternCanvas.parentElement.scrollTop = 0; 
     }
 
-//----------------------------------------------
-    // PATTERN EXPORT (Block-Grid with Physical Multiplier)
+    //----------------------------------------------
+    // PATTERN EXPORT (Fixed with Separation Borders)
     //----------------------------------------------
     function exportPatternImage() {
         if (patternHistory.length === 0) {
@@ -1640,12 +1640,10 @@ function initLoom() {
         const baseWarpCount = patternHistory[0].length;
         const rowCount = patternHistory.length;
         
-        // Block-grid settings
         const CELL_PX = 10; 
         const PADDING = 60;
         const FOOTER_H = 140; 
 
-        // Multiplier Logic: Using TOTAL_PHYSICAL_THREADS instead of DISPLAY_THREADS
         const patternW = Math.round(TOTAL_PHYSICAL_THREADS * CELL_PX);
         const patternH = rowCount * CELL_PX;
 
@@ -1657,23 +1655,19 @@ function initLoom() {
         exportCanvas.height = canvasH;
         const ctx = exportCanvas.getContext('2d');
 
-        // White background
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvasW, canvasH);
 
         const offsetX = (canvasW - patternW) / 2;
         const offsetY = PADDING;
 
-        // --- THE BLOCK DRAWING LOOP WITH MULTIPLIER ---
         patternHistory.forEach((rowStates, ri) => {
-            // Newest row at top
             const y = (rowCount - 1 - ri) * CELL_PX;
             const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
             const currentRowColor = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : fallbackWeft;
 
-            // ti loops through the full physical width (e.g., 240 threads)
             for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
-                const baseIndex = ti % baseWarpCount; // Loops the pattern logic across the width
+                const baseIndex = ti % baseWarpCount;
                 const isWarpUp = rowStates[baseIndex];
                 const x = ti * CELL_PX;
                 const shaft = threading[baseIndex % threading.length] || 0;
@@ -1682,18 +1676,24 @@ function initLoom() {
                     ? (warpColors[baseIndex] || "#ffffff")
                     : (warpColors[shaft] || "#ffffff");
 
-                // Logic from Code 1: Fill the whole cell (Block style)
+                // 1. Draw the Main Block
                 ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
                 ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
 
-                // Subtle grid lines
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                // 2. Add Opaque Separation Border (Inner White Highlight)
+                // This makes the thread look slightly 3D and separates same-colored blocks
+                ctx.strokeStyle = "rgba(255,255,255,0.15)";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(offsetX + x + 0.5, offsetY + y + 0.5, CELL_PX - 1, CELL_PX - 1);
+
+                // 3. Add Subtle Outer Grid (Dark Border)
+                ctx.strokeStyle = "rgba(0,0,0,0.12)";
                 ctx.lineWidth = 0.5;
                 ctx.strokeRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
             }
         });
 
-        // --- FOOTER SECTION (Code 1 Style) ---
+        // --- FOOTER SECTION ---
         const footerTop = offsetY + patternH + 30;
         ctx.strokeStyle = "#e0e0e0";
         ctx.lineWidth = 1;
@@ -1711,11 +1711,9 @@ function initLoom() {
         ctx.fillStyle = "#666666";
         const estHeight = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
         
-        // Meta text using the physical multiplier variables
         ctx.fillText(`Physical Size: ${PHYSICAL_WIDTH_CM}cm (W) × ${estHeight}cm (L)`, PADDING, footerTop + 65);
         ctx.fillText(`Structure: ${TOTAL_PHYSICAL_THREADS} warp ends (${THREADS_PER_CM} ends/cm) · ${rowCount} weft picks (${EXPECTED_WEFT_PER_CM} picks/cm)`, PADDING, footerTop + 85);
 
-        // Download
         const link = document.createElement('a');
         const safeName = (loomConfig.patternName || 'pattern').replace(/\s+/g, '_').toLowerCase();
         link.download = `${safeName}.png`;
