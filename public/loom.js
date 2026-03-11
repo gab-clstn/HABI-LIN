@@ -1256,93 +1256,6 @@ function initLoom() {
     }
 
     //----------------------------------------------
-    // 2D PATTERN RENDERER
-    //----------------------------------------------
-    function render2DPattern() {
-        const patternCanvas = document.getElementById("patternCanvas");
-        if (!patternCanvas) return;
-        const ctx = patternCanvas.getContext("2d");
-        
-        const rowCount = patternHistory.length;
-        const DISPLAY_THREADS = loomConfig.totalThreads || 120; 
-
-        if (rowCount === 0 && (!activeWeft)) {
-            patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
-            patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
-            ctx.fillStyle = "#111";
-            ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
-            return;
-        }
-
-        const container = patternCanvas.parentElement;
-        // Calculation to ensure it fills the width of your panel
-        const availableWidth = container.clientWidth - 16;
-        const cellSize = availableWidth / DISPLAY_THREADS;
-
-        patternCanvas.width = DISPLAY_THREADS * cellSize;
-        patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
-        
-        ctx.fillStyle = "#1a1a1a";
-        ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
-
-        // --- SHARED DRAWING STYLE (MATCHES EXPORT) ---
-        const drawHabiCell = (x, y, isWarpUp, weftCol, warpCol) => {
-            // Weft base fills the background
-            ctx.fillStyle = weftCol;
-            ctx.fillRect(x, y, cellSize, cellSize);
-
-            // Thin Warp Overlay (matching export format)
-            if (isWarpUp) {
-                ctx.fillStyle = warpCol;
-                // Draw vertical warp thread covering the middle 50%
-                ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
-            }
-
-            // Subtle grid lines
-            ctx.strokeStyle = "rgba(0,0,0,0.15)";
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(x, y, cellSize, cellSize);
-        };
-        
-        // Draw locked rows
-        patternHistory.forEach((rowStates, rowIndex) => {
-            const y = (patternCanvas.height / cellSize - 1 - rowIndex) * cellSize;
-            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
-            const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
-            
-            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
-                const isWarpUp = rowStates[ti];
-                const x = ti * cellSize;
-                const shaft = threading[ti % threading.length] || 0;
-                const threadColor = Array.isArray(warpColors) && warpColors.length > 4
-                    ? (warpColors[ti] || "#ffffff")
-                    : (warpColors[shaft] || "#ffffff");
-
-                drawHabiCell(x, y, isWarpUp, currentRowColor, threadColor);
-            }
-        });
-
-        // Draw live throw on top
-        if (activeWeft && activeWeft.live) {
-            const y = 0; 
-            const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
-            
-            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
-                const isWarpUp = activeWeft.warpPattern[ti];
-                const x = ti * cellSize;
-                const shaft = threading[ti % threading.length] || 0;
-                const threadColor = Array.isArray(warpColors) && warpColors.length > 4
-                    ? (warpColors[ti] || "#ffffff")
-                    : (warpColors[shaft] || "#ffffff");
-
-                drawHabiCell(x, y, isWarpUp, liveColor, threadColor);
-            }
-        }
-        
-        patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
-    }
-
-    //----------------------------------------------
     // UI PANEL
     //----------------------------------------------
     function createUI() {
@@ -1630,82 +1543,89 @@ function initLoom() {
         });
     }
 
+
     //----------------------------------------------
-    // 2D PATTERN RENDERER — Zoomed to Fill Width
+    // 2D PATTERN RENDERER — Pixel Block Format
     //----------------------------------------------
     function render2DPattern() {
         const patternCanvas = document.getElementById("patternCanvas");
         if (!patternCanvas) return;
         const ctx = patternCanvas.getContext("2d");
         
-        const warpCount = loomConfig.totalThreads; // Locks to 120 base threads
+        const baseWarpCount = (patternHistory.length > 0) ? patternHistory[0].length : (loomConfig.totalThreads || 120);
         const rowCount = patternHistory.length;
 
         if (rowCount === 0 && (!activeWeft)) {
             patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
             patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
-            ctx.fillStyle = "#111";
+            ctx.fillStyle = "#111"; 
             ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
             return;
         }
         
         const container = patternCanvas.parentElement;
-        // ZOOM LOGIC: Cell size is calculated strictly from the width, so it fills horizontally!
-        const cellSize = Math.max(2, (container.clientWidth - 16) / warpCount);
+        // Calculation to fill the horizontal width of the panel with solid pixel blocks
+        const cellSize = Math.max(2, (container.clientWidth - 16) / TOTAL_PHYSICAL_THREADS);
 
-        patternCanvas.width = warpCount * cellSize;
+        patternCanvas.width = TOTAL_PHYSICAL_THREADS * cellSize;
         patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
         
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
-        
-        // Draw locked rows
+        // 1. Draw the locked rows (Pattern History)
         patternHistory.forEach((rowStates, rowIndex) => {
-            const y = (patternCanvas.height / cellSize - 1 - rowIndex) * cellSize;
+            // Stack logic: newest row at the top
+            const y = (rowCount - 1 - rowIndex + (activeWeft ? 1 : 0)) * cellSize;
             const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
             const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
             
-            rowStates.forEach((isWarpUp, warpIndex) => {
-                const x = warpIndex * cellSize;
-                const shaft = threading[warpIndex % threading.length] || 0;
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount;
+                const isWarpUp = rowStates[baseIndex];
+                const x = ti * cellSize;
+                const shaft = threading[baseIndex % threading.length] || 0;
                 
-                ctx.fillStyle = currentRowColor;
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[baseIndex] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
+
+                // --- PIXEL FORMATTING ---
+                // If warp is UP, use warp color. If DOWN, use weft color.
+                // Fill the ENTIRE square cell to create the pixel look.
+                ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
                 ctx.fillRect(x, y, cellSize, cellSize);
-                if (isWarpUp) {
-                    const threadColor = Array.isArray(warpColors) && warpColors.length > 4
-                        ? (warpColors[warpIndex] || "#ffffff")
-                        : (warpColors[shaft] || "#ffffff");
-                    ctx.fillStyle = threadColor;
-                    // Thin warp overlay
-                    ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
-                }
-            });
+
+                // Subtle grid line (set to 0.1 opacity so it's barely visible, just like pixels)
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+            }
         });
 
-        // Draw live active throw immediately on top
+        // 2. Draw the live "unbeaten" row (The Active Throw)
         if (activeWeft && activeWeft.live) {
             const y = 0; 
             const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
             
-            for (let warpIndex = 0; warpIndex < warpCount; warpIndex++) {
-                const x = warpIndex * cellSize;
-                const isWarpUp = activeWeft.warpPattern[warpIndex];
-                const shaft = threading[warpIndex % threading.length] || 0;
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount;
+                const isWarpUp = activeWeft.warpPattern[baseIndex];
+                const x = ti * cellSize;
+                const shaft = threading[baseIndex % threading.length] || 0;
                 
-                ctx.fillStyle = liveColor;
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[baseIndex] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
+
+                ctx.fillStyle = isWarpUp ? warpCol : liveColor;
                 ctx.fillRect(x, y, cellSize, cellSize);
-                
-                if (isWarpUp) {
-                    const threadColor = Array.isArray(warpColors) && warpColors.length > 4
-                        ? (warpColors[warpIndex] || "#ffffff")
-                        : (warpColors[shaft] || "#ffffff");
-                    ctx.fillStyle = threadColor;
-                    ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
-                }
+
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cellSize, cellSize);
             }
         }
         
-        patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
+        // Auto-scroll to show the newest row at the top
+        patternCanvas.parentElement.scrollTop = 0; 
     }
 
 //----------------------------------------------
