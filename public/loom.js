@@ -1708,8 +1708,8 @@ function initLoom() {
         patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
     }
 
-//----------------------------------------------
-    // PATTERN EXPORT
+    //----------------------------------------------
+    // PATTERN EXPORT (Matches your Block-Grid Image)
     //----------------------------------------------
     function exportPatternImage() {
         if (patternHistory.length === 0) {
@@ -1719,14 +1719,18 @@ function initLoom() {
 
         const baseWarpCount = patternHistory[0].length;
         const rowCount = patternHistory.length;
-        const CELL_PX = 8; 
-        const PADDING = 40;
-        const FOOTER_H = 120; 
+        
+        // Block-grid settings
+        const CELL_PX = 10; 
+        const PADDING = 60;
+        const FOOTER_H = 140; 
 
-        const patternW = Math.round(TOTAL_PHYSICAL_THREADS * CELL_PX);
-        const patternH = Math.round(rowCount * CELL_PX);
+        const DISPLAY_THREADS = loomConfig.totalThreads || 120; 
 
-        const canvasW = Math.max(patternW + (PADDING * 2), 600); 
+        const patternW = DISPLAY_THREADS * CELL_PX;
+        const patternH = rowCount * CELL_PX;
+
+        const canvasW = Math.max(patternW + (PADDING * 2), 800); 
         const canvasH = patternH + (PADDING * 2) + FOOTER_H;
 
         const exportCanvas = document.createElement('canvas');
@@ -1734,80 +1738,64 @@ function initLoom() {
         exportCanvas.height = canvasH;
         const ctx = exportCanvas.getContext('2d');
 
-        // Background
+        // White background
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvasW, canvasH);
 
         const offsetX = (canvasW - patternW) / 2;
         const offsetY = PADDING;
 
-        const safeWarpColors = (Array.isArray(warpColors) && warpColors.length > 0)
-            ? warpColors
-            : ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
-            
-        // Check if colors are defined per-thread (120 length) or per-shaft (4 length)
-        const isPerThread = safeWarpColors.length > 4;
+        // --- THE BLOCK DRAWING LOOP ---
+        patternHistory.forEach((rowStates, ri) => {
+            // Newest row at top
+            const y = (rowCount - 1 - ri) * CELL_PX;
+            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
+            const currentRowColor = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : fallbackWeft;
 
-        // Draw Pattern
-        for (let ri = 0; ri < rowCount; ri++) {
-            const rowStates = patternHistory[ri];
-            const weftCol = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : "#f0eadf";
-
-            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
-                const baseIndex = ti % baseWarpCount;
-                const isWarpUp = rowStates[baseIndex];
+            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
+                const isWarpUp = rowStates[ti];
                 const x = ti * CELL_PX;
-                const y = (rowCount - 1 - ri) * CELL_PX;
-
-                const shaft = threading[baseIndex % threading.length] || 0;
+                const shaft = threading[ti % threading.length] || 0;
                 
-                // FIXED: Correctly grab the warp color from the full 120-array or fallback to the shaft color
-                const warpCol = isPerThread 
-                    ? (safeWarpColors[baseIndex] || "#ffffff") 
-                    : (safeWarpColors[shaft] || "#ffffff");
+                const warpCol = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[ti] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
 
-                // 1. Draw Weft Background
-                ctx.fillStyle = weftCol;
+                // Fill the whole cell with either Warp or Weft color
+                // This creates the "Block" look from your screenshot
+                ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
                 ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
 
-                // 2. Draw Warp Overlay (if thread is up)
-                if (isWarpUp) {
-                    ctx.fillStyle = warpCol;
-                    // Draw vertical warp thread covering the middle 50%
-                    ctx.fillRect(offsetX + x + (CELL_PX * 0.25), offsetY + y, CELL_PX * 0.5, CELL_PX);
-                }
-
-                // 3. Grid Lines
+                // Subtle grid lines (very thin to match screenshot)
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                ctx.lineWidth = 0.3;
+                ctx.lineWidth = 0.5;
                 ctx.strokeRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
             }
-        }
+        });
 
-        // Footer Divider
-        const footerTop = offsetY + patternH + 25;
-        ctx.strokeStyle = "#eeeeee";
-        ctx.lineWidth = 2;
+        // --- FOOTER SECTION (Identical to screenshot layout) ---
+        const footerTop = offsetY + patternH + 30;
+        ctx.strokeStyle = "#e0e0e0";
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(PADDING, footerTop);
         ctx.lineTo(canvasW - PADDING, footerTop);
         ctx.stroke();
 
-        // Footer Text (Measurements)
         ctx.fillStyle = "#1a1a1a";
-        ctx.font = "bold 22px sans-serif";
+        ctx.font = "bold 24px 'Plus Jakarta Sans', sans-serif";
         ctx.textAlign = "left";
-        ctx.fillText(loomConfig.patternName || "HABI-LIN Draft", PADDING, footerTop + 35);
+        ctx.fillText(loomConfig.patternName || "HABI-LIN Draft", PADDING, footerTop + 40);
 
-        ctx.font = "14px sans-serif";
+        ctx.font = "14px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = "#666666";
-        const estimatedHeightCm = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
-        ctx.fillText(`Dimensions: ${PHYSICAL_WIDTH_CM}cm Width × ${estimatedHeightCm}cm Length`, PADDING, footerTop + 60);
-        ctx.fillText(`Thread Density: ${THREADS_PER_CM} ends/cm · ${EXPECTED_WEFT_PER_CM} picks/cm`, PADDING, footerTop + 80);
-        ctx.fillText(`Total: ${TOTAL_PHYSICAL_THREADS} Warp Ends · ${rowCount} Weft Picks`, PADDING, footerTop + 100);
+        const estHeight = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
+        ctx.fillText(`Physical Size: ${PHYSICAL_WIDTH_CM}cm (W) × ${estHeight}cm (L)`, PADDING, footerTop + 65);
+        ctx.fillText(`Structure: ${DISPLAY_THREADS} warp ends (${THREADS_PER_CM} ends/cm) · ${rowCount} weft picks (${EXPECTED_WEFT_PER_CM} picks/cm)`, PADDING, footerTop + 85);
 
+        // Download
         const link = document.createElement('a');
-        const safeName = (loomConfig.patternName || 'woven_draft').replace(/\s+/g, '_').toLowerCase();
+        const safeName = (loomConfig.patternName || 'pattern').replace(/\s+/g, '_').toLowerCase();
         link.download = `${safeName}.png`;
         link.href = exportCanvas.toDataURL('image/png');
         link.click();
