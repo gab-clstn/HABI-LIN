@@ -528,6 +528,48 @@
       border-color: var(--brand);
     }
 
+    /* ── PRIVACY BUTTON ── */
+    .pattern-card .privacy-btn {
+      opacity: 0;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+    }
+
+    .pattern-card:hover .privacy-btn {
+      opacity: 1;
+    }
+
+    .privacy-btn.private {
+      background: rgba(43, 3, 3, 0.85);
+      color: #aaa;
+    }
+    .privacy-btn.private:hover {
+      background: rgba(43, 3, 3, 1);
+      color: white;
+    }
+
+    .privacy-btn.public {
+      background: rgba(0, 229, 255, 0.15);
+      color: #00e5ff;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+    .privacy-btn.public:hover {
+      background: rgba(0, 229, 255, 0.25);
+    }
+
     /* Hover Action Buttons */
     .card-actions {
       position: absolute;
@@ -998,7 +1040,7 @@
         <div class="collection-header">
           <div class="collection-tabs">
             <button class="tab-btn active" id="my-patterns-tab">My Patterns</button>
-            <button class="tab-btn" id="all-patterns-tab">All Patterns</button>
+            <button class="tab-btn" id="all-patterns-tab">Community Patterns</button>
           </div>
           <div class="header-content">
             <div class="header-text">
@@ -1112,17 +1154,37 @@
       await loadPatterns();
     });
 
-    /* ── DATA FETCHING ── */
+    /* ── LOAD PATTERNS ── */
     async function loadPatterns() {
       const grid = document.getElementById("pattern-grid");
-      grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading patterns…</div>`;
+      grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
       try {
+        // 1. Fetch user FIRST so we definitely know who is logged in
+        try {
+          const userRes = await fetch("/auth/user");
+          const user = await userRes.json();
+          if (user) {
+            window.currentUserId = user._id;
+            window.currentUserName = user.name;
+          }
+        } catch(e) { console.log("Could not verify user for grid"); }
+
+        // 2. Fetch the patterns
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("Failed to fetch");
-        allPatterns = await res.json();
-        renderFiltered();
+        const patterns = await res.json();
+        allPatterns = patterns;
+        
+        // 3. Render the grid
+        renderPatternGrid(patterns);
       } catch (err) {
-        grid.innerHTML = `<div class="empty-state"><h3>Could not load patterns</h3></div>`;
+        console.error("Collection fetch error:", err);
+        grid.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3>Could not load patterns</h3>
+            <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
+          </div>`;
       }
     }
 
@@ -1133,54 +1195,61 @@
         (p.type || "").toLowerCase().includes(query) ||
         (p.creator || "").toLowerCase().includes(query)
       );
+
       if (currentTab === "my") {
         filtered = filtered.filter(p => getOwnerId(p) === currentUserId && p.isImported !== true);
       } else {
         filtered = filtered.filter(p => {
-          if (p.isImported === true) return getOwnerId(p) === currentUserId;
-          return true;
+          if (p.isImported === true) return true;
+          
+          if (p.isPrivate === false) return true;
+          
+          return false; 
         });
       }
+      
       renderPatternGrid(filtered);
     }
 
     /* ── RENDER GRID ── */
+/* ── RENDER GRID ── */
     function renderPatternGrid(patterns) {
       const grid = document.getElementById("pattern-grid");
       if (!patterns || patterns.length === 0) {
-        const emptyMessage = currentTab === "my"
-          ? `<div class="empty-state"><span style="font-size:2.8rem;display:block;margin-bottom:16px;">🪡</span><h3>No patterns saved yet</h3><p>Head to the Weaving Studio and save your first design!</p></div>`
-          : `<div class="empty-state"><span style="font-size:2.8rem;display:block;margin-bottom:16px;">🧵</span><h3>No patterns found</h3><p>Try adjusting your search or check back later for new patterns.</p></div>`;
-        grid.innerHTML = emptyMessage;
+        grid.innerHTML = `
+          <div class="empty-state">
+            <span style="font-family:sans-serif;font-style:normal;font-size:3rem;display:block;margin-bottom:20px;">🪡</span>
+            <h3>No patterns saved yet</h3>
+            <p>Head to the Weaving Studio and save your first design!</p>
+          </div>`;
         return;
       }
       grid.innerHTML = "";
-
+      
       patterns.forEach(pattern => {
-        const isOwnPattern = getOwnerId(pattern) === currentUserId;
+        const isOwnPattern = (pattern.userId === window.currentUserId) || (pattern.creator === window.currentUserName);
+        const isImported = pattern.isImported === true;
         const shaftCount = pattern.loom === "traditional" ? 2 : 4;
         const lastSaved = pattern.created
           ? new Date(pattern.created).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })
           : "Unknown date";
         const typeLabel = (pattern.type || "plain").charAt(0).toUpperCase() + (pattern.type || "plain").slice(1);
-        const authorDisplay = pattern.creator || "Unknown Weaver";
-        const importBadge = pattern.isImported === true
-          ? ` <span style="font-size:0.65rem;background:#e0e0e0;color:#444;padding:2px 8px;border-radius:4px;margin-left:6px;font-weight:800;vertical-align:middle;">IMPORTED</span>`
-          : "";
 
-        // ── Build measurement expand block ──
+        let creatorText = "";
+        if (pattern.creator) {
+          creatorText = `<br><strong style="color:#555;">Created by: ${escapeHtml(pattern.creator)}</strong>`;
+        }
+
+        // ── HOVER MEASUREMENTS OVERLAY ──
         const m = pattern.measurements;
         let measureExpandHTML = "";
 
         if (m && typeof m.weftCount === "number") {
           const hasMeasure = m.physicalWidthCm || m.estimatedHeightCm || m.weftCount;
           if (hasMeasure) {
-            const accPct = typeof m.patternAccuracyPct === "number" ? m.patternAccuracyPct : 0;
-            const accColor = accPct >= 80 ? "#3ecf5a" : accPct >= 50 ? "#f0b429" : "#e84040";
             const heightDisplay = m.estimatedHeightCm ? `${m.estimatedHeightCm.toFixed(1)}` : "—";
             const widthDisplay = m.physicalWidthCm ? `${m.physicalWidthCm}` : "—";
             const epcDisplay = m.endsPerCm ? `${parseFloat(m.endsPerCm).toFixed(1)}` : "—";
-            const ppcDisplay = m.expectedPicksPerCm ? `${m.expectedPicksPerCm}` : "—";
 
             measureExpandHTML = `
               <div class="measure-expand">
@@ -1203,72 +1272,143 @@
                     <span class="measure-cell__value">${epcDisplay}<em> e/cm</em></span>
                   </div>
                 </div>
-                <div class="measure-acc-wrap">
-                  <div class="measure-acc-header">
-                    <span class="measure-acc-label">Pattern Accuracy</span>
-                    <span class="measure-acc-value" style="color:${accColor}">${accPct}%</span>
-                  </div>
-                  <div class="measure-acc-bar">
-                    <div class="measure-acc-fill" style="width:${accPct}%;background:linear-gradient(90deg,#27653a,${accColor});"></div>
-                  </div>
-                </div>
               </div>`;
           }
         }
 
         const card = document.createElement("div");
         card.className = "pattern-card";
+        card.style.position = "relative";
+        card.style.overflow = "hidden";
+
+        // ── PRIVACY BUTTON LOGIC ──
+        const isPrivate = pattern.isPrivate !== false; 
+        let privacyBtnHTML = "";
+        
+        // ONLY show the toggle if it's their own pattern AND NOT imported
+        if (isOwnPattern && !isImported) {
+          const pClass = isPrivate ? "private" : "public";
+          const pIcon = isPrivate ? '<i class="fa-solid fa-lock"></i> Private' : '<i class="fa-solid fa-globe"></i> Public';
+          privacyBtnHTML = `
+            <button class="privacy-btn ${pClass}" title="Click to toggle visibility">
+              ${pIcon}
+            </button>
+          `;
+        }
+
+        // ── HTML GENERATION (with SVG Action Icons) ──
         card.innerHTML = `
-          <div class="pattern-preview">
-            <canvas class="pattern-canvas" width="300" height="180"></canvas>
+          <div class="pattern-preview" style="display:flex; justify-content:center; align-items:center;">
+            ${privacyBtnHTML}
+            
             <div class="card-actions">
-              <button class="action-icon-btn btn-export-action export-btn" title="Export .habi file">
+              <button class="action-icon-btn btn-export-action" title="Export pattern to .habi">
                 <svg class="icon"><use href="#icon-download" /></svg>
               </button>
               ${isOwnPattern ? `
-              <button class="action-icon-btn btn-delete-action delete-btn" title="Delete pattern">
+              <button class="action-icon-btn btn-delete-action" title="Delete pattern">
                 <svg class="icon"><use href="#icon-trash" /></svg>
-              </button>` : ""}
+              </button>` : ''}
             </div>
+
+            <canvas class="pattern-canvas" style="max-width:100%; max-height:100%; object-fit:contain;"></canvas>
           </div>
           <div class="pattern-details">
-            <h4>${escapeHtml(pattern.name || "Untitled")}</h4>
-            <p>
-              Saved ${lastSaved}<br>
-              <strong style="color:#555;">Created by: ${escapeHtml(authorDisplay)}${importBadge}</strong>
-            </p>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <h4 style="margin-bottom:0;">${escapeHtml(pattern.name || "Untitled")}</h4>
+              ${isImported ? `<span style="font-size:0.6rem;background:#2b0303;color:#ff4d4d;padding:2px 6px;border-radius:4px;font-weight:800;text-transform:uppercase;">Imported</span>` : ''}
+            </div>
+            <p>Saved ${lastSaved} ${creatorText}</p>
             <div class="tag-row">
               <span class="pattern-tag">${typeLabel} &nbsp;·&nbsp; ${shaftCount}-shaft</span>
-              ${m && m.weftCount ? `<span style="font-size:0.68rem;color:#aaa;font-weight:600;">${m.weftCount} picks · ${m.physicalWidthCm || "?"}cm wide</span>` : ""}
+              <i class="fa-solid fa-chevron-right" style="color:#ccc;font-size:0.8rem;"></i>
             </div>
           </div>
           ${measureExpandHTML}
         `;
 
-        card.addEventListener("click", (e) => {
-          if (e.target.closest("button")) return;
-          localStorage.setItem("resumePattern", JSON.stringify(pattern));
-          window.location.href = "dashboard.html?action=resume";
+        const canvas = card.querySelector(".pattern-canvas");
+        requestAnimationFrame(() => {
+            if (typeof drawPatternOnCanvas === "function") {
+                drawPatternOnCanvas(canvas, pattern);
+            }
         });
 
-        card.querySelector(".export-btn").addEventListener("click", (e) => {
-          e.stopPropagation();
-          exportHabi(pattern);
-        });
+        // ACTION: EXPORT LOGIC
+        const exportBtn = card.querySelector(".btn-export-action");
+        if (exportBtn) {
+          exportBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            exportHabi(pattern); // Triggers your existing export function!
+          });
+        }
 
-        if (isOwnPattern) {
-          card.querySelector(".delete-btn").addEventListener("click", async (e) => {
+        // ACTION: DELETE LOGIC
+        const deleteBtn = card.querySelector(".btn-delete-action");
+        if (deleteBtn) {
+          deleteBtn.addEventListener("click", async (e) => {
             e.stopPropagation();
             if (!confirm(`Delete "${pattern.name}"?`)) return;
             try {
               const res = await fetch(`/api/patterns/${pattern._id}`, { method: "DELETE" });
-              if (res.ok) loadPatterns();
-            } catch (err) { alert("Error deleting pattern."); }
+              if (res.ok) {
+                card.style.transition = "opacity 0.3s, transform 0.3s";
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.95)";
+                setTimeout(() => card.remove(), 300);
+              } else {
+                alert("Could not delete pattern.");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Server error while deleting.");
+            }
           });
         }
 
-        grid.appendChild(card);
+        const privacyBtn = card.querySelector(".privacy-btn");
+        if (privacyBtn) {
+          privacyBtn.addEventListener("click", async (e) => {
+            e.stopPropagation(); 
+            const newPrivacyState = !pattern.isPrivate;
+            
+            pattern.isPrivate = newPrivacyState;
+            
+            renderFiltered(); 
+
+            try {
+              const res = await fetch(`/api/patterns/${pattern._id}/privacy`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isPrivate: newPrivacyState })
+              });
+              
+              if (!res.ok) throw new Error("Failed to update on server");
+            } catch (err) {
+              console.error(err);
+              alert("Failed to update privacy setting. Check server logs.");
+              pattern.isPrivate = !newPrivacyState; // Revert if failed
+              
+              renderFiltered();
+            }
+          });
+        }
+
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".action-icon-btn") || e.target.closest(".privacy-btn") || e.target.closest(".measure-expand")) return;
+          
+          localStorage.setItem("resumePattern", JSON.stringify(pattern));
+          
+          if (typeof startResumeProcess === "function") {
+              startResumeProcess();
+          } else {
+              window.location.href = "dashboard.html?action=resume";
+          }
+        });
+
+        grid.appendChild(card);        
         drawPatternOnCanvas(card.querySelector(".pattern-canvas"), pattern);
+
       });
     }
 
@@ -1286,7 +1426,10 @@
     }
 
     function drawPatternOnCanvas(canvas, pattern) {
-      const patternRows = pattern.patternRows || [];
+      const patternRows = pattern.patternRows && pattern.patternRows.length > 0
+        ? pattern.patternRows
+        : simulatePatternFromSteps(pattern.steps || [], pattern.loom === "traditional" ? 2 : 4);
+
       if (!canvas || patternRows.length === 0) return;
 
       const ctx = canvas.getContext("2d");
@@ -1294,11 +1437,7 @@
       const rowCount = patternRows.length;
 
       // ── PIXEL-GRID THUMBNAIL ──
-      // Each cell is always CELL_PX × CELL_PX pixels so the weave structure
-      // reads clearly as distinct squares regardless of thread count.
-      // We show a centred crop of the pattern (up to MAX_COLS × MAX_ROWS cells)
-      // so the card displays a representative slice, not a 1px-per-thread blur.
-      const CELL_PX = 6;          // px per warp/weft cell — large enough to see clearly
+      const CELL_PX = 6;          // px per warp/weft cell
       const MAX_COLS = 48;         // columns (warp threads) shown in the crop
       const MAX_ROWS = 30;         // rows (weft picks) shown in the crop
 
@@ -1342,11 +1481,9 @@
           const isWarpUp = rowStates[warpIndex];
 
           if (!isWarpUp) {
-            // Weft thread visible → fill full cell with weft color
             ctx.fillStyle = weftColor;
             ctx.fillRect(x, y, CELL_PX, CELL_PX);
           } else {
-            // Warp thread visible → fill full cell with warp color
             const warpColor = isPerThread
               ? (safeWarpColors[warpIndex] || "#f0eadf")
               : (safeWarpColors[map[warpIndex % map.length]] || "#f0eadf");
@@ -1354,14 +1491,14 @@
             ctx.fillRect(x, y, CELL_PX, CELL_PX);
           }
 
-          // Subtle 1px dark grid lines so cells read as distinct squares
+          // Subtle 1px dark grid lines
           ctx.strokeStyle = "rgba(0,0,0,0.18)";
           ctx.lineWidth = 0.5;
           ctx.strokeRect(x + 0.25, y + 0.25, CELL_PX - 0.5, CELL_PX - 0.5);
         }
       }
 
-      // Tiny "crop indicator" label: show how many total rows are in the pattern
+      // Crop indicator label
       if (rowCount > MAX_ROWS) {
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(0, canvas.height - 14, canvas.width, 14);
@@ -1369,7 +1506,6 @@
         ctx.font = "bold 9px sans-serif";
         ctx.textBaseline = "middle";
         ctx.textAlign = "center";
-        ctx.fillText(`${rowCount} picks total`, canvas.width / 2, canvas.height - 7);
       }
     }
 
