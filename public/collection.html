@@ -1158,33 +1158,32 @@
     async function loadPatterns() {
       const grid = document.getElementById("pattern-grid");
       grid.innerHTML = `<div class="loading-state"><div class="spinner"></div> Loading your patterns…</div>`;
+      
       try {
-        // 1. Fetch user FIRST so we definitely know who is logged in
-        try {
-          const userRes = await fetch("/auth/user");
+        // 1. AWAIT the user fetch completely before moving to patterns
+        const userRes = await fetch("/auth/user");
+        if (userRes.ok) {
           const user = await userRes.json();
           if (user) {
-            window.currentUserId = user._id;
+            windowCurrentUserObj = user;
+            window.currentUserId = (user._id || user.id).toString();
             window.currentUserName = user.name;
+            currentUserId = window.currentUserId; // Sync the local variable too
           }
-        } catch(e) { console.log("Could not verify user for grid"); }
+        }
 
-        // 2. Fetch the patterns
+        // 2. Now that we definitely know the User ID, fetch patterns
         const res = await fetch("/api/patterns");
         if (!res.ok) throw new Error("Failed to fetch");
         const patterns = await res.json();
         allPatterns = patterns;
         
-        // 3. Render the grid using the active tab filter!
-        renderFiltered(); 
+        // 3. IMPORTANT: Use renderFiltered() so it checks the "My Patterns" tab logic
+        renderFiltered();
+
       } catch (err) {
         console.error("Collection fetch error:", err);
-        grid.innerHTML = `
-          <div class="empty-state">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <h3>Could not load patterns</h3>
-            <p>Make sure your server is running and <code>/api/patterns</code> is available.</p>
-          </div>`;
+        grid.innerHTML = `<div class="empty-state"><h3>Could not load patterns</h3><p>Check your connection or server logs.</p></div>`;
       }
     }
 
