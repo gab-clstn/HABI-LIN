@@ -122,6 +122,9 @@
           d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zm0-294.2a48 48 0 1 0 76.2-57.8 48 48 0 1 0 -76.2 57.8zM369.1 437a48 48 0 1 0 -76.2-57.8 48 48 0 1 0 76.2 57.8z"
         />
       </symbol>
+      <symbol id="icon-download" viewBox="0 0 512 512">
+        <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+      </symbol>
     </svg>
 
     <style>
@@ -595,6 +598,13 @@
         transform: translateX(20px);
       }
 
+      .save-btn-container {
+        display: flex;
+        gap: 16px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+      }
+
       .save-btn {
         background: var(--brand);
         color: white;
@@ -604,10 +614,10 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 30px;
         font-size: 0.95rem;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
       }
 
@@ -931,9 +941,11 @@
         .switch {
           align-self: flex-end;
         }
+        .save-btn-container {
+          flex-direction: column;
+        }
         .save-btn {
           width: 100%;
-          justify-content: center;
         }
         .avatar-container {
           flex-direction: column;
@@ -1035,7 +1047,6 @@
               </svg>
               <span id="stab-account">Account</span>
             </button>
-            <!-- Security tab button — hidden for social login users via JS -->
             <button
               class="settings-menu-btn"
               id="security-tab-btn"
@@ -1098,12 +1109,22 @@
                   </label>
                 </div>
 
+                  <div class="save-btn-container">
                 <button class="save-btn" onclick="saveLanguageSettings(this)">
                   <svg class="icon" aria-hidden="true">
                     <use href="#icon-floppy-disk" />
                   </svg>
                   <span id="s-save-btn">Save Preferences</span>
                 </button>
+
+                <button class="save-btn" id="install-app-btn" onclick="installPWA()" style="display: inline-flex;">
+                  <svg class="icon" aria-hidden="true">
+                    <use href="#icon-download" />
+                  </svg>
+                  <span>Install HABI-LIN</span>
+                </button>
+              </div>
+
               </div>
 
               <div id="account" class="pane">
@@ -1196,7 +1217,6 @@
                   </p>
                 </div>
 
-                <!-- SOCIAL LOGIN NOTICE: shown only for Google/Facebook users -->
                 <div
                   class="social-login-notice"
                   id="social-login-notice"
@@ -1217,8 +1237,6 @@
                   </div>
                 </div>
 
-                <!-- PASSWORD FIELDS: shown only for local (email) users -->
-                <!-- PASSWORD FIELDS: shown only for local (email) users -->
                 <div id="password-change-section" style="display: none">
                   <div class="form-group">
                     <label id="s-curr-pass-label">Current Password</label>
@@ -1301,7 +1319,7 @@
           closeDrawer();
       });
 
-      // === AVATAR UPLOAD (Base64 for Railway/MongoDB Atlas) ===
+      // === AVATAR UPLOAD ===
       async function uploadAvatar(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -1484,7 +1502,6 @@
       }
 
       // === APPLY SOCIAL LOGIN SECURITY RESTRICTIONS ===
-      // === APPLY SOCIAL LOGIN SECURITY RESTRICTIONS ===
       function applyProviderRestrictions(provider) {
         const isSocial = provider === "google" || provider === "facebook";
 
@@ -1496,7 +1513,6 @@
         const badgeLabel = document.getElementById("provider-badge-label");
 
         if (isSocial) {
-          // Keep Security tab visible — just swap content
           if (passwordSection) passwordSection.style.display = "none";
           if (notice) notice.style.display = "flex";
 
@@ -1509,7 +1525,6 @@
                 : "Signed in with Facebook";
           }
         } else {
-          // Local email/password user — show password fields, hide notice
           if (passwordSection) passwordSection.style.display = "block";
           if (notice) notice.style.display = "none";
         }
@@ -1517,22 +1532,18 @@
 
       // === INITIALIZATION ===
       document.addEventListener("DOMContentLoaded", async () => {
-        // 1. Sync Language UI
         const savedLang = sessionStorage.getItem("preferredLanguage") || "en";
         const langSelect = document.getElementById("languageSelect");
         if (langSelect) langSelect.value = savedLang;
 
-        // 2. Sync Theme Toggle UI
         const themeToggle = document.getElementById("darkModeToggle");
         if (themeToggle) {
           themeToggle.checked = localStorage.getItem("theme") === "dark";
         }
 
-        // 3. Fetch User Session Data
         try {
           const response = await fetch("/auth/user");
           const user = await response.json();
-          console.log("Provider:", user.provider); // ADD THIS
 
           if (user) {
             const sidebarName = document.getElementById(
@@ -1560,7 +1571,6 @@
               }
             }
 
-            // Sync user DB theme preference with local storage
             if (
               user.theme === "dark" &&
               localStorage.getItem("theme") !== "dark"
@@ -1577,13 +1587,52 @@
               if (themeToggle) themeToggle.checked = false;
             }
 
-            // 4. Apply provider-based security restrictions
             applyProviderRestrictions(user.provider || "local");
           }
         } catch (error) {
           console.log("Session sync failed.");
         }
       });
+
+      // === PWA INSTALL LOGIC ===
+      let deferredPrompt = null;
+      const installBtn = document.getElementById("install-app-btn");
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        console.log("PWA Install Prompt is ready!");
+      });
+
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        installBtn.style.display = "none";
+        alert("HABI-LIN successfully installed!");
+      });
+
+      async function installPWA() {
+        if (!deferredPrompt) {
+          // If forced visible but the browser won't allow installation yet
+          alert("Installation not available right now. Ensure you are on HTTPS and the app isn't already installed.");
+          return;
+        }
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        
+        if (outcome === 'accepted') {
+            installBtn.style.display = "none";
+        }
+      }
+
+      // Hide the button if the app is already installed/running in standalone mode
+      if (window.matchMedia("(display-mode: standalone)").matches) {
+          installBtn.style.display = "none";
+      } 
+      
     </script>
   </body>
 </html>
