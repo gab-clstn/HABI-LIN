@@ -54,6 +54,7 @@ const patternSchema = new mongoose.Schema(
         name:        { type: String,  default: "Untitled Weave" },
         creator:     { type: String,  default: "Unknown Weaver" },
         isImported:  { type: Boolean, default: false },
+        isPrivate:   { type: Boolean, default: true }, // ADDED PRIVACY DEFAULT
         type:        { type: String,  default: "plain" },
         loom:        { type: String,  default: "standard" },
         steps:       { type: mongoose.Schema.Types.Mixed, default: [] },
@@ -282,7 +283,9 @@ app.get("/api/patterns", async (req, res) => {
     try {
         const patterns = await Pattern.find({
             $or: [
-                { isImported: { $ne: true } }, 
+                // If it's not imported, only show it if it's public OR if the logged-in user owns it
+                { isImported: { $ne: true }, $or: [{ isPrivate: false }, { userId: req.user._id }] }, 
+                // Imported patterns are visible to the owner
                 { userId: req.user._id, isImported: true } 
             ]
         })
@@ -360,6 +363,35 @@ app.put("/api/patterns/:id", async (req, res) => {
     } catch (err) {
         console.error("Pattern Update Error:", err);
         res.status(500).json({ error: "Failed to update pattern" });
+    }
+});
+
+// --- UPDATE PATTERN PRIVACY ---
+app.patch('/api/patterns/:id/privacy', async (req, res) => {
+    try {
+        // FIXED: Use req.user instead of req.session for Passport auth
+        if (!req.user) {
+             return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const patternId = req.params.id;
+        const newPrivacyState = req.body.isPrivate;
+
+        // Ensure the pattern belongs to the logged-in user before updating
+        const updatedPattern = await Pattern.findOneAndUpdate(
+            { _id: patternId, userId: req.user._id },
+            { isPrivate: newPrivacyState },
+            { new: true }
+        );
+
+        if (!updatedPattern) {
+            return res.status(404).json({ error: "Pattern not found or unauthorized" });
+        }
+
+        res.status(200).json({ message: "Privacy updated successfully" });
+    } catch (error) {
+        console.error("Error updating privacy:", error);
+        res.status(500).json({ error: "Failed to update privacy" });
     }
 });
 
