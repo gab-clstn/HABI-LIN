@@ -1422,6 +1422,87 @@
     </main>
   </div><!-- /.dashboard-wrapper -->
 
+  <div id="pwa-fab" style="position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: none; flex-direction: column; align-items: flex-end; gap: 10px;">
+    <div id="pwa-tooltip" style="background: #1a1a1a; color: white; padding: 8px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 500; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .15); display: none; position: relative;">
+        Install HABI-LIN as an app!
+    </div>
+    <button id="pwa-install-fab" onclick="installPWA()" title="Install HABI-LIN App" 
+        style="width: 56px; height: 56px; border-radius: 50%; background: #2b0303; color: white; border: none; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(43, 3, 3, .35); transition: transform 0.2s;">
+        ⬇️
+    </button>
+  </div>
+
+  <div id="pwa-toast" style="position: fixed; bottom: 100px; right: 28px; background: #1a1a1a; color: white; padding: 12px 20px; border-radius: 12px; font-size: 0.82rem; font-weight: 500; z-index: 9999; display: none; box-shadow: 0 4px 20px rgba(0, 0, 0, .2); max-width: 220px; line-height: 1.4; transition: opacity 0.3s;"></div>
+
+  <script>
+    let deferredPrompt = null;
+    const fab = document.getElementById("pwa-fab");
+    const tooltip = document.getElementById("pwa-tooltip");
+    const fabBtn = document.getElementById("pwa-install-fab");
+    const toast = document.getElementById("pwa-toast");
+
+    // Listen for the install prompt
+    window.addEventListener("beforeinstallprompt", (e) => {
+      console.log("✅ PWA: beforeinstallprompt event fired!");
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Show the button
+      fab.style.display = "flex";
+      
+      // Auto-show tooltip for 4 seconds
+      setTimeout(() => {
+        tooltip.style.display = "block";
+        setTimeout(() => tooltip.style.display = "none", 4000);
+      }, 2000);
+    });
+
+    window.addEventListener("appinstalled", () => {
+      console.log("🎉 PWA: Successfully installed");
+      deferredPrompt = null;
+      fab.style.display = "none";
+      showPwaToast("✅ HABI-LIN installed successfully!");
+    });
+
+    // Hover effects for tooltip
+    if (fabBtn) {
+        fabBtn.addEventListener("mouseenter", () => tooltip.style.display = "block");
+        fabBtn.addEventListener("mouseleave", () => tooltip.style.display = "none");
+    }
+
+    async function installPWA() {
+      if (!deferredPrompt) {
+        showPwaToast("ℹ️ Installation not ready. Ensure you are on Chrome and HTTPS.");
+        console.log("❌ PWA: deferredPrompt is null. Check F12 > Application > Manifest for errors.");
+        return;
+      }
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install: ${outcome}`);
+      
+      if (outcome === "accepted") {
+          showPwaToast("🎉 Installing HABI-LIN...");
+          deferredPrompt = null;
+          fab.style.display = "none";
+      }
+    }
+
+    function showPwaToast(message) {
+      toast.textContent = message;
+      toast.style.display = "block";
+      toast.style.opacity = "1";
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.style.display = "none", 300);
+      }, 4000);
+    }
+
+    // Hide if already in app mode
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      fab.style.display = "none";
+    }
+  </script>
+  
   <script>
     /* ── HAMBURGER ── */
     const hamburgerBtn = document.getElementById("hamburger-btn");
