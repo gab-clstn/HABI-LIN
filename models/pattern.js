@@ -1,11 +1,17 @@
 import mongoose from 'mongoose';
 
 const patternSchema = new mongoose.Schema({
-  patternName: { type: String, required: true },
+  patternName: { type: String },
   weaverName: String,
-  // Storing the design as a grid or coordinates for your 3D loom
+  
   gridData: Array, 
-  createdAt: { type: Date, default: Date.now }
-});
+  
+  isPrivate: { type: Boolean, default: true },
+
+  userId: String,
+  creator: String,
+
+  createdAt: { type: Date, default: Date.nows }
+}, { strict: false }); 
 
 export default mongoose.model('Pattern', patternSchema);
