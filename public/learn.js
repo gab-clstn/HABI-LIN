@@ -958,7 +958,11 @@ function initLearnLoom(pattern) {
                 shuttleHighlight.material.emissive.setHex(0xffdd00);
             }
         }
-        if (beaterHighlight) beaterHighlight.visible = (currentPhase === "BEAT" && !beaterHeld);
+        if (beaterHighlight) {
+            beaterHighlight.visible = (currentPhase === "BEAT");
+            beaterHighlight.material.color.setHex(0x00ff88);
+            beaterHighlight.material.emissive.setHex(0x00ff88);
+        }
     }
 
     function clearAllHighlights() {
