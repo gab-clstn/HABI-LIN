@@ -26,246 +26,83 @@ function attachStartButton() {
         return;
     }
 
-    // ── REBUILD COLOR SECTION IN HEDDLES OVERLAY ──
-    // Hides the old 4-shaft inline pickers and replaces with a full-width
-    // tabbed panel: "Warp Threads" (by range) | "Weft Picks" (by range).
-    // Called from nextBtn click so the DOM is guaranteed ready.
-    function buildColorUI() {
-        if (document.getElementById("color-section-root")) return;
+    // Prevent duplicate event listeners if startLoom is called multiple times
+    if (nextBtn.dataset.listenerAttached) return;
+    nextBtn.dataset.listenerAttached = "true";
 
-        // ── Inject styles ──
+    // ── REBUILD COLOR SECTION IN HEDDLES OVERLAY ──
+    function buildColorUI() {
+        const existingRoot = document.getElementById("color-section-root");
+        if (existingRoot) existingRoot.remove();
+
         if (!document.getElementById("color-section-styles")) {
             const s = document.createElement("style");
             s.id = "color-section-styles";
             s.textContent = `
-                /* Hide legacy shaft pickers — we replace them entirely */
                 #wrap-warpColor1, #wrap-warpColor2,
                 #wrap-warpColor3, #wrap-warpColor4 { display: none !important; }
-
-                /* Overlay scrollable content wrapper */
-                #heddlesOverlay .heddles-inner {
-                    width: 100%;
-                    max-width: 480px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                    box-sizing: border-box;
-                }
-
-                /* ── Color section root ── */
-                #color-section-root {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding-top: 0;
-                }
-                .cs-heading {
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    letter-spacing: 0.8px;
-                    text-transform: uppercase;
-                    color: #888;
-                    margin-bottom: 10px;
-                }
-
-                /* ── Mode toggle tabs ── */
-                .cs-tabs {
-                    display: flex;
-                    gap: 6px;
-                    margin-bottom: 14px;
-                }
-                .cs-tab {
-                    flex: 1;
-                    padding: 8px 6px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(255,255,255,0.12);
-                    background: rgba(255,255,255,0.04);
-                    color: #888;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    font-family: inherit;
-                    cursor: pointer;
-                    text-align: center;
-                    transition: all 0.18s;
-                    line-height: 1.3;
-                }
-                .cs-tab:hover { background: rgba(255,255,255,0.08); color: #ccc; }
-                .cs-tab.active {
-                    background: rgba(200,169,110,0.18);
-                    border-color: rgba(200,169,110,0.5);
-                    color: #e8c97a;
-                }
-                .cs-tab .cs-tab-icon { font-size: 1rem; display: block; margin-bottom: 2px; }
-
-                /* ── Panel (shown/hidden) ── */
-                .cs-panel { display: none; flex-direction: column; gap: 8px; }
-                .cs-panel.active { display: flex; }
-
-                /* ── Rows list ── */
+                #heddlesOverlay .heddles-inner { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; }
+                #color-section-root { display: block !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding-bottom: 8px; }
+                .cs-heading { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+                .cs-panel { display: flex; flex-direction: column; gap: 8px; }
                 .cs-rows { display: flex; flex-direction: column; gap: 6px; }
-
-                /* ── Single range row ── */
-                .cs-row {
-                    display: grid;
-                    grid-template-columns: 1fr auto auto auto auto;
-                    align-items: center;
-                    gap: 6px;
-                    background: rgba(255,255,255,0.04);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 9px;
-                    padding: 8px 10px;
-                    box-sizing: border-box;
-                }
-                .cs-row-label {
-                    font-size: 0.7rem;
-                    color: #777;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                .cs-row-sep {
-                    font-size: 0.75rem;
-                    color: #555;
-                    padding: 0 2px;
-                }
-                .cs-row input[type="number"] {
-                    width: 48px;
-                    min-width: 0;
-                    background: rgba(0,0,0,0.35);
-                    border: 1px solid rgba(255,255,255,0.14);
-                    border-radius: 6px;
-                    color: #e8e8e8;
-                    font-size: 0.78rem;
-                    padding: 4px 5px;
-                    text-align: center;
-                    font-family: inherit;
-                    -moz-appearance: textfield;
-                    box-sizing: border-box;
-                }
-                .cs-row input[type="number"]:focus {
-                    outline: none;
-                    border-color: rgba(200,169,110,0.5);
-                }
-                .cs-row input[type="number"]::-webkit-inner-spin-button,
-                .cs-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-                .cs-row input[type="color"] {
-                    width: 32px;
-                    height: 26px;
-                    border: 1px solid rgba(255,255,255,0.15);
-                    border-radius: 6px;
-                    cursor: pointer;
-                    padding: 2px;
-                    background: rgba(0,0,0,0.2);
-                    flex-shrink: 0;
-                }
-                .cs-row-del {
-                    width: 24px;
-                    height: 24px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: rgba(220,60,60,0.15);
-                    border: 1px solid rgba(220,60,60,0.3);
-                    color: #e06060;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 0.7rem;
-                    flex-shrink: 0;
-                    transition: background 0.15s;
-                    padding: 0;
-                    font-family: inherit;
-                }
-                .cs-row-del:hover { background: rgba(220,60,60,0.35); }
-
-                /* ── Add button ── */
-                .cs-add-btn {
-                    width: 100%;
-                    padding: 8px 12px;
-                    background: rgba(100,180,100,0.1);
-                    border: 1px dashed rgba(100,180,100,0.35);
-                    color: #7ecf7e;
-                    border-radius: 9px;
-                    cursor: pointer;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    font-family: inherit;
-                    text-align: left;
-                    transition: background 0.15s;
-                    box-sizing: border-box;
-                }
-                .cs-add-btn:hover { background: rgba(100,180,100,0.22); }
-
-                /* ── Hint text ── */
-                .cs-hint {
-                    font-size: 0.67rem;
-                    color: #555;
-                    line-height: 1.5;
-                    padding: 2px 0;
-                }
-
-                /* ── Preview bar ── */
-                .cs-preview-wrap { margin-top: 4px; }
-                .cs-preview-label {
-                    font-size: 0.67rem;
-                    color: #555;
-                    margin-bottom: 4px;
-                }
-                #cs-warp-preview, #cs-weft-preview {
-                    width: 100%;
-                    height: 12px;
-                    border-radius: 4px;
-                    display: block;
-                    image-rendering: pixelated;
-                    border: 1px solid rgba(255,255,255,0.08);
-                }
+                .cs-row { display: grid; grid-template-columns: 1fr auto auto auto auto; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 8px 10px; box-sizing: border-box; }
+                .cs-row-label { font-size: 0.7rem; color: #777; white-space: nowrap; }
+                .cs-row-sep { font-size: 0.75rem; color: #555; padding: 0 2px; }
+                .cs-row input[type="number"] { width: 48px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.14); border-radius: 6px; color: #e8e8e8; font-size: 0.78rem; padding: 4px 5px; text-align: center; }
+                .cs-row input[type="color"] { width: 32px; height: 26px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; cursor: pointer; padding: 2px; background: rgba(0,0,0,0.2); }
+                .cs-row-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: rgba(220,60,60,0.15); border: 1px solid rgba(220,60,60,0.3); color: #e06060; border-radius: 6px; cursor: pointer; font-size: 0.7rem; }
+                .cs-add-btn { width: 100%; padding: 10px 12px; background: rgba(100,180,100,0.1); border: 1px dashed rgba(100,180,100,0.35); color: #7ecf7e; border-radius: 9px; cursor: pointer; font-size: 0.75rem; font-weight: 600; text-align: center; transition: 0.2s; }
+                .cs-add-btn:hover { background: rgba(100,180,100,0.2); }
+                .cs-hint { font-size: 0.67rem; color: #555; line-height: 1.5; padding: 2px 0; }
+                .cs-preview-wrap { margin-top: 15px; }
+                .cs-preview-label { font-size: 0.67rem; color: #555; margin-bottom: 4px; }
+                #cs-warp-preview { width: 100%; height: 12px; border-radius: 4px; display: block; image-rendering: pixelated; border: 1px solid rgba(255,255,255,0.08); }
+                
+                /* PRETTIER TOGGLE BUTTONS */
+                .warp-toggle-container { display: flex; background: #111; border-radius: 10px; padding: 4px; margin-bottom: 18px; border: 1px solid #333; }
+                .warp-toggle-btn { flex: 1; text-align: center; padding: 8px; font-size: 0.78rem; color: #666; cursor: pointer; border-radius: 8px; transition: all 0.25s ease; font-weight: 700; border: none; background: none; font-family: inherit; }
+                .warp-toggle-btn:hover { color: #aaa; }
+                .warp-toggle-btn.active { background: #2a2a35; color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
             `;
             document.head.appendChild(s);
         }
 
-        // ── Build root ──
         const root = document.createElement("div");
         root.id = "color-section-root";
 
         root.innerHTML = `
-            <div class="cs-heading">Thread Colors</div>
-            <div class="cs-tabs">
-                <button type="button" class="cs-tab active" data-tab="warp">
-                    <span class="cs-tab-icon">↕</span>Warp Threads
-                </button>
-                <button type="button" class="cs-tab" data-tab="weft">
-                    <span class="cs-tab-icon">↔</span>Weft Picks
-                </button>
+            <div class="cs-heading">Warp Thread Colors</div>
+            <div class="warp-toggle-container">
+                <button type="button" class="warp-toggle-btn active" data-mode="range">By Range</button>
+                <button type="button" class="warp-toggle-btn" data-mode="heddle">By Heddle</button>
             </div>
 
-            <!-- WARP panel -->
-            <div class="cs-panel active" id="cs-panel-warp">
+            <div class="cs-panel" id="cs-panel-warp-range">
                 <div class="cs-hint">Color warp threads by range. Ranges stack — last one wins.</div>
                 <div class="cs-rows" id="cs-warp-rows"></div>
                 <button type="button" class="cs-add-btn" id="cs-warp-add">+ Add Thread Range</button>
-                <div class="cs-preview-wrap">
-                    <div class="cs-preview-label">Preview</div>
-                    <canvas id="cs-warp-preview" height="1"></canvas>
-                </div>
             </div>
 
-            <!-- WEFT panel -->
-            <div class="cs-panel" id="cs-panel-weft">
-                <div class="cs-hint">Pre-set weft pick colors by range. You can still change color live while weaving.</div>
-                <div class="cs-rows" id="cs-weft-rows"></div>
-                <button type="button" class="cs-add-btn" id="cs-weft-add">+ Add Pick Range</button>
-                <div class="cs-preview-wrap">
-                    <div class="cs-preview-label">Preview (first 200 picks)</div>
-                    <canvas id="cs-weft-preview" height="1"></canvas>
-                </div>
+            <div class="cs-panel" id="cs-panel-warp-heddle" style="display:none;">
+                <div class="cs-hint">Assign one color per heddle shaft.</div>
+                <div class="cs-row"><span class="cs-row-label">Heddle 1</span><input type="color" id="hc1" value="#ffffff"></div>
+                <div class="cs-row"><span class="cs-row-label">Heddle 2</span><input type="color" id="hc2" value="#ffffff"></div>
+                <div class="cs-row" id="hc3-row"><span class="cs-row-label">Heddle 3</span><input type="color" id="hc3" value="#ffffff"></div>
+                <div class="cs-row" id="hc4-row"><span class="cs-row-label">Heddle 4</span><input type="color" id="hc4" value="#ffffff"></div>
+            </div>
+
+            <div class="cs-preview-wrap">
+                <div class="cs-preview-label">Warp Preview</div>
+                <canvas id="cs-warp-preview" height="1"></canvas>
             </div>
         `;
 
-        // ── Inject into the right column mount point ──
         const mountEl = document.getElementById("color-panel-mount");
         if (mountEl) {
-            mountEl.innerHTML = ""; // clear placeholder text
+            mountEl.innerHTML = ""; 
             mountEl.appendChild(root);
         } else {
-            // fallback: inject before Start Weaving button
             const startBtnEl = heddlesOverlay.querySelector("#startWeavingFromHeddles");
             if (startBtnEl && startBtnEl.parentNode) {
                 startBtnEl.parentNode.insertBefore(root, startBtnEl);
@@ -274,37 +111,37 @@ function attachStartButton() {
             }
         }
 
-        // ── Tab switching ──
-        root.querySelectorAll(".cs-tab").forEach(tab => {
-            tab.addEventListener("click", () => {
-                root.querySelectorAll(".cs-tab").forEach(t => t.classList.remove("active"));
-                root.querySelectorAll(".cs-panel").forEach(p => p.classList.remove("active"));
-                tab.classList.add("active");
-                root.querySelector(`#cs-panel-${tab.dataset.tab}`).classList.add("active");
+        const warpRows = root.querySelector("#cs-warp-rows");
+        const warpAddBtn = root.querySelector("#cs-warp-add");
+        let currentWarpMode = "range";
+
+        // Prettier Toggle Logic
+        root.querySelectorAll('.warp-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                root.querySelectorAll('.warp-toggle-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentWarpMode = e.target.dataset.mode;
+                
+                if (currentWarpMode === 'range') {
+                    root.querySelector('#cs-panel-warp-range').style.display = 'flex';
+                    root.querySelector('#cs-panel-warp-heddle').style.display = 'none';
+                } else {
+                    root.querySelector('#cs-panel-warp-range').style.display = 'none';
+                    root.querySelector('#cs-panel-warp-heddle').style.display = 'flex';
+                }
+                drawWarpPreview();
             });
         });
 
-        // ── Generic row factory ──
-        function makeRow(rowsEl, from, to, color, labelText, previewFn) {
-            const row = document.createElement("div");
-            row.className = "cs-row";
-            row.innerHTML = `
-                <span class="cs-row-label">${labelText}</span>
-                <input type="number" class="range-from" value="${from}" min="1" />
-                <span class="cs-row-sep">–</span>
-                <input type="number" class="range-to" value="${to}" min="1" />
-                <input type="color" class="range-color" value="${color}" />
-                <button type="button" class="cs-row-del" title="Remove">✕</button>
-            `;
-            row.querySelector(".cs-row-del").addEventListener("click", () => { row.remove(); previewFn(); });
-            row.querySelectorAll("input").forEach(el => el.addEventListener("input", previewFn));
-            rowsEl.appendChild(row);
-            previewFn();
+        // Hide Heddle 3 & 4 if traditional loom
+        if (document.getElementById("loomType")?.value === "traditional") {
+            root.querySelector('#hc3-row').style.display = 'none';
+            root.querySelector('#hc4-row').style.display = 'none';
         }
 
-        // ── Warp row helpers ──
-        const warpRows = root.querySelector("#cs-warp-rows");
-        const warpAddBtn = root.querySelector("#cs-warp-add");
+        root.querySelectorAll('#cs-panel-warp-heddle input[type="color"]').forEach(inp => {
+            inp.addEventListener('input', drawWarpPreview);
+        });
 
         function drawWarpPreview() {
             const canvas = root.querySelector("#cs-warp-preview");
@@ -321,17 +158,55 @@ function attachStartButton() {
 
         function buildWarpColorArray(total) {
             const arr = new Array(total).fill("#ffffff");
-            warpRows.querySelectorAll(".cs-row").forEach(row => {
-                const from = Math.max(1, parseInt(row.querySelector(".range-from").value) || 1);
-                const to = Math.min(total, parseInt(row.querySelector(".range-to").value) || total);
-                const col = row.querySelector(".range-color").value || "#ffffff";
-                for (let i = from - 1; i < to; i++) arr[i] = col;
-            });
+
+            if (currentWarpMode === 'range') {
+                warpRows.querySelectorAll(".cs-row").forEach(row => {
+                    const from = Math.max(1, parseInt(row.querySelector(".range-from").value) || 1);
+                    const to = Math.min(total, parseInt(row.querySelector(".range-to").value) || total);
+                    const col = row.querySelector(".range-color").value || "#ffffff";
+                    for (let i = from - 1; i < to; i++) arr[i] = col;
+                });
+            } else {
+                const colors = [
+                    root.querySelector('#hc1').value,
+                    root.querySelector('#hc2').value,
+                    root.querySelector('#hc3').value,
+                    root.querySelector('#hc4').value
+                ];
+                
+                const parseHeddleStr = (id) => {
+                    const el = document.getElementById(id);
+                    return (el && el.value) ? el.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) : [];
+                };
+                const patternSize = parseInt(document.getElementById("patternSize")?.value || "4");
+                let tempMap = new Array(patternSize).fill(0);
+                parseHeddleStr("heddle1").forEach(n => { if(n<=patternSize) tempMap[n-1] = 0; });
+                parseHeddleStr("heddle2").forEach(n => { if(n<=patternSize) tempMap[n-1] = 1; });
+                parseHeddleStr("heddle3").forEach(n => { if(n<=patternSize) tempMap[n-1] = 2; });
+                parseHeddleStr("heddle4").forEach(n => { if(n<=patternSize) tempMap[n-1] = 3; });
+
+                for (let i = 0; i < total; i++) {
+                    arr[i] = colors[tempMap[i % patternSize] || 0];
+                }
+            }
             return arr;
         }
 
-        function addWarpRow(from, to, color) {
-            makeRow(warpRows, from, to, color, "Threads", drawWarpPreview);
+        function makeRow(from, to, color) {
+            const row = document.createElement("div");
+            row.className = "cs-row";
+            row.innerHTML = `
+                <span class="cs-row-label">Threads</span>
+                <input type="number" class="range-from" value="${from}" min="1" />
+                <span class="cs-row-sep">–</span>
+                <input type="number" class="range-to" value="${to}" min="1" />
+                <input type="color" class="range-color" value="${color}" />
+                <button type="button" class="cs-row-del" title="Remove">✕</button>
+            `;
+            row.querySelector(".cs-row-del").addEventListener("click", () => { row.remove(); drawWarpPreview(); });
+            row.querySelectorAll("input").forEach(el => el.addEventListener("input", drawWarpPreview));
+            warpRows.appendChild(row);
+            drawWarpPreview();
         }
 
         warpAddBtn.addEventListener("click", () => {
@@ -343,60 +218,11 @@ function attachStartButton() {
             }
             const currentMax = parseInt(document.getElementById("patternSize")?.value || "4");
             const maxT = Math.floor(120 / Math.max(1, currentMax)) * currentMax;
-            addWarpRow(nextFrom, maxT, "#000000");
+            makeRow(nextFrom, maxT, "#000000");
         });
 
-        // Default: one row covering all threads in white
-        addWarpRow(1, 120, "#ffffff");
-
-        // ── Weft row helpers ──
-        const weftRows = root.querySelector("#cs-weft-rows");
-        const weftAddBtn = root.querySelector("#cs-weft-add");
-
-        function drawWeftPreview() {
-            const canvas = root.querySelector("#cs-weft-preview");
-            if (!canvas) return;
-            const total = 200;
-            canvas.width = total;
-            const ctx = canvas.getContext("2d");
-            const colors = buildWeftColorArray(total);
-            for (let i = 0; i < total; i++) {
-                ctx.fillStyle = colors[i];
-                ctx.fillRect(i, 0, 1, 1);
-            }
-        }
-
-        function buildWeftColorArray(total) {
-            const arr = new Array(total).fill("#f0eadf");
-            weftRows.querySelectorAll(".cs-row").forEach(row => {
-                const from = Math.max(1, parseInt(row.querySelector(".range-from").value) || 1);
-                const to = Math.min(total, parseInt(row.querySelector(".range-to").value) || total);
-                const col = row.querySelector(".range-color").value || "#f0eadf";
-                for (let i = from - 1; i < to; i++) arr[i] = col;
-            });
-            return arr;
-        }
-
-        function addWeftRow(from, to, color) {
-            makeRow(weftRows, from, to, color, "Picks", drawWeftPreview);
-        }
-
-        weftAddBtn.addEventListener("click", () => {
-            const rows = weftRows.querySelectorAll(".cs-row");
-            let nextFrom = 1;
-            if (rows.length > 0) {
-                const lastTo = parseInt(rows[rows.length - 1].querySelector(".range-to").value);
-                if (!isNaN(lastTo)) nextFrom = lastTo + 1;
-            }
-            addWeftRow(nextFrom, 200, "#c0392b");
-        });
-
-        // Default: one weft row, off-white
-        addWeftRow(1, 200, "#f0eadf");
-
-        // Expose helpers on the element so startBtn handler can read them
+        makeRow(1, 120, "#ffffff");
         root._buildWarpColorArray = buildWarpColorArray;
-        root._buildWeftColorArray = buildWeftColorArray;
     }
 
     nextBtn.addEventListener("click", async (e) => {
@@ -426,22 +252,15 @@ function attachStartButton() {
         const loomType = document.getElementById("loomType").value;
         const h3Wrap = document.getElementById("wrap-heddle3");
         const h4Wrap = document.getElementById("wrap-heddle4");
-        const w3Wrap = document.getElementById("wrap-warpColor3");
-        const w4Wrap = document.getElementById("wrap-warpColor4");
 
         if (loomType === "traditional") {
             if (h3Wrap) h3Wrap.style.display = "none";
             if (h4Wrap) h4Wrap.style.display = "none";
-            if (w3Wrap) w3Wrap.style.display = "none";
-            if (w4Wrap) w4Wrap.style.display = "none";
         } else {
             if (h3Wrap) h3Wrap.style.display = "block";
             if (h4Wrap) h4Wrap.style.display = "block";
-            if (w3Wrap) w3Wrap.style.display = "flex";
-            if (w4Wrap) w4Wrap.style.display = "flex";
         }
 
-        // Update range input max hints based on totalThreads
         const patternSize = parseInt(document.getElementById("patternSize").value) || 4;
         const maxThreads = 120;
         const repeats = Math.floor(maxThreads / patternSize);
@@ -450,7 +269,6 @@ function attachStartButton() {
             el.max = totalThreads;
             el.placeholder = el.classList.contains("range-to") ? totalThreads : "1";
         });
-        // Fill empty "to" fields with totalThreads
         document.querySelectorAll(".range-to").forEach(el => {
             if (!el.value) el.value = totalThreads;
         });
@@ -521,8 +339,6 @@ function attachStartButton() {
             return;
         }
 
-        // ── PHYSICAL MEASUREMENTS ──
-        // clothWidth from the setup form (in centimeters)
         const rawWidth = parseFloat(document.getElementById("clothWidth").value);
         const physicalWidthCm = isNaN(rawWidth) || rawWidth <= 0 ? 30 : rawWidth;
 
@@ -536,21 +352,13 @@ function attachStartButton() {
             customThreadingMap: finalThreadingMap
         };
 
-        // ── READ WARP & WEFT COLORS FROM NEW COLOR UI ──
         const colorRoot = document.getElementById("color-section-root");
-
-        // Warp: per-thread array of length totalThreads
         const perThreadColors = colorRoot && colorRoot._buildWarpColorArray
             ? colorRoot._buildWarpColorArray(totalThreads)
             : new Array(totalThreads).fill("#ffffff");
         warpColors = perThreadColors;
 
-        // Weft: pre-set pick color array — stored on loomConfig, applied in initLoom
-        const presetWeftColors = colorRoot && colorRoot._buildWeftColorArray
-            ? colorRoot._buildWeftColorArray(2000)   // enough for any session
-            : [];
-
-        loomConfig.presetWeftColors = presetWeftColors;
+        loomConfig.presetWeftColors = [];
 
         heddlesOverlay.style.display = "none";
         initLoom();
@@ -649,9 +457,9 @@ function injectLoomStyles() {
         }
         .loom-btn:hover  { opacity: 0.88; }
         .loom-btn:active { transform: scale(0.97); }
-        .loom-btn--ble    { background: #007bff; }
+        .loom-btn--ble   { background: #007bff; }
         .loom-btn--export { background: #28a745; }
-        .loom-btn--save   { background: #fd7e14; }
+        .loom-btn--save  { background: #fd7e14; }
         .loom-hint {
             font-size: clamp(9px, 0.95vw, 10px);
             color: #666;
@@ -763,26 +571,6 @@ function injectLoomStyles() {
             border-top: 1px solid #1a2e1a;
             margin: 2px 0;
         }
-        .measure-accuracy-bar {
-            background: #111a11;
-            border-radius: 4px;
-            height: 5px;
-            overflow: hidden;
-            margin-top: 2px;
-        }
-        .measure-accuracy-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #2d7a36, #4ecb5e);
-            border-radius: 4px;
-            transition: width 0.6s ease;
-            width: 0%;
-        }
-        .measure-accuracy-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
 
         /* ── 2D PATTERN PANEL (BOTTOM-RIGHT) ── */
         .loom-pattern-panel {
@@ -863,13 +651,8 @@ function initLoom() {
     const SHAFT_COUNT = (loomConfig.loomType === "traditional") ? 2 : 4;
 
     // ── PHYSICAL SCALE ──
-    // The 3D loom frame stays a FIXED size regardless of cloth width.
-    // Physical width is recorded for measurement/export only.
-    // Threads are simply compressed tighter to fit more into the same HEDDLE_WIDTH.
-    // At 0.1mm per thread, a 120-thread warp = 12mm — far narrower than the loom frame,
-    // so we always spread threads evenly across HEDDLE_WIDTH in 3D space.
     const PHYSICAL_WIDTH_CM = Math.max(1, Math.min(200, loomConfig.width || 30));
-    const WIDTH = 6.5;   // FIXED — 3D loom never resizes
+    const WIDTH = 6.5;
 
     const DEPTH = 4.2;
     const FRONT = 0;
@@ -898,16 +681,16 @@ function initLoom() {
     const PATTERN_SIZE = loomConfig.patternSize;
 
     // ── PHYSICAL MEASUREMENT CONSTANTS ──
-    const THREADS_PER_CM = TOTAL_THREADS / PHYSICAL_WIDTH_CM;
-    // Standard handloom: ~8 picks/cm is reasonable for plain weave
-    // We derive expected picks per cm from pattern type
     const EXPECTED_PPC = loomConfig.patternType === "twill" ? 10
         : loomConfig.patternType === "basket" ? 6
             : loomConfig.patternType === "rib" ? 5
                 : 8; // plain default
-    // This is our accuracy baseline: we compare actual weft count vs expected
-    // for the current woven height
+                
     const EXPECTED_WEFT_PER_CM = EXPECTED_PPC;
+    
+    // NEW: Warp density matches Weft density for a balanced textile
+    const THREADS_PER_CM = EXPECTED_WEFT_PER_CM; 
+    const TOTAL_PHYSICAL_THREADS = Math.round(PHYSICAL_WIDTH_CM * THREADS_PER_CM);
 
     let zPositions = [];
     if (SHAFT_COUNT === 2) {
@@ -932,7 +715,7 @@ function initLoom() {
     let patternHistory = loomConfig.resumeHistory || [];
     let rowCounter = 0;
     let weftColorHistory = (loomConfig.rowColors && Array.isArray(loomConfig.rowColors)) ? Array.from(loomConfig.rowColors) : [];
-    // Pre-set weft pick colors from the color UI (may be empty array if not set)
+    
     const presetWeftColors = Array.isArray(loomConfig.presetWeftColors) ? loomConfig.presetWeftColors : [];
     let fellZ = BASE_FRONT - 0.12;
 
@@ -951,22 +734,8 @@ function initLoom() {
     let weftReadyToBeat = false;
     let shuttleCurrentSide = -1;
 
-    // ── MEASUREMENT STATE ──
-    // weftCount: total beats committed (same as patternHistory.length after resume)
     let weftCount = patternHistory.length;
-
-    // ── WEFT COLOR STATE ──
-    // colorMode: "preset" | "manual"
-    //   "preset"  → shuttle color advances automatically from presetWeftColors each beat
-    //   "manual"  → weaver has taken control; color stays exactly as set until changed again
-    //
-    // Switching rules:
-    //   • Weaver touches the color picker          → switch to "manual", stay manual forever
-    //   • No presets defined                       → always "manual"
-    //   • Resuming a saved pattern                 → always "manual" (don't overwrite saved colors)
-    let colorMode = (presetWeftColors.length > 0 && !loomConfig.resumeHistory?.length)
-        ? "preset"
-        : "manual";
+    let colorMode = "manual";
 
     //----------------------------------------------
     // THREE.JS SCENE
@@ -979,6 +748,7 @@ function initLoom() {
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(0x202025, 1);
 
     const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
     camera.position.set(4, 6, 14);
@@ -989,12 +759,20 @@ function initLoom() {
 
     function resizeRenderer() {
         const rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return; // Prevent black screen bug if container is hidden
         renderer.setSize(rect.width, rect.height, false);
         camera.aspect = rect.width / rect.height;
         camera.updateProjectionMatrix();
     }
+    
+    // Add multiple delay points to handle CSS fade-in causing 0 height initially
     resizeRenderer();
+    setTimeout(resizeRenderer, 50);
+    setTimeout(resizeRenderer, 300);
     window.addEventListener("resize", resizeRenderer);
+
+    const resizeObserver = new ResizeObserver(() => resizeRenderer());
+    resizeObserver.observe(container);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
@@ -1254,8 +1032,6 @@ function initLoom() {
                 new THREE.Vector3(x, WARP_BEAM_Y + 0.3, BACK)
             ];
 
-            // Per-thread color: warpColors is now a full-length per-thread array.
-            // Fall back to shaft color if it's the old 4-element format.
             const threadColor = Array.isArray(warpColors) && warpColors.length > 4
                 ? (warpColors[i] || "#ffffff")
                 : (warpColors[hIdx] || "#ffffff");
@@ -1404,9 +1180,6 @@ function initLoom() {
 
         patternHistory.push(rowStates);
 
-        // ── Snapshot the shuttle color at the moment of insertion ──
-        // This is the authoritative color for this pick. Any color change between
-        // insertion and beat will NOT affect the already-inserted thread.
         const insertionColor = "#" + shuttleThreadMaterial.color.getHexString();
 
         const line = new THREE.Line(
@@ -1422,7 +1195,7 @@ function initLoom() {
             valid: true,
             capturedShed: shed.slice(),
             warpPattern: rowStates.slice(),
-            capturedColor: insertionColor   // ← locked in at insertion
+            capturedColor: insertionColor
         };
         weftThreads.push(activeWeft);
 
@@ -1436,9 +1209,6 @@ function initLoom() {
         weftReadyToBeat = false;
         if (!activeWeft || activeWeft.isBeaten) return;
 
-        // ── Restore shuttle color to what it was when this pick was inserted ──
-        // Only restores if we're still in preset mode (color wasn't manually changed).
-        // In manual mode, the weaver's chosen color stays as-is.
         if (activeWeft.capturedColor && colorMode === "preset") {
             shuttleThreadMaterial.color.set(activeWeft.capturedColor);
             const shuttleColorInput = document.getElementById("shuttleColor");
@@ -1463,187 +1233,113 @@ function initLoom() {
     //----------------------------------------------
     // ── MEASUREMENT UTILITIES ──
     //----------------------------------------------
-    /**
-     * Compute physical height in cm.
-     * We use the 3D row spacing as a proxy: each beat advances fellZ by ROW_SPACING (3D units).
-     * We map the total 3D units woven → physical cm using the configured width ratio.
-     * A simpler & more meaningful approach: assume the weaver set up the loom for a given
-     * sett (EPI / thread density). We derive picks-per-cm from the pattern type default
-     * and cross-reference with actual weft count.
-     * 
-     * Estimated height = weftCount / EXPECTED_WEFT_PER_CM  (cm)
-     */
     function computeMeasurements() {
         const count = weftCount;
-        // Physical width stays fixed (user-configured)
         const widthCm = PHYSICAL_WIDTH_CM;
-        // Estimated height based on beats and expected sett
         const heightCm = count > 0 ? (count / EXPECTED_WEFT_PER_CM) : 0;
-        // Thread density: ends per cm
         const endPerCm = THREADS_PER_CM;
-        // Picks per cm so far (actual)
-        // Accuracy: compare actual weft/cm to expected; capped at 100%
-        // Only meaningful after ≥5 rows
-        let accuracyPct = 0;
-        if (count >= 5 && heightCm > 0) {
-            const actualPPC = count / heightCm; // This always equals EXPECTED_WEFT_PER_CM by definition
-            // More useful: compare the pattern repeat count vs expected repeat for this length
-            const treadlingLen = treadlingSequence.length || 2;
-            const completeRepeats = Math.floor(count / treadlingLen);
-            const expectedRepeats = Math.floor(count / treadlingLen); // they match by design
-            // Real accuracy: check that the weft insertion is consistent
-            // We measure by looking at ratio of complete pattern repeats to partial
-            const partialRow = count % treadlingLen;
-            // A perfectly woven cloth has 0 partial rows at any pattern checkpoint
-            // We use a simpler approach: accuracy rises as weft count grows
-            // and dips if there are too many "voided" wefts (we can track those)
-            accuracyPct = Math.min(100, Math.round((completeRepeats / Math.max(1, count / treadlingLen)) * 100));
-            if (count > 0) accuracyPct = Math.min(100, Math.round(100 - (partialRow / treadlingLen) * 15));
-        }
 
-        return { widthCm, heightCm: heightCm.toFixed(1), endPerCm: endPerCm.toFixed(1), count, accuracyPct };
+        return { widthCm, heightCm: heightCm.toFixed(1), endPerCm: endPerCm.toFixed(1), count };
     }
 
-    /**
-     * Update the live measurement panel DOM elements.
-     */
     function updateMeasurePanel() {
         const m = computeMeasurements();
-
         const elWidth = document.getElementById("measure-width");
         const elHeight = document.getElementById("measure-height");
         const elEPC = document.getElementById("measure-epc");
         const elWeft = document.getElementById("measure-weft");
-        const elAcc = document.getElementById("measure-accuracy-val");
-        const elFill = document.getElementById("measure-accuracy-fill");
 
         if (elWidth) elWidth.textContent = m.widthCm;
         if (elHeight) elHeight.textContent = m.heightCm;
         if (elEPC) elEPC.textContent = m.endPerCm;
         if (elWeft) elWeft.textContent = m.count;
-        if (elAcc) elAcc.textContent = `${m.accuracyPct}%`;
-        if (elFill) elFill.style.width = `${m.accuracyPct}%`;
     }
 
     //----------------------------------------------
-    // PATTERN EXPORT — physically-scaled
+    // 2D PATTERN RENDERER
     //----------------------------------------------
-    function exportPatternImage() {
-        if (patternHistory.length === 0) {
-            alert("Weave some rows first!");
+    function render2DPattern() {
+        const patternCanvas = document.getElementById("patternCanvas");
+        if (!patternCanvas) return;
+        const ctx = patternCanvas.getContext("2d");
+        
+        const rowCount = patternHistory.length;
+        const DISPLAY_THREADS = loomConfig.totalThreads || 120; 
+
+        if (rowCount === 0 && (!activeWeft)) {
+            patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
+            patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
+            ctx.fillStyle = "#111";
+            ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
             return;
         }
 
-        // ── SCALE DERIVATION ──
-        // Standard screen print resolution: 96 px = 1 inch = 2.54 cm
-        // So 1 cm = 96/2.54 ≈ 37.8 px at 96 DPI (screen-accurate for printing at 100%)
-        const PX_PER_CM = 96 / 2.54;               // ~37.8 px per real-world cm
+        const container = patternCanvas.parentElement;
+        // Calculation to ensure it fills the width of your panel
+        const availableWidth = container.clientWidth - 16;
+        const cellSize = availableWidth / DISPLAY_THREADS;
 
-        const warpCount = loomConfig.totalThreads;
-        const rowCount = patternHistory.length;
+        patternCanvas.width = DISPLAY_THREADS * cellSize;
+        patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
+        
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
 
-        // Each warp thread column gets exactly (physicalWidthCm / warpCount) cm → px
-        const cellW = (PHYSICAL_WIDTH_CM / warpCount) * PX_PER_CM;
+        // --- SHARED DRAWING STYLE (MATCHES EXPORT) ---
+        const drawHabiCell = (x, y, isWarpUp, weftCol, warpCol) => {
+            // Weft base fills the background
+            ctx.fillStyle = weftCol;
+            ctx.fillRect(x, y, cellSize, cellSize);
 
-        // Each weft pick row height: use expected picks-per-cm to derive row height
-        // so printing at 100% → cloth dimensions match reality
-        const cellH = (1 / EXPECTED_WEFT_PER_CM) * PX_PER_CM;
+            // Thin Warp Overlay (matching export format)
+            if (isWarpUp) {
+                ctx.fillStyle = warpCol;
+                // Draw vertical warp thread covering the middle 50%
+                ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
+            }
 
-        // Ruler strip height in px (bottom of image)
-        const RULER_H = Math.round(PX_PER_CM * 0.7); // ~0.7 cm tall
-
-        const canvasW = Math.round(warpCount * cellW);
-        const canvasH = Math.round(rowCount * cellH) + RULER_H;
-
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = canvasW;
-        exportCanvas.height = canvasH;
-        const ctx = exportCanvas.getContext('2d');
-
-        // White background
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvasW, canvasH);
-
-        // ── DRAW PATTERN ──
+            // Subtle grid lines
+            ctx.strokeStyle = "rgba(0,0,0,0.15)";
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(x, y, cellSize, cellSize);
+        };
+        
+        // Draw locked rows
         patternHistory.forEach((rowStates, rowIndex) => {
-            rowStates.forEach((isWarpUp, warpIndex) => {
-                const x = Math.round(warpIndex * cellW);
-                const y = Math.round((rowCount - 1 - rowIndex) * cellH);
-                const w = Math.max(1, Math.round(cellW));
-                const h = Math.max(1, Math.round(cellH));
+            const y = (patternCanvas.height / cellSize - 1 - rowIndex) * cellSize;
+            const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
+            const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
+            
+            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
+                const isWarpUp = rowStates[ti];
+                const x = ti * cellSize;
+                const shaft = threading[ti % threading.length] || 0;
+                const threadColor = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[ti] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
 
-                if (!isWarpUp) {
-                    const fallbackColor = "#" + shuttleThreadMaterial.color.getHexString();
-                    ctx.fillStyle = (weftColorHistory && weftColorHistory[rowIndex])
-                        ? weftColorHistory[rowIndex] : fallbackColor;
-                    ctx.fillRect(x, y, w, h);
-                } else {
-                    // Per-thread color: full array vs legacy 4-shaft array
-                    const threadColor = Array.isArray(warpColors) && warpColors.length > 4
-                        ? (warpColors[warpIndex] || "#f0eadf")
-                        : (warpColors[threading[warpIndex % threading.length]] || "#f0eadf");
-                    ctx.fillStyle = threadColor;
-                    ctx.fillRect(x, y, w, h);
-                }
-            });
+                drawHabiCell(x, y, isWarpUp, currentRowColor, threadColor);
+            }
         });
 
-        // ── RULER STRIP ──
-        // Draw a cm ruler along the bottom so the print is self-documenting.
-        const rulerY = canvasH - RULER_H;
+        // Draw live throw on top
+        if (activeWeft && activeWeft.live) {
+            const y = 0; 
+            const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
+            
+            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
+                const isWarpUp = activeWeft.warpPattern[ti];
+                const x = ti * cellSize;
+                const shaft = threading[ti % threading.length] || 0;
+                const threadColor = Array.isArray(warpColors) && warpColors.length > 4
+                    ? (warpColors[ti] || "#ffffff")
+                    : (warpColors[shaft] || "#ffffff");
 
-        // Alternating tick bg
-        ctx.fillStyle = "#f5f5f5";
-        ctx.fillRect(0, rulerY, canvasW, RULER_H);
-        ctx.strokeStyle = "#888";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, rulerY);
-        ctx.lineTo(canvasW, rulerY);
-        ctx.stroke();
-
-        const totalWidthCm = PHYSICAL_WIDTH_CM;
-        const fontSize = Math.max(8, Math.min(14, RULER_H * 0.55));
-        ctx.font = `bold ${fontSize}px sans-serif`;
-        ctx.fillStyle = "#333";
-        ctx.textBaseline = "middle";
-
-        for (let c = 0; c <= totalWidthCm; c++) {
-            const px = Math.round((c / totalWidthCm) * canvasW);
-            const isMajor = c % 5 === 0;
-
-            // Tick mark
-            const tickH = isMajor ? RULER_H * 0.6 : RULER_H * 0.35;
-            ctx.strokeStyle = isMajor ? "#444" : "#aaa";
-            ctx.lineWidth = isMajor ? 1.5 : 1;
-            ctx.beginPath();
-            ctx.moveTo(px, rulerY);
-            ctx.lineTo(px, rulerY + tickH);
-            ctx.stroke();
-
-            // Label every 5 cm
-            if (isMajor && px + 4 < canvasW) {
-                ctx.fillStyle = "#333";
-                ctx.fillText(`${c}cm`, px + 3, rulerY + RULER_H * 0.55);
+                drawHabiCell(x, y, isWarpUp, liveColor, threadColor);
             }
         }
-
-        // ── METADATA LABEL (bottom-right) ──
-        const estimatedHeightCm = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
-        const metaText = `${PHYSICAL_WIDTH_CM}cm × ${estimatedHeightCm}cm · ${warpCount} ends · ${rowCount} picks`;
-        ctx.font = `${Math.max(8, fontSize - 1)}px sans-serif`;
-        ctx.fillStyle = "#888";
-        ctx.textBaseline = "bottom";
-        ctx.textAlign = "right";
-        ctx.fillText(metaText, canvasW - 6, canvasH - 2);
-
-        const link = document.createElement('a');
-        const safeName = loomConfig.patternName
-            ? loomConfig.patternName.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-            : 'woven_pattern';
-        link.download = `${safeName}.png`;
-        link.href = exportCanvas.toDataURL('image/png');
-        link.click();
+        
+        patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
     }
 
     //----------------------------------------------
@@ -1652,7 +1348,7 @@ function initLoom() {
     function createUI() {
         injectLoomStyles();
 
-        // ── Control Panel ──
+        document.querySelectorAll('.loom-panel, .loom-measure-panel, .loom-pattern-panel').forEach(el => el.remove());
         const gui = document.createElement('div');
         gui.className = 'loom-panel';
         gui.innerHTML = `
@@ -1665,12 +1361,29 @@ function initLoom() {
                 Hold 1-4: Shed &nbsp;|&nbsp; Space: Shuttle<br>Hold B: Beat &nbsp;|&nbsp; V: Release Beat
             </div>
             <hr class="loom-divider" />
-            <div class="loom-color-row">
+            
+            <div style="font-size:clamp(10px, 1vw, 11px); color:#aaa; margin-bottom:4px; font-weight:700;">Weft Strategy</div>
+            <select id="weftStrategySelect" style="width:100%; background:#222; color:#fff; border:1px solid #444; border-radius:6px; padding:6px; margin-bottom:8px; font-size:10px; cursor:pointer;">
+                <option value="manual">Manual (One by One)</option>
+                <option value="range">Preset Ranges</option>
+            </select>
+
+            <div style="font-size: 0.7rem; color: #999; margin-bottom: 12px; line-height: 1.5; background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 8px; border-left: 3px solid #00e5ff;">
+                💡 <b>Color changes only affect new throws.</b> Existing picks are permanently locked in.
+            </div>
+            
+            <div id="manual-weft-box" class="loom-color-row">
                 <label class="loom-color-label">
-                    Shuttle
+                    Shuttle Color
                     <input type="color" id="shuttleColor" value="#f0eadf" />
                 </label>
             </div>
+
+            <div id="range-weft-box" style="display:none; flex-direction:column; gap:6px;">
+                <div id="weft-ranges-container" style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto; padding-right:4px;"></div>
+                <button id="addWeftRangeBtn" style="background:rgba(100,180,100,0.1); border:1px dashed rgba(100,180,100,0.35); color:#7ecf7e; padding:8px; border-radius:6px; cursor:pointer; font-size:10px; transition:0.2s; font-weight:600;">+ Add Pick Range</button>
+            </div>
+
             <hr class="loom-divider" />
             <button id="convertBtn" class="loom-btn loom-btn--export">Export Pattern</button>
             <button id="savePattern" class="loom-btn loom-btn--save">Save to Learning Library</button>
@@ -1684,46 +1397,106 @@ function initLoom() {
         });
         if (window.innerWidth <= 600) gui.classList.add('collapsed');
 
+        // ── Weft Strategy Logic ──
+        const strategySelect = document.getElementById("weftStrategySelect");
+        const manualBox = document.getElementById("manual-weft-box");
+        const rangeBox = document.getElementById("range-weft-box");
+        const weftRangesContainer = document.getElementById("weft-ranges-container");
+        const addWeftRangeBtn = document.getElementById("addWeftRangeBtn");
+
+        strategySelect.addEventListener("change", (e) => {
+            if (e.target.value === "range") {
+                manualBox.style.display = "none";
+                rangeBox.style.display = "flex";
+                colorMode = "preset";
+                updatePresetWeftColors();
+            } else {
+                manualBox.style.display = "flex";
+                rangeBox.style.display = "none";
+                colorMode = "manual";
+            }
+        });
+
+        function updatePresetWeftColors() {
+            const arr = new Array(2000).fill("#f0eadf");
+            weftRangesContainer.querySelectorAll("div.w-row-item").forEach(row => {
+                const from = Math.max(1, parseInt(row.querySelector(".w-from").value) || 1);
+                const to = Math.min(2000, parseInt(row.querySelector(".w-to").value) || 2000);
+                const col = row.querySelector(".w-color").value || "#f0eadf";
+                for (let i = from - 1; i < to; i++) {
+                    if (i < 2000) arr[i] = col;
+                }
+            });
+            
+            presetWeftColors.length = 0; 
+            arr.forEach(c => presetWeftColors.push(c));
+            
+            if (colorMode === "preset") {
+                const nextColor = presetWeftColors[weftCount] || presetWeftColors[presetWeftColors.length - 1];
+                if (nextColor) shuttleThreadMaterial.color.set(nextColor);
+            }
+        }
+
+        function addWeftControlRow(from, to, color) {
+            const div = document.createElement("div");
+            div.className = "w-row-item";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.style.background = "rgba(255,255,255,0.03)";
+            div.style.padding = "6px 8px";
+            div.style.borderRadius = "6px";
+            div.style.border = "1px solid rgba(255,255,255,0.08)";
+            
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="color:#777; font-size:9px; font-weight:600; text-transform:uppercase;">Picks</span>
+                    <input type="number" class="w-from" value="${from}" min="1" style="width:38px; background:rgba(0,0,0,0.4); border:1px solid #444; color:#fff; font-size:10px; border-radius:4px; padding:3px; text-align:center;">
+                    <span style="color:#555;">-</span>
+                    <input type="number" class="w-to" value="${to}" min="1" style="width:38px; background:rgba(0,0,0,0.4); border:1px solid #444; color:#fff; font-size:10px; border-radius:4px; padding:3px; text-align:center;">
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" class="w-color" value="${color}" style="width:28px; height:22px; border:1px solid #444; border-radius:6px; background:#111; padding:2px; cursor:pointer;">
+                    <button class="w-del" style="background:rgba(217,48,37,0.15); border:1px solid rgba(217,48,37,0.3); color:#e06060; border-radius:4px; cursor:pointer; font-size:10px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; transition:0.2s;">✕</button>
+                </div>
+            `;
+            div.querySelector(".w-del").addEventListener("click", () => {
+                div.remove();
+                updatePresetWeftColors();
+            });
+            div.querySelectorAll("input").forEach(inp => inp.addEventListener("input", updatePresetWeftColors));
+            weftRangesContainer.appendChild(div);
+            updatePresetWeftColors();
+        }
+
+        addWeftRangeBtn.addEventListener("click", () => {
+            const rows = weftRangesContainer.children;
+            let nextFrom = 1;
+            if (rows.length > 0) {
+                const lastTo = parseInt(rows[rows.length - 1].querySelector(".w-to").value);
+                if (!isNaN(lastTo)) nextFrom = lastTo + 1;
+            }
+            addWeftControlRow(nextFrom, nextFrom + 50, "#c0392b");
+        });
+
+        if (presetWeftColors.length === 0) addWeftControlRow(1, 200, "#f0eadf");
+        
+        if (colorMode === "preset") {
+            strategySelect.value = "range";
+            strategySelect.dispatchEvent(new Event("change"));
+        }
+
         // ── Measurement Panel ──
         const measurePanel = document.createElement("div");
         measurePanel.className = "loom-measure-panel";
         measurePanel.innerHTML = `
             <div class="loom-measure-panel__title">Live Measurements</div>
-
-            <div class="measure-row">
-                <span class="measure-label">Width</span>
-                <span class="measure-value" id="measure-width">${PHYSICAL_WIDTH_CM}<span> cm</span></span>
-            </div>
-
-            <div class="measure-row">
-                <span class="measure-label">Est. Height</span>
-                <span class="measure-value" id="measure-height">0.0<span> cm</span></span>
-            </div>
-
+            <div class="measure-row"><span class="measure-label">Width</span><span class="measure-value" id="measure-width">${PHYSICAL_WIDTH_CM}<span> cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Est. Height</span><span class="measure-value" id="measure-height">0.0<span> cm</span></span></div>
             <hr class="measure-divider" />
-
-            <div class="measure-row">
-                <span class="measure-label">Ends/cm</span>
-                <span class="measure-value" id="measure-epc">${(THREADS_PER_CM).toFixed(1)}<span> e/cm</span></span>
-            </div>
-
-            <div class="measure-row">
-                <span class="measure-label">Weft Count</span>
-                <span class="measure-value" id="measure-weft">${weftCount}<span> picks</span></span>
-            </div>
-
+            <div class="measure-row"><span class="measure-label">Ends/cm</span><span class="measure-value" id="measure-epc">${(THREADS_PER_CM).toFixed(1)}<span> e/cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Weft Count</span><span class="measure-value" id="measure-weft">${weftCount}<span> picks</span></span></div>
             <hr class="measure-divider" />
-
-            <div class="measure-accuracy-label">
-                <span class="measure-label">Pattern Accuracy</span>
-                <span class="measure-value" id="measure-accuracy-val" style="font-size:11px;">–</span>
-            </div>
-            <div class="measure-accuracy-bar">
-                <div class="measure-accuracy-fill" id="measure-accuracy-fill"></div>
-            </div>
-
-            <hr class="measure-divider" />
-
             <div class="measure-label" style="margin-bottom:4px;">Warp Color Preview</div>
             <canvas id="warp-color-preview" style="width:100%;height:14px;border-radius:4px;display:block;image-rendering:pixelated;"></canvas>
         `;
@@ -1762,25 +1535,26 @@ function initLoom() {
         // ── Listeners ──
         document.getElementById('shuttleColor').addEventListener('input', (e) => {
             shuttleThreadMaterial.color.set(e.target.value);
-            // Weaver has taken control of color — switch to manual mode permanently.
-            // Presets will no longer auto-advance until a new weaving session starts.
             colorMode = "manual";
+            
+            // Instantly change the color of the thread sitting in the shed!
+            if (activeWeft && !activeWeft.isBeaten) {
+                activeWeft.capturedColor = e.target.value;
+                activeWeft.line.material.color.set(e.target.value);
+            }
+            render2DPattern(); // Live update instantly!
         });
-        // Priority: resuming saved weftColor > preset pick[0] > default
+
         const shuttleInput = document.getElementById('shuttleColor');
         if (shuttleInput) {
-            const initialColor = loomConfig.weftColor
-                || (presetWeftColors.length > 0 ? presetWeftColors[weftCount] : null)
-                || "#f0eadf";
+            const initialColor = loomConfig.weftColor || (presetWeftColors.length > 0 ? presetWeftColors[weftCount] : null) || "#f0eadf";
             shuttleInput.value = initialColor;
             shuttleThreadMaterial.color.set(initialColor);
         }
 
         document.getElementById('convertBtn').addEventListener('click', exportPatternImage);
         document.getElementById('bleConnect').addEventListener('click', connectBLE);
-        document.getElementById('backToMenuBtn').addEventListener('click', () => {
-            window.location.href = 'dashboard.html';
-        });
+        document.getElementById('backToMenuBtn').addEventListener('click', () => { window.location.href = 'dashboard.html'; });
 
         document.getElementById("savePattern").addEventListener("click", async () => {
             if (patternHistory.length === 0) {
@@ -1791,8 +1565,6 @@ function initLoom() {
             const shuttleColorEl = document.getElementById("shuttleColor");
             const weftColor = shuttleColorEl ? shuttleColorEl.value : "#" + shuttleThreadMaterial.color.getHexString();
             const currentUser = window.windowCurrentUserObj || { name: "Unknown" };
-
-            // ── Collect measurements to save alongside the pattern ──
             const measurements = computeMeasurements();
 
             const data = {
@@ -1809,21 +1581,18 @@ function initLoom() {
                 threadingMap: loomConfig.customThreadingMap,
                 creator: currentUser.name,
                 isImported: false,
-                // ── PHYSICAL MEASUREMENTS ──
+                isPrivate: loomConfig.isPrivate !== undefined ? loomConfig.isPrivate : true, // Sets to private by default
                 measurements: {
                     physicalWidthCm: measurements.widthCm,
                     estimatedHeightCm: parseFloat(measurements.heightCm),
                     endsPerCm: parseFloat(measurements.endPerCm),
                     weftCount: measurements.count,
-                    patternAccuracyPct: measurements.accuracyPct,
                     expectedPicksPerCm: EXPECTED_WEFT_PER_CM
                 }
             };
 
             try {
-                if (loomConfig.patternId) {
-                    await fetch(`/api/patterns/${loomConfig.patternId}`, { method: "DELETE" });
-                }
+                if (loomConfig.patternId) await fetch(`/api/patterns/${loomConfig.patternId}`, { method: "DELETE" });
                 const res = await fetch("/api/patterns/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1844,48 +1613,186 @@ function initLoom() {
     }
 
     //----------------------------------------------
-    // 2D PATTERN RENDERER
+    // 2D PATTERN RENDERER — Zoomed to Fill Width
     //----------------------------------------------
     function render2DPattern() {
         const patternCanvas = document.getElementById("patternCanvas");
         if (!patternCanvas) return;
         const ctx = patternCanvas.getContext("2d");
-        if (patternHistory.length === 0) {
+        
+        const warpCount = loomConfig.totalThreads; // Locks to 120 base threads
+        const rowCount = patternHistory.length;
+
+        if (rowCount === 0 && (!activeWeft)) {
             patternCanvas.width = patternCanvas.parentElement.clientWidth || 200;
             patternCanvas.height = patternCanvas.parentElement.clientHeight || 100;
             ctx.fillStyle = "#111";
             ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
             return;
         }
-        const warpCount = loomConfig.totalThreads;
+        
         const container = patternCanvas.parentElement;
-        const cellWidth = (container.clientWidth - 10) / warpCount;
-        const cellHeight = (container.clientHeight - 10) / patternHistory.length;
-        const cellSize = Math.max(2, Math.min(cellWidth, cellHeight));
+        // ZOOM LOGIC: Cell size is calculated strictly from the width, so it fills horizontally!
+        const cellSize = Math.max(2, (container.clientWidth - 16) / warpCount);
+
         patternCanvas.width = warpCount * cellSize;
-        patternCanvas.height = patternHistory.length * cellSize;
+        patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
+        
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
+        
+        // Draw locked rows
         patternHistory.forEach((rowStates, rowIndex) => {
-            const y = (patternHistory.length - 1 - rowIndex) * cellSize;
+            const y = (patternCanvas.height / cellSize - 1 - rowIndex) * cellSize;
             const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
             const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
+            
             rowStates.forEach((isWarpUp, warpIndex) => {
                 const x = warpIndex * cellSize;
                 const shaft = threading[warpIndex % threading.length] || 0;
+                
                 ctx.fillStyle = currentRowColor;
                 ctx.fillRect(x, y, cellSize, cellSize);
                 if (isWarpUp) {
-                    // Per-thread color: full array vs legacy 4-shaft array
+                    const threadColor = Array.isArray(warpColors) && warpColors.length > 4
+                        ? (warpColors[warpIndex] || "#ffffff")
+                        : (warpColors[shaft] || "#ffffff");
+                    ctx.fillStyle = threadColor;
+                    // Thin warp overlay
+                    ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
+                }
+            });
+        });
+
+        // Draw live active throw immediately on top
+        if (activeWeft && activeWeft.live) {
+            const y = 0; 
+            const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
+            
+            for (let warpIndex = 0; warpIndex < warpCount; warpIndex++) {
+                const x = warpIndex * cellSize;
+                const isWarpUp = activeWeft.warpPattern[warpIndex];
+                const shaft = threading[warpIndex % threading.length] || 0;
+                
+                ctx.fillStyle = liveColor;
+                ctx.fillRect(x, y, cellSize, cellSize);
+                
+                if (isWarpUp) {
                     const threadColor = Array.isArray(warpColors) && warpColors.length > 4
                         ? (warpColors[warpIndex] || "#ffffff")
                         : (warpColors[shaft] || "#ffffff");
                     ctx.fillStyle = threadColor;
                     ctx.fillRect(x + (cellSize * 0.25), y, cellSize * 0.5, cellSize);
                 }
-            });
-        });
+            }
+        }
+        
         patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
+    }
+
+//----------------------------------------------
+    // PATTERN EXPORT
+    //----------------------------------------------
+    function exportPatternImage() {
+        if (patternHistory.length === 0) {
+            alert("Weave some rows first!");
+            return;
+        }
+
+        const baseWarpCount = patternHistory[0].length;
+        const rowCount = patternHistory.length;
+        const CELL_PX = 8; 
+        const PADDING = 40;
+        const FOOTER_H = 120; 
+
+        const patternW = Math.round(TOTAL_PHYSICAL_THREADS * CELL_PX);
+        const patternH = Math.round(rowCount * CELL_PX);
+
+        const canvasW = Math.max(patternW + (PADDING * 2), 600); 
+        const canvasH = patternH + (PADDING * 2) + FOOTER_H;
+
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = canvasW;
+        exportCanvas.height = canvasH;
+        const ctx = exportCanvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvasW, canvasH);
+
+        const offsetX = (canvasW - patternW) / 2;
+        const offsetY = PADDING;
+
+        const safeWarpColors = (Array.isArray(warpColors) && warpColors.length > 0)
+            ? warpColors
+            : ["#ffffff", "#ffffff", "#ffffff", "#ffffff"];
+            
+        // Check if colors are defined per-thread (120 length) or per-shaft (4 length)
+        const isPerThread = safeWarpColors.length > 4;
+
+        // Draw Pattern
+        for (let ri = 0; ri < rowCount; ri++) {
+            const rowStates = patternHistory[ri];
+            const weftCol = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : "#f0eadf";
+
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount;
+                const isWarpUp = rowStates[baseIndex];
+                const x = ti * CELL_PX;
+                const y = (rowCount - 1 - ri) * CELL_PX;
+
+                const shaft = threading[baseIndex % threading.length] || 0;
+                
+                // FIXED: Correctly grab the warp color from the full 120-array or fallback to the shaft color
+                const warpCol = isPerThread 
+                    ? (safeWarpColors[baseIndex] || "#ffffff") 
+                    : (safeWarpColors[shaft] || "#ffffff");
+
+                // 1. Draw Weft Background
+                ctx.fillStyle = weftCol;
+                ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
+
+                // 2. Draw Warp Overlay (if thread is up)
+                if (isWarpUp) {
+                    ctx.fillStyle = warpCol;
+                    // Draw vertical warp thread covering the middle 50%
+                    ctx.fillRect(offsetX + x + (CELL_PX * 0.25), offsetY + y, CELL_PX * 0.5, CELL_PX);
+                }
+
+                // 3. Grid Lines
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.lineWidth = 0.3;
+                ctx.strokeRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
+            }
+        }
+
+        // Footer Divider
+        const footerTop = offsetY + patternH + 25;
+        ctx.strokeStyle = "#eeeeee";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(PADDING, footerTop);
+        ctx.lineTo(canvasW - PADDING, footerTop);
+        ctx.stroke();
+
+        // Footer Text (Measurements)
+        ctx.fillStyle = "#1a1a1a";
+        ctx.font = "bold 22px sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(loomConfig.patternName || "HABI-LIN Draft", PADDING, footerTop + 35);
+
+        ctx.font = "14px sans-serif";
+        ctx.fillStyle = "#666666";
+        const estimatedHeightCm = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
+        ctx.fillText(`Dimensions: ${PHYSICAL_WIDTH_CM}cm Width × ${estimatedHeightCm}cm Length`, PADDING, footerTop + 60);
+        ctx.fillText(`Thread Density: ${THREADS_PER_CM} ends/cm · ${EXPECTED_WEFT_PER_CM} picks/cm`, PADDING, footerTop + 80);
+        ctx.fillText(`Total: ${TOTAL_PHYSICAL_THREADS} Warp Ends · ${rowCount} Weft Picks`, PADDING, footerTop + 100);
+
+        const link = document.createElement('a');
+        const safeName = (loomConfig.patternName || 'woven_draft').replace(/\s+/g, '_').toLowerCase();
+        link.download = `${safeName}.png`;
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
     }
 
     //----------------------------------------------
@@ -1960,6 +1867,7 @@ function initLoom() {
         if (!shuttleArmed || shuttleInserted || !isShedOpenEnough()) return;
         const crossingFromLeft = shuttleStartSide === -1 && shuttleGroup.position.x > 0;
         const crossingFromRight = shuttleStartSide === 1 && shuttleGroup.position.x < 0;
+        
         if (crossingFromLeft || crossingFromRight) {
             if (weftThreads.length > 0 && !activeWeft) {
                 const lastWeft = weftThreads[weftThreads.length - 1];
@@ -1968,17 +1876,35 @@ function initLoom() {
                     const isUp = !currentPressedPedals.has(i);
                     if (lastWeft.capturedShed[i] !== isUp) { isUndo = false; break; }
                 }
+                
+                // --- UNDO HAPPENS HERE ---
                 if (isUndo) {
                     scene.remove(lastWeft.line);
                     lastWeft.line.geometry.dispose();
                     lastWeft.line.material.dispose();
                     weftThreads.pop();
                     patternHistory.pop();
-                    rowCounter = Math.max(0, rowCounter - 1);
+                    
+                    if (lastWeft.isBeaten) {
+                        weftCount = Math.max(0, weftCount - 1);
+                        weftColorHistory.pop();
+                        rowCounter = Math.max(0, rowCounter - 1);
+                        
+                        if (colorMode === "preset" && presetWeftColors.length > 0) {
+                            const prevColor = presetWeftColors[weftCount] || presetWeftColors[0];
+                            if (prevColor) {
+                                shuttleThreadMaterial.color.set(prevColor);
+                                const shuttleColorInput = document.getElementById("shuttleColor");
+                                if (shuttleColorInput) shuttleColorInput.value = prevColor;
+                            }
+                        }
+                    }
+                    
                     fellZ = BEATER_HIT_Z - (rowCounter * ROW_SPACING);
                     shuttleInserted = true;
-                    if (window.requestIdleCallback) requestIdleCallback(render2DPattern);
-                    else setTimeout(render2DPattern, 0);
+                    
+                    updateMeasurePanel(); // Instant math update
+                    render2DPattern();    // Instant visual update
                     return;
                 }
             }
@@ -2018,17 +1944,10 @@ function initLoom() {
         activeWeft.live = false;
         rowCounter++;
 
-        // ── Record the color that was on the shuttle at INSERTION time, not now ──
-        // capturedColor is snapshotted in addWeftThread, so it always reflects what
-        // the weaver had loaded when they threw the shuttle — immune to any color
-        // change made between insertion and beat.
         const committedColor = activeWeft.capturedColor
             || "#" + shuttleThreadMaterial.color.getHexString();
         weftColorHistory.push(committedColor);
 
-        // ── Update the line material to match the committed color ──
-        // (In case the weaver changed color between insertion and beat, the 3D line
-        // should show the original insertion color, not the current shuttle color.)
         if (activeWeft.line && activeWeft.line.material) {
             activeWeft.line.material.color.set(committedColor);
         }
@@ -2040,12 +1959,8 @@ function initLoom() {
         shuttleMovingPositive = null;
         recordedSteps.push({ action: "beat" });
 
-        // ── Increment weft count and refresh panels ──
         weftCount++;
 
-        // ── Auto-advance shuttle color from preset weft colors ──
-        // Only runs in "preset" mode. Once the weaver touches the color picker,
-        // colorMode becomes "manual" and stays that way — color never auto-changes again.
         if (colorMode === "preset" && presetWeftColors.length > 0) {
             const nextColor = presetWeftColors[weftCount] || presetWeftColors[presetWeftColors.length - 1];
             if (nextColor) {
@@ -2054,7 +1969,6 @@ function initLoom() {
                 if (shuttleColorInput) shuttleColorInput.value = nextColor;
             }
         }
-        // Note: no flag reset here. colorMode persists across all beats.
 
         render2DPattern();
         updateMeasurePanel();
@@ -2118,7 +2032,7 @@ function initLoom() {
     });
 
     createUI();
-    updateMeasurePanel(); // Initial render with resume data
+    updateMeasurePanel(); 
     animate();
 }
 
@@ -2180,13 +2094,10 @@ export async function resumeLoom(data) {
         weftColor: data.weftColor || "#f0eadf",
         creator: data.creator,
         created: data.created,
-        // Restore physical width from saved measurements if available
         width: (data.measurements && data.measurements.physicalWidthCm) ? data.measurements.physicalWidthCm : 30
     };
 
     warpColors = data.warpColors || defaultColors;
-    // If saved warpColors is a per-thread array (length > 4), use as-is.
-    // If it's the legacy 4-shaft array, keep as-is for backward compat.
     recordedSteps = data.steps || [];
 
     initLoom();
