@@ -1399,21 +1399,6 @@ function initLoom() {
             strategySelect.dispatchEvent(new Event("change"));
         }
 
-        // ── Measurement Panel ──
-        const measurePanel = document.createElement("div");
-        measurePanel.className = "loom-measure-panel";
-        measurePanel.innerHTML = `
-            <div class="loom-measure-panel__title">Live Measurements</div>
-            <div class="measure-row"><span class="measure-label">Width</span><span class="measure-value" id="measure-width">${PHYSICAL_WIDTH_CM}<span> cm</span></span></div>
-            <div class="measure-row"><span class="measure-label">Est. Height</span><span class="measure-value" id="measure-height">0.0<span> cm</span></span></div>
-            <hr class="measure-divider" />
-            <div class="measure-row"><span class="measure-label">Ends/cm</span><span class="measure-value" id="measure-epc">${(THREADS_PER_CM).toFixed(1)}<span> e/cm</span></span></div>
-            <div class="measure-row"><span class="measure-label">Weft Count</span><span class="measure-value" id="measure-weft">${weftCount}<span> picks</span></span></div>
-            <hr class="measure-divider" />
-            <div class="measure-label" style="margin-bottom:4px;">Warp Color Preview</div>
-            <canvas id="warp-color-preview" style="width:100%;height:14px;border-radius:4px;display:block;image-rendering:pixelated;"></canvas>
-        `;
-        document.getElementById("weaving-studio").appendChild(measurePanel);
 
         // Draw warp color preview strip
         (function drawWarpPreview() {
@@ -1433,6 +1418,32 @@ function initLoom() {
         })();
 
         // ── 2D Pattern Panel ──
+   // ── Measurement Panel ──
+        const measurePanel = document.createElement("div");
+        measurePanel.className = "loom-measure-panel";
+
+        // Get creator name (fallback to Guest if not found)
+        const creatorName = loomConfig.creator || (window.windowCurrentUserObj ? window.windowCurrentUserObj.name : "Guest");
+
+        measurePanel.innerHTML = `
+            <div class="loom-measure-panel__title" style="flex-direction: column; align-items: flex-start; gap: 2px; padding-bottom: 10px;">
+                <div style="font-size: 0.85rem; color: #fff; text-transform: none; letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+                    ${loomConfig.patternName || "Untitled"} — ${creatorName}
+                </div>
+                <div style="font-size: 0.65rem; color: #7edd8f; opacity: 0.8;">Live Measurements</div>
+            </div>
+            
+            <div class="measure-row"><span class="measure-label">Width</span><span class="measure-value" id="measure-width">${PHYSICAL_WIDTH_CM}<span> cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Est. Height</span><span class="measure-value" id="measure-height">0.0<span> cm</span></span></div>
+            <hr class="measure-divider" />
+            <div class="measure-row"><span class="measure-label">Ends/cm</span><span class="measure-value" id="measure-epc">${(THREADS_PER_CM).toFixed(1)}<span> e/cm</span></span></div>
+            <div class="measure-row"><span class="measure-label">Weft Count</span><span class="measure-value" id="measure-weft">${weftCount}<span> picks</span></span></div>
+            <hr class="measure-divider" />
+            <div class="measure-label" style="margin-bottom:4px;">Warp Color Preview</div>
+            <canvas id="warp-color-preview" style="width:100%;height:14px;border-radius:4px;display:block;image-rendering:pixelated;"></canvas>
+        `;
+        document.getElementById("weaving-studio").appendChild(measurePanel);
+        
         const patternPanel = document.createElement("div");
         patternPanel.className = "loom-pattern-panel";
         patternPanel.innerHTML = `
