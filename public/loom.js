@@ -1708,8 +1708,8 @@ function initLoom() {
         patternCanvas.parentElement.scrollTop = patternCanvas.parentElement.scrollHeight;
     }
 
-    //----------------------------------------------
-    // PATTERN EXPORT (Matches your Block-Grid Image)
+//----------------------------------------------
+    // PATTERN EXPORT (Block-Grid with Physical Multiplier)
     //----------------------------------------------
     function exportPatternImage() {
         if (patternHistory.length === 0) {
@@ -1725,9 +1725,8 @@ function initLoom() {
         const PADDING = 60;
         const FOOTER_H = 140; 
 
-        const DISPLAY_THREADS = loomConfig.totalThreads || 120; 
-
-        const patternW = DISPLAY_THREADS * CELL_PX;
+        // Multiplier Logic: Using TOTAL_PHYSICAL_THREADS instead of DISPLAY_THREADS
+        const patternW = Math.round(TOTAL_PHYSICAL_THREADS * CELL_PX);
         const patternH = rowCount * CELL_PX;
 
         const canvasW = Math.max(patternW + (PADDING * 2), 800); 
@@ -1745,35 +1744,36 @@ function initLoom() {
         const offsetX = (canvasW - patternW) / 2;
         const offsetY = PADDING;
 
-        // --- THE BLOCK DRAWING LOOP ---
+        // --- THE BLOCK DRAWING LOOP WITH MULTIPLIER ---
         patternHistory.forEach((rowStates, ri) => {
             // Newest row at top
             const y = (rowCount - 1 - ri) * CELL_PX;
             const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
             const currentRowColor = (weftColorHistory && weftColorHistory[ri]) ? weftColorHistory[ri] : fallbackWeft;
 
-            for (let ti = 0; ti < DISPLAY_THREADS; ti++) {
-                const isWarpUp = rowStates[ti];
+            // ti loops through the full physical width (e.g., 240 threads)
+            for (let ti = 0; ti < TOTAL_PHYSICAL_THREADS; ti++) {
+                const baseIndex = ti % baseWarpCount; // Loops the pattern logic across the width
+                const isWarpUp = rowStates[baseIndex];
                 const x = ti * CELL_PX;
-                const shaft = threading[ti % threading.length] || 0;
+                const shaft = threading[baseIndex % threading.length] || 0;
                 
                 const warpCol = Array.isArray(warpColors) && warpColors.length > 4
-                    ? (warpColors[ti] || "#ffffff")
+                    ? (warpColors[baseIndex] || "#ffffff")
                     : (warpColors[shaft] || "#ffffff");
 
-                // Fill the whole cell with either Warp or Weft color
-                // This creates the "Block" look from your screenshot
+                // Logic from Code 1: Fill the whole cell (Block style)
                 ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
                 ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
 
-                // Subtle grid lines (very thin to match screenshot)
+                // Subtle grid lines
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 ctx.lineWidth = 0.5;
                 ctx.strokeRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
             }
         });
 
-        // --- FOOTER SECTION (Identical to screenshot layout) ---
+        // --- FOOTER SECTION (Code 1 Style) ---
         const footerTop = offsetY + patternH + 30;
         ctx.strokeStyle = "#e0e0e0";
         ctx.lineWidth = 1;
@@ -1790,8 +1790,10 @@ function initLoom() {
         ctx.font = "14px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = "#666666";
         const estHeight = (rowCount / EXPECTED_WEFT_PER_CM).toFixed(1);
+        
+        // Meta text using the physical multiplier variables
         ctx.fillText(`Physical Size: ${PHYSICAL_WIDTH_CM}cm (W) × ${estHeight}cm (L)`, PADDING, footerTop + 65);
-        ctx.fillText(`Structure: ${DISPLAY_THREADS} warp ends (${THREADS_PER_CM} ends/cm) · ${rowCount} weft picks (${EXPECTED_WEFT_PER_CM} picks/cm)`, PADDING, footerTop + 85);
+        ctx.fillText(`Structure: ${TOTAL_PHYSICAL_THREADS} warp ends (${THREADS_PER_CM} ends/cm) · ${rowCount} weft picks (${EXPECTED_WEFT_PER_CM} picks/cm)`, PADDING, footerTop + 85);
 
         // Download
         const link = document.createElement('a');
