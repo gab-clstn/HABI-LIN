@@ -74,6 +74,7 @@ app.use(session({
     cookie: { 
         maxAge: 24 * 60 * 60 * 1000, 
         sameSite: isProduction ? "none" : "lax",
+        sameSite: "lax",
         secure: isProduction
     }
 }));
@@ -106,23 +107,37 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         callbackURL:  `${process.env.BASE_URL}/auth/google/callback`
     }, async (accessToken, refreshToken, profile, done) => {
         try {
+            // Safely grab email and photo (preventing "undefined" crashes)
+            const email = profile.emails?.[0]?.value;
+            const photo = profile.photos?.[0]?.value || "";
+
+            if (!email) {
+                return done(null, false, { message: "No email provided from Google" });
+            }
+
             let user = await User.findOne({ providerId: profile.id });
             if (!user) {
-                user = await User.findOne({ email: profile.emails[0].value });
+                user = await User.findOne({ email: email });
                 if (user) {
                     user.providerId = profile.id;
                     user.provider   = "google";
-                    user.photo      = profile.photos[0].value;
+                    user.photo      = photo;
                     await user.save();
                 } else {
                     user = await User.create({
-                        name: profile.displayName, email: profile.emails[0].value,
-                        provider: "google", providerId: profile.id, photo: profile.photos[0].value
+                        name: profile.displayName || "Weaver", 
+                        email: email,
+                        provider: "google", 
+                        providerId: profile.id, 
+                        photo: photo
                     });
                 }
             }
             return done(null, user);
-        } catch (err) { return done(err); }
+        } catch (err) { 
+            console.error("Google Auth Error:", err); 
+            return done(err); 
+        }
     }));
 }
 
@@ -396,6 +411,19 @@ app.patch('/api/patterns/:id/privacy', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+// ── Global Error Handler ──
+app.use((err, req, res, next) => {
+    console.error("Server Error Caught:", err.message);
+    
+    // If the error happened during the Google callback, redirect them safely
+    if (req.path.includes('/auth/google/callback')) {
+        return res.redirect('/login.html?error=oauth-failed');
+    }
+    
+    res.status(500).json({ error: "Something went wrong on our end." });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
     console.log(`📦 Environment: ${isProduction ? "production" : "development"}`);
