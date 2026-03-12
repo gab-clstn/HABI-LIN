@@ -146,12 +146,12 @@ function attachStartButton() {
         function drawWarpPreview() {
             const canvas = root.querySelector("#cs-warp-preview");
             if (!canvas) return;
-            const total = 120;
+            const total = 500; // Increased to 500
             canvas.width = total;
             const ctx = canvas.getContext("2d");
             const colors = buildWarpColorArray(total);
             for (let i = 0; i < total; i++) {
-                ctx.fillStyle = colors[i];
+                ctx.fillStyle = colors[i] || "#ffffff";
                 ctx.fillRect(i, 0, 1, 1);
             }
         }
@@ -217,11 +217,11 @@ function attachStartButton() {
                 if (!isNaN(lastTo)) nextFrom = lastTo + 1;
             }
             const currentMax = parseInt(document.getElementById("patternSize")?.value || "4");
-            const maxT = Math.floor(120 / Math.max(1, currentMax)) * currentMax;
+            const maxT = Math.floor(500 / Math.max(1, currentMax)) * currentMax; // Max 500
             makeRow(nextFrom, maxT, "#000000");
         });
 
-        makeRow(1, 120, "#ffffff");
+        makeRow(1, 500, "#ffffff"); // Max 500
         root._buildWarpColorArray = buildWarpColorArray;
     }
 
@@ -261,8 +261,16 @@ function attachStartButton() {
             if (h4Wrap) h4Wrap.style.display = "block";
         }
 
+        const patternSizeInput = document.getElementById("patternSize");
+        if (patternSizeInput) {
+            // Update the label visually to show the new max
+            const label = patternSizeInput.parentElement.querySelector("label");
+            if (label) label.textContent = "Threads per Pattern Repeat (Max 500)";
+            patternSizeInput.max = "500";
+        }
+
         const patternSize = parseInt(document.getElementById("patternSize").value) || 4;
-        const maxThreads = 120;
+        const maxThreads = 500; // Increased to 500
         const repeats = Math.floor(maxThreads / patternSize);
         const totalThreads = repeats * patternSize;
         document.querySelectorAll(".range-from, .range-to").forEach(el => {
@@ -270,7 +278,7 @@ function attachStartButton() {
             el.placeholder = el.classList.contains("range-to") ? totalThreads : "1";
         });
         document.querySelectorAll(".range-to").forEach(el => {
-            if (!el.value) el.value = totalThreads;
+            if (!el.value || el.value == "120") el.value = totalThreads; // Automatically scale up default to new max
         });
 
         setupOverlay.style.display = "none";
@@ -330,12 +338,12 @@ function attachStartButton() {
         h3.forEach(n => finalThreadingMap[n - 1] = 2);
         h4.forEach(n => finalThreadingMap[n - 1] = 3);
 
-        const maxThreads = 120;
+        const maxThreads = 500; // Increased to 500
         const repeats = Math.floor(maxThreads / patternSize);
         const totalThreads = repeats * patternSize;
 
         if (totalThreads === 0) {
-            alert("Pattern size is too large (max 120).");
+            alert("Pattern size is too large (max 500).");
             return;
         }
 
@@ -677,7 +685,7 @@ function initLoom() {
     const ROW_SPACING = 0.02;
     const BEATER_HIT_Z = BASE_FRONT - 0.2;
     const MAX_ROWS_BEFORE_TAKEUP = 100;
-    const TOTAL_THREADS = loomConfig.totalThreads;
+    const TOTAL_THREADS = loomConfig.totalThreads; // Now correctly set up to 500
     const PATTERN_SIZE = loomConfig.patternSize;
 
     // ── PHYSICAL MEASUREMENT CONSTANTS ──
@@ -1038,7 +1046,7 @@ function initLoom() {
 
             const thread = new THREE.Line(
                 new THREE.BufferGeometry().setFromPoints(points),
-                new THREE.LineBasicMaterial({ color: threadColor })
+                new THREE.LineBasicMaterial({ color: threadColor, opacity: 0.8, transparent: true }) // Adjusted opacity for clarity
             );
             scene.add(thread);
             warpGroups[hIdx].push(thread);
@@ -1499,7 +1507,6 @@ function initLoom() {
 
             const data = {
                 name: loomConfig.patternName || "Untitled",
-                name: loomConfig.patternName || "Untitled",
                 type: loomConfig.patternType,
                 loom: loomConfig.loomType,
                 steps: recordedSteps,
@@ -1543,9 +1550,8 @@ function initLoom() {
         });
     }
 
-
     //----------------------------------------------
-    // 2D PATTERN RENDERER — Pixel Block Format
+    // 2D PATTERN RENDERER — Hard Square Pixel Style
     //----------------------------------------------
     function render2DPattern() {
         const patternCanvas = document.getElementById("patternCanvas");
@@ -1564,15 +1570,19 @@ function initLoom() {
         }
         
         const container = patternCanvas.parentElement;
-        // Calculation to fill the horizontal width of the panel with solid pixel blocks
-        const cellSize = Math.max(2, (container.clientWidth - 16) / TOTAL_PHYSICAL_THREADS);
+        
+        // 1. HARD ROUNDING: Use Math.floor to prevent sub-pixel gaps (the "lines" you see)
+        const rawCellSize = (container.clientWidth - 16) / TOTAL_PHYSICAL_THREADS;
+        const cellSize = Math.max(2, Math.floor(rawCellSize)); 
 
         patternCanvas.width = TOTAL_PHYSICAL_THREADS * cellSize;
         patternCanvas.height = (rowCount + (activeWeft ? 1 : 0)) * cellSize;
         
-        // 1. Draw the locked rows (Pattern History)
+        // Disable image smoothing to keep edges sharp like pixels
+        ctx.imageSmoothingEnabled = false;
+
+        // 2. Draw History
         patternHistory.forEach((rowStates, rowIndex) => {
-            // Stack logic: newest row at the top
             const y = (rowCount - 1 - rowIndex + (activeWeft ? 1 : 0)) * cellSize;
             const fallbackWeft = "#" + shuttleThreadMaterial.color.getHexString();
             const currentRowColor = (weftColorHistory && weftColorHistory[rowIndex]) ? weftColorHistory[rowIndex] : fallbackWeft;
@@ -1587,20 +1597,15 @@ function initLoom() {
                     ? (warpColors[baseIndex] || "#ffffff")
                     : (warpColors[shaft] || "#ffffff");
 
-                // --- PIXEL FORMATTING ---
-                // If warp is UP, use warp color. If DOWN, use weft color.
-                // Fill the ENTIRE square cell to create the pixel look.
+                // FULL BLOCK FILL: No offsets, no math, just a full box
                 ctx.fillStyle = isWarpUp ? warpCol : currentRowColor;
-                ctx.fillRect(x, y, cellSize, cellSize);
-
-                // Subtle grid line (set to 0.1 opacity so it's barely visible, just like pixels)
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, cellSize, cellSize);
+                
+                // We use +0.5 or a tiny overlap to ensure there are NO gaps between pixels
+                ctx.fillRect(x, y, cellSize, cellSize); 
             }
         });
 
-        // 2. Draw the live "unbeaten" row (The Active Throw)
+        // 3. Draw Active Row
         if (activeWeft && activeWeft.live) {
             const y = 0; 
             const liveColor = activeWeft.capturedColor || "#" + shuttleThreadMaterial.color.getHexString();
@@ -1617,14 +1622,9 @@ function initLoom() {
 
                 ctx.fillStyle = isWarpUp ? warpCol : liveColor;
                 ctx.fillRect(x, y, cellSize, cellSize);
-
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, cellSize, cellSize);
             }
         }
         
-        // Auto-scroll to show the newest row at the top
         patternCanvas.parentElement.scrollTop = 0; 
     }
 
@@ -1681,7 +1681,6 @@ function initLoom() {
                 ctx.fillRect(offsetX + x, offsetY + y, CELL_PX, CELL_PX);
 
                 // 2. Add Opaque Separation Border (Inner White Highlight)
-                // This makes the thread look slightly 3D and separates same-colored blocks
                 ctx.strokeStyle = "rgba(255,255,255,0.15)";
                 ctx.lineWidth = 1;
                 ctx.strokeRect(offsetX + x + 0.5, offsetY + y + 0.5, CELL_PX - 1, CELL_PX - 1);
