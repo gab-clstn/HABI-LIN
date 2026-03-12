@@ -2,6 +2,7 @@ const CACHE_NAME = "habi-lin-v2";
 
 // Pages and assets to cache immediately on install
 const STATIC_ASSETS = [
+    "/",
     "/dashboard.html",
     "/collection.html",
     "/login.html",
@@ -52,18 +53,17 @@ self.addEventListener("fetch", event => {
         return;
     }
 
-    // For HTML pages: try network first, fall back to cache, then offline page
+    // 3. For HTML pages: try network first, fall back to cache, then offline page
     if (request.mode === "navigate" || request.headers.get("accept")?.includes("text/html")) {
         event.respondWith(
             fetch(request)
                 .then(response => {
-                    // Cache the fresh page
                     const clone = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
                     return response;
                 })
                 .catch(() =>
-                    caches.match(request).then(cached => cached || caches.match("/offline.html"))
+                    caches.match(request, { ignoreSearch: true }).then(cached => cached || caches.match("/offline.html"))
                 )
         );
         return;
