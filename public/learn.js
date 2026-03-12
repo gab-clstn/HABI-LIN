@@ -629,7 +629,10 @@ function initLearnLoom(pattern) {
                     <button id="learnNextBtn" style="padding:5px 14px; background:#00e5ff; color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:clamp(0.72rem,1.5vw,0.8rem); white-space:nowrap;">Skip →</button>
                 </div>
             </div>
+            <button id="bleConnectLearn" class="lhud-collapsible" style="width:100%; padding:8px; background:#007bff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:clamp(0.72rem,1.5vw,0.8rem); margin-top:4px; transition:0.2s;">Connect ESP32</button>
         `;
+
+        
         container.appendChild(hud);
 
         const patPanel = document.createElement("div");
@@ -694,6 +697,7 @@ function initLearnLoom(pattern) {
         });
         document.getElementById("learnNextBtn").addEventListener("click", skipCurrentPhase);
         document.getElementById("learnPrevBtn").addEventListener("click", goToPrevStep);
+        document.getElementById("bleConnectLearn").addEventListener("click", connectBLE);
 
         document.getElementById("learnCollapseBtn").addEventListener("click", () => {
             const collapsed = hud.classList.toggle("collapsed");
@@ -1294,6 +1298,78 @@ function initLearnLoom(pattern) {
         }
     }
 
+    /* ── ESP32 Hardware Integration for Learn Mode ── */
+    async function connectBLE() {
+        const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+        const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+        const btn = document.getElementById('bleConnectLearn');
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'ESP32' }],
+                optionalServices: [SERVICE_UUID]
+            });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService(SERVICE_UUID);
+            const characteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
+            await characteristic.startNotifications();
+            characteristic.addEventListener('characteristicvaluechanged', (e) => {
+                const val = new TextDecoder().decode(e.target.value).trim();
+                handleHardwareInput(val);
+            });
+            btn.style.background = "#28a745";
+            btn.innerHTML = "ESP32 Connected ✓";
+        } catch (err) {
+            console.error("BLE Error:", err);
+            alert("Failed to connect to ESP32: " + err.message);
+        }
+    }
+
+    function handleHardwareInput(data) {
+        data = data.trim();
+        
+        const pedalMapDown = { "1": 0, "2": 1, "3": 2, "4": 3 };
+        if (pedalMapDown[data] !== undefined) {
+            currentPressedPedals.add(pedalMapDown[data]);
+            evaluatePedalPhases();
+            return;
+        }
+        
+        const pedalMapUp = { "7": 0, "8": 1, "9": 2, "0": 3 };
+        if (pedalMapUp[data] !== undefined) {
+            currentPressedPedals.delete(pedalMapUp[data]);
+            evaluatePedalPhases();
+            return;
+        }
+        
+        if (data.includes(",")) {
+            currentPressedPedals.clear();
+            data.split(",").forEach(p => {
+                const pedalIdx = parseInt(p) - 1;
+                if (!isNaN(pedalIdx)) currentPressedPedals.add(pedalIdx);
+            });
+            evaluatePedalPhases();
+            return;
+        }
+        
+        if (data === "R") { 
+            currentPressedPedals.clear(); 
+            evaluatePedalPhases(); 
+            return; 
+        }
+        if (data === "S1S2" || data === "S2S1") {
+            handleLearnKey({ code: "Space", preventDefault: () => {} });
+            return;
+        }
+        if (data === "B" || data === "RFID_3" || data === "RFID_4") {
+            handleLearnKey({ code: "KeyB", key: "b" });
+            return;
+        }
+        if (data === "B_1" || data === "V") {
+            handleLearnKey({ code: "KeyV", key: "v" });
+            return;
+        }
+    }
+    
     function tickAutoPlay() {
         if (!autoPlay || currentPhase === "DONE" || isTransitioning) return;
         
